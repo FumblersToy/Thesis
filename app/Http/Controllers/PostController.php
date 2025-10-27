@@ -6,6 +6,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Post;
 use Cloudinary\Cloudinary;
 use Exception;
@@ -23,6 +24,11 @@ class PostController extends Controller
             'description' => 'nullable|string|max:1000',
             'image' => 'nullable|image|max:4096',
         ]);
+
+        // Ensure at least one field is provided
+        if (!$request->has('description') && !$request->hasFile('image')) {
+            return redirect()->back()->with('error', 'Please provide at least a description or an image.');
+        }
 
         $imageUrl = ''; // safe default
         $imagePublicId = null;
@@ -46,10 +52,20 @@ class PostController extends Controller
                         $imageUrl = $uploadedFile['secure_url'] ?? '';
                         $imagePublicId = $uploadedFile['public_id'] ?? null;
                     } else {
-                        Log::warning('Cloudinary URL not configured');
+                        // Fallback to local storage if Cloudinary not configured
+                        $storedPath = $file->store('posts', 'public');
+                        $imageUrl = Storage::url($storedPath);
+                        Log::warning('Cloudinary URL not configured, using local storage');
                     }
                 } catch (Exception $e) {
                     Log::error('Cloudinary upload error: ' . $e->getMessage());
+                    // Fallback to local storage on error
+                    try {
+                        $storedPath = $file->store('posts', 'public');
+                        $imageUrl = Storage::url($storedPath);
+                    } catch (Exception $fallbackError) {
+                        Log::error('Local storage fallback error: ' . $fallbackError->getMessage());
+                    }
                 }
             }
         }

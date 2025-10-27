@@ -236,9 +236,9 @@
                 </h2>
                 <form id="createPostForm" class="space-y-6" enctype="multipart/form-data" action="{{ route('posts.store') }}" method="POST">
                     @csrf
-                    <label for="image" class="block text-gray-700 font-medium mb-3 text-lg">📷 Upload Image</label>
+                    <label for="image" class="block text-gray-700 font-medium mb-3 text-lg">📷 Upload Image (Optional)</label>
                     <div class="custom-file-input">
-                        <input type="file" name="image" id="image" accept="image/*" required>
+                        <input type="file" name="image" id="image" accept="image/*">
                         <label for="image" class="custom-file-label cursor-pointer">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
@@ -249,7 +249,7 @@
                         <span id="fileName" class="text-sm text-gray-600 hidden"></span>
                     </div>
                     <label class="block text-gray-700 font-medium mb-3 text-lg" for="description">Description</label>
-                    <textarea name="description" id="description" class="w-full border-2 border-gray-400 rounded p-3 resize-none overflow-hidden" required placeholder="Write your description here..." rows="4"></textarea>
+                    <textarea name="description" id="description" class="w-full border-2 border-gray-400 rounded p-3 resize-none overflow-hidden" placeholder="Write your description here..." rows="4"></textarea>
                     <button class="px-6 py-2 button-bg rounded text-white font-bold" type="submit">Post</button>
                 </form>
             </div>
