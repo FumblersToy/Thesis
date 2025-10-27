@@ -4,12 +4,16 @@ nixPkgs = ['nodejs', 'php83', 'php83Packages.composer']
 [phases.install]
 cmds = [
     'composer install --no-dev --optimize-autoloader',
-    'npm install',
-    'npm run build'
+    'npm ci'
 ]
 
 [phases.build]
-cmds = ['php artisan config:cache', 'php artisan route:cache', 'php artisan view:cache']
+cmds = [
+    'npm run build',
+    'php artisan config:cache',
+    'php artisan route:cache',
+    'php artisan view:cache'
+]
 
 [start]
 cmd = 'php artisan serve --host=0.0.0.0 --port=${PORT:-8000}'
