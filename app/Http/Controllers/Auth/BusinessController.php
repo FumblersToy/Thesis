@@ -28,16 +28,14 @@ class BusinessController extends Controller
             'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
             'venue' => 'required|string|max:255',
-            'profile_picture' => 'nullable|image|max:2048', // Max 2MB
+            'profile_picture' => 'nullable|image|max:2048',
         ]);
 
-        // Check if business profile already exists for this user
         if (Business::where('user_id', Auth::id())->exists()) {
             return redirect()->back()->with('error', 'You already have a business profile.');
         }
 
-        // Handle profile picture upload to Cloudinary if provided
-        $profilePictureUrl = null;
+        $profilePictureUrl = '';
         if ($request->hasFile('profile_picture')) {
             $uploadedFile = Cloudinary::upload($request->file('profile_picture')->getRealPath(), [
                 'folder' => 'business_profiles',
@@ -47,3 +45,22 @@ class BusinessController extends Controller
                     'crop' => 'fill',
                     'gravity' => 'face'
                 ]
+            ]);
+            if ($uploadedFile && method_exists($uploadedFile, 'getSecurePath')) {
+                $profilePictureUrl = $uploadedFile->getSecurePath();
+            }
+        }
+
+        $business = Business::create([
+            'user_id' => Auth::id(),
+            'business_name' => $request->business_name,
+            'contact_email' => $request->contact_email,
+            'phone_number' => $request->phone_number,
+            'address' => $request->address,
+            'venue' => $request->venue,
+            'profile_picture' => $profilePictureUrl,
+        ]);
+
+        return redirect()->route('feed')->with('success', 'Business profile created successfully!');
+    }
+}

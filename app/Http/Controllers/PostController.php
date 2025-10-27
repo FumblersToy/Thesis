@@ -24,7 +24,7 @@ class PostController extends Controller
                 'image' => 'nullable|image|max:4096',
             ]);
 
-            $imageUrl = null;
+            $imageUrl = '';
             $imagePublicId = null;
 
             if ($request->hasFile('image')) {
@@ -36,15 +36,17 @@ class PostController extends Controller
                         'crop' => 'limit'
                     ]
                 ]);
-                $imageUrl = $uploadedFile->getSecurePath();
-                $imagePublicId = $uploadedFile->getPublicId();
+                if ($uploadedFile && method_exists($uploadedFile, 'getSecurePath')) {
+                    $imageUrl = $uploadedFile->getSecurePath();
+                    $imagePublicId = $uploadedFile->getPublicId();
+                }
             }
 
             $post = Post::create([
                 'user_id' => Auth::id(),
                 'description' => $data['description'] ?? null,
                 'image_path' => $imageUrl,
-                'image_public_id' => $imagePublicId, // store for deletion
+                'image_public_id' => $imagePublicId,
             ]);
 
             if ($request->wantsJson() || $request->header('Accept') === 'application/json') {
@@ -56,9 +58,6 @@ class PostController extends Controller
                         'image_path' => $imageUrl,
                         'created_at' => $post->created_at->toDateTimeString(),
                         'user_name' => Auth::user()->name,
-                        'user_genre' => '',
-                        'user_type' => 'member',
-                        'user_avatar' => null,
                         'user_id' => $post->user_id,
                         'is_owner' => true,
                     ],
@@ -82,41 +81,23 @@ class PostController extends Controller
     {
         try {
             $post = Post::findOrFail($id);
-            
-            // Check ownership
+
             if ($post->user_id !== Auth::id()) {
-                if (request()->wantsJson() || request()->header('Accept') === 'application/json') {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Unauthorized to delete this post',
-                    ], 403);
-                }
-                return redirect()->back()->with('error', 'Unauthorized to delete this post');
+                return request()->wantsJson() || request()->header('Accept') === 'application/json'
+                    ? response()->json(['success' => false, 'message' => 'Unauthorized'], 403)
+                    : redirect()->back()->with('error', 'Unauthorized');
             }
 
-            // Delete Cloudinary image if exists
             if ($post->image_public_id) {
                 Cloudinary::destroy($post->image_public_id);
             }
 
             $post->delete();
 
-            if (request()->wantsJson() || request()->header('Accept') === 'application/json') {
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Post deleted successfully',
-                ]);
-            }
-
-            return redirect()->route('feed')->with('success', 'Post deleted successfully');
+            return request()->wantsJson() || request()->header('Accept') === 'application/json'
+                ? response()->json(['success' => true, 'message' => 'Post deleted'])
+                : redirect()->route('feed')->with('success', 'Post deleted');
         } catch (Throwable $e) {
-            if (request()->wantsJson() || request()->header('Accept') === 'application/json') {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'exception' => (new \ReflectionClass($e))->getShortName(),
-                ], 500);
-            }
             throw $e;
         }
     }
