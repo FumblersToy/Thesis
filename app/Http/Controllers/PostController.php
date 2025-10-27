@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use App\Models\Post;
 use Cloudinary\Cloudinary;
 use Exception;
@@ -20,14 +21,37 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'description' => 'nullable|string|max:1000',
-            'image' => 'nullable|image|max:4096',
-        ]);
+        try {
+            $request->validate([
+                'description' => 'nullable|string|max:1000',
+                'image' => 'nullable|image|max:4096',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
+        }
 
         // Ensure at least one field is provided
-        if (!$request->has('description') && !$request->hasFile('image')) {
-            return redirect()->back()->with('error', 'Please provide at least a description or an image.');
+        $hasDescription = !empty($request->input('description'));
+        $hasImage = $request->hasFile('image');
+        
+        if (!$hasDescription && !$hasImage) {
+            $errorMessage = 'Please provide at least a description or an image.';
+            
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMessage
+                ], 422);
+            }
+            
+            return redirect()->back()->with('error', $errorMessage);
         }
 
         $imageUrl = ''; // safe default
@@ -70,14 +94,48 @@ class PostController extends Controller
             }
         }
 
-        $post = Post::create([
-            'user_id' => Auth::id(),
-            'description' => $request->description,
-            'image_path' => $imageUrl,
-            'image_public_id' => $imagePublicId,
-        ]);
+        try {
+            $post = Post::create([
+                'user_id' => Auth::id(),
+                'description' => $request->description,
+                'image_path' => $imageUrl,
+                'image_public_id' => $imagePublicId,
+            ]);
 
-        return redirect()->route('feed')->with('success', 'Post created successfully!');
+            Log::info('Post created successfully', [
+                'post_id' => $post->id,
+                'user_id' => Auth::id(),
+                'has_image' => !empty($imageUrl),
+            ]);
+
+            // Handle AJAX requests
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Post created successfully!',
+                    'post' => [
+                        'id' => $post->id,
+                        'description' => $post->description,
+                        'image_path' => $post->image_path,
+                        'created_at' => $post->created_at->toDateTimeString(),
+                    ]
+                ]);
+            }
+
+            return redirect()->route('feed')->with('success', 'Post created successfully!');
+        } catch (\Exception $e) {
+            Log::error('Error creating post: ' . $e->getMessage());
+            
+            // Handle AJAX requests
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to create post. Please try again.'
+                ], 422);
+            }
+            
+            return redirect()->back()->with('error', 'Failed to create post. Please try again.');
+        }
     }
 
     public function destroy($id)
