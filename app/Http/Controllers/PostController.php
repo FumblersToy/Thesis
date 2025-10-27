@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use App\Models\Post;
 use Throwable;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class PostController extends Controller
 {
@@ -24,15 +24,27 @@ class PostController extends Controller
                 'image' => 'nullable|image|max:4096',
             ]);
 
-            $imagePath = null;
+            $imageUrl = null;
+            $imagePublicId = null;
+
             if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('posts', 'public');
+                $uploadedFile = Cloudinary::upload($request->file('image')->getRealPath(), [
+                    'folder' => 'posts',
+                    'transformation' => [
+                        'width' => 800,
+                        'height' => 800,
+                        'crop' => 'limit'
+                    ]
+                ]);
+                $imageUrl = $uploadedFile->getSecurePath();
+                $imagePublicId = $uploadedFile->getPublicId();
             }
 
             $post = Post::create([
                 'user_id' => Auth::id(),
                 'description' => $data['description'] ?? null,
-                'image_path' => $imagePath,
+                'image_path' => $imageUrl,
+                'image_public_id' => $imagePublicId, // store for deletion
             ]);
 
             if ($request->wantsJson() || $request->header('Accept') === 'application/json') {
@@ -41,7 +53,7 @@ class PostController extends Controller
                     'post' => [
                         'id' => $post->id,
                         'description' => $post->description,
-                        'image_path' => $imagePath ? Storage::url($imagePath) : null,
+                        'image_path' => $imageUrl,
                         'created_at' => $post->created_at->toDateTimeString(),
                         'user_name' => Auth::user()->name,
                         'user_genre' => '',
@@ -56,12 +68,11 @@ class PostController extends Controller
             return redirect()->route('feed')->with('success', 'Post created!');
         } catch (Throwable $e) {
             if ($request->wantsJson() || $request->header('Accept') === 'application/json') {
-                $status = 500;
                 return response()->json([
                     'success' => false,
                     'message' => $e->getMessage(),
                     'exception' => (new \ReflectionClass($e))->getShortName(),
-                ], $status);
+                ], 500);
             }
             throw $e;
         }
@@ -72,7 +83,7 @@ class PostController extends Controller
         try {
             $post = Post::findOrFail($id);
             
-            // Check if the authenticated user owns this post
+            // Check ownership
             if ($post->user_id !== Auth::id()) {
                 if (request()->wantsJson() || request()->header('Accept') === 'application/json') {
                     return response()->json([
@@ -83,12 +94,11 @@ class PostController extends Controller
                 return redirect()->back()->with('error', 'Unauthorized to delete this post');
             }
 
-            // Delete the image file if it exists
-            if ($post->image_path && Storage::disk('public')->exists($post->image_path)) {
-                Storage::disk('public')->delete($post->image_path);
+            // Delete Cloudinary image if exists
+            if ($post->image_public_id) {
+                Cloudinary::destroy($post->image_public_id);
             }
 
-            // Delete the post
             $post->delete();
 
             if (request()->wantsJson() || request()->header('Accept') === 'application/json') {
@@ -101,12 +111,11 @@ class PostController extends Controller
             return redirect()->route('feed')->with('success', 'Post deleted successfully');
         } catch (Throwable $e) {
             if (request()->wantsJson() || request()->header('Accept') === 'application/json') {
-                $status = 500;
                 return response()->json([
                     'success' => false,
                     'message' => $e->getMessage(),
                     'exception' => (new \ReflectionClass($e))->getShortName(),
-                ], $status);
+                ], 500);
             }
             throw $e;
         }

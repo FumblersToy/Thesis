@@ -6,6 +6,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use App\Models\Business;
 use Illuminate\Support\Facades\Auth;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class BusinessController extends Controller
 {
@@ -27,28 +28,22 @@ class BusinessController extends Controller
             'phone_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
             'venue' => 'required|string|max:255',
-            'profile_picture' => 'nullable|image|max:2048',
+            'profile_picture' => 'nullable|image|max:2048', // Max 2MB
         ]);
 
+        // Check if business profile already exists for this user
         if (Business::where('user_id', Auth::id())->exists()) {
             return redirect()->back()->with('error', 'You already have a business profile.');
         }
 
-        $profilePicturePath = null;
+        // Handle profile picture upload to Cloudinary if provided
+        $profilePictureUrl = null;
         if ($request->hasFile('profile_picture')) {
-            $profilePicturePath = $request->file('profile_picture')->store('business_profiles', 'public');
-        }
-
-        $business = new Business();
-        $business->user_id = Auth::id();
-        $business->business_name = $request->business_name;
-        $business->contact_email = $request->contact_email;
-        $business->phone_number = $request->phone_number;
-        $business->address = $request->address;
-        $business->venue = $request->venue;
-        $business->profile_picture = $profilePicturePath;
-        $business->save();
-
-        return redirect()->route('feed')->with('success', 'Business profile created successfully!');
-    }
-}
+            $uploadedFile = Cloudinary::upload($request->file('profile_picture')->getRealPath(), [
+                'folder' => 'business_profiles',
+                'transformation' => [
+                    'width' => 500,
+                    'height' => 500,
+                    'crop' => 'fill',
+                    'gravity' => 'face'
+                ]

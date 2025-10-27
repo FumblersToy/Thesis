@@ -6,6 +6,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use App\Models\Musician;
 use Illuminate\Support\Facades\Auth;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class MusicianController extends Controller
 {
@@ -26,7 +27,6 @@ class MusicianController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'stage_name' => 'required|string|max:255',
-            // match exact option values from the form
             'genre' => 'required|in:RnB,House,Pop Punk,Electronic,Reggae,Jazz,Rock',
             'instrument' => 'nullable|string|max:255',
             'bio' => 'nullable|string',
@@ -38,25 +38,33 @@ class MusicianController extends Controller
             return redirect()->back()->with('error', 'You already have a musician profile.');
         }
 
-        // Handle profile picture upload if provided
-        $profilePicturePath = null;
+        // Handle profile picture upload to Cloudinary if provided
+        $profilePictureUrl = null;
         if ($request->hasFile('profile_picture')) {
-            $profilePicturePath = $request->file('profile_picture')->store('profile_pictures', 'public');
+            $uploadedFile = Cloudinary::upload($request->file('profile_picture')->getRealPath(), [
+                'folder' => 'profile_pictures',
+                'transformation' => [
+                    'width' => 500,
+                    'height' => 500,
+                    'crop' => 'fill',
+                    'gravity' => 'face'
+                ]
+            ]);
+            $profilePictureUrl = $uploadedFile->getSecurePath();
         }
 
         // Create the musician profile
         $musician = new Musician();
-        $musician->user_id = Auth::id(); // Using Auth facade
+        $musician->user_id = Auth::id();
         $musician->first_name = $request->first_name;
         $musician->last_name = $request->last_name;
         $musician->stage_name = $request->stage_name;
         $musician->genre = $request->genre;
         $musician->instrument = $request->instrument;
         $musician->bio = $request->bio;
-        $musician->profile_picture = $profilePicturePath;
+        $musician->profile_picture = $profilePictureUrl; // Now stores full Cloudinary URL
         $musician->save();
 
-        // Redirect to a desired location, e.g., musician profile page
         return redirect()->route('feed', ['id' => $musician->id])
             ->with('success', 'Musician profile created successfully!');
     }
