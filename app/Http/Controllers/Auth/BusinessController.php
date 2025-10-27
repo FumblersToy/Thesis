@@ -6,7 +6,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use App\Models\Business;
 use Illuminate\Support\Facades\Auth;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Cloudinary\Cloudinary;
 
 class BusinessController extends Controller
 {
@@ -35,23 +35,23 @@ class BusinessController extends Controller
             return redirect()->back()->with('error', 'You already have a business profile.');
         }
 
-        $profilePictureUrl = ''; // default empty string
+        $profilePictureUrl = ''; // default empty
+
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');
             if ($file->isValid()) {
-                $uploadedFile = Cloudinary::upload($file->getRealPath(), [
+                $cloudinary = new Cloudinary(env('CLOUDINARY_URL'));
+                $uploadedFile = $cloudinary->uploadApi()->upload($file->getRealPath(), [
                     'folder' => 'business_profiles',
                     'transformation' => [
                         'width' => 500,
                         'height' => 500,
                         'crop' => 'fill',
                         'gravity' => 'face',
-                    ]
+                    ],
                 ]);
 
-                if ($uploadedFile && method_exists($uploadedFile, 'getSecurePath')) {
-                    $profilePictureUrl = $uploadedFile->getSecurePath();
-                }
+                $profilePictureUrl = $uploadedFile['secure_url'] ?? '';
             }
         }
 

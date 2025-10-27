@@ -6,8 +6,8 @@ use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Post;
+use Cloudinary\Cloudinary;
 use Throwable;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class PostController extends Controller
 {
@@ -18,87 +18,57 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
-        try {
-            $data = $request->validate([
-                'description' => 'nullable|string|max:1000',
-                'image' => 'nullable|image|max:4096',
-            ]);
+        $request->validate([
+            'description' => 'nullable|string|max:1000',
+            'image' => 'nullable|image|max:4096',
+        ]);
 
-            $imageUrl = '';
-            $imagePublicId = null;
+        $imageUrl = ''; // safe default
+        $imagePublicId = null;
 
-            if ($request->hasFile('image')) {
-                $uploadedFile = Cloudinary::upload($request->file('image')->getRealPath(), [
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            if ($file->isValid()) {
+                $cloudinary = new Cloudinary(env('CLOUDINARY_URL'));
+                $uploadedFile = $cloudinary->uploadApi()->upload($file->getRealPath(), [
                     'folder' => 'posts',
                     'transformation' => [
                         'width' => 800,
                         'height' => 800,
-                        'crop' => 'limit'
-                    ]
-                ]);
-                if ($uploadedFile && method_exists($uploadedFile, 'getSecurePath')) {
-                    $imageUrl = $uploadedFile->getSecurePath();
-                    $imagePublicId = $uploadedFile->getPublicId();
-                }
-            }
-
-            $post = Post::create([
-                'user_id' => Auth::id(),
-                'description' => $data['description'] ?? null,
-                'image_path' => $imageUrl,
-                'image_public_id' => $imagePublicId,
-            ]);
-
-            if ($request->wantsJson() || $request->header('Accept') === 'application/json') {
-                return response()->json([
-                    'success' => true,
-                    'post' => [
-                        'id' => $post->id,
-                        'description' => $post->description,
-                        'image_path' => $imageUrl,
-                        'created_at' => $post->created_at->toDateTimeString(),
-                        'user_name' => Auth::user()->name,
-                        'user_id' => $post->user_id,
-                        'is_owner' => true,
+                        'crop' => 'limit',
                     ],
-                ], 201);
-            }
+                ]);
 
-            return redirect()->route('feed')->with('success', 'Post created!');
-        } catch (Throwable $e) {
-            if ($request->wantsJson() || $request->header('Accept') === 'application/json') {
-                return response()->json([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                    'exception' => (new \ReflectionClass($e))->getShortName(),
-                ], 500);
+                $imageUrl = $uploadedFile['secure_url'] ?? '';
+                $imagePublicId = $uploadedFile['public_id'] ?? null;
             }
-            throw $e;
         }
+
+        $post = Post::create([
+            'user_id' => Auth::id(),
+            'description' => $request->description,
+            'image_path' => $imageUrl,
+            'image_public_id' => $imagePublicId,
+        ]);
+
+        return redirect()->route('feed')->with('success', 'Post created successfully!');
     }
 
     public function destroy($id)
     {
-        try {
-            $post = Post::findOrFail($id);
+        $post = Post::findOrFail($id);
 
-            if ($post->user_id !== Auth::id()) {
-                return request()->wantsJson() || request()->header('Accept') === 'application/json'
-                    ? response()->json(['success' => false, 'message' => 'Unauthorized'], 403)
-                    : redirect()->back()->with('error', 'Unauthorized');
-            }
-
-            if ($post->image_public_id) {
-                Cloudinary::destroy($post->image_public_id);
-            }
-
-            $post->delete();
-
-            return request()->wantsJson() || request()->header('Accept') === 'application/json'
-                ? response()->json(['success' => true, 'message' => 'Post deleted'])
-                : redirect()->route('feed')->with('success', 'Post deleted');
-        } catch (Throwable $e) {
-            throw $e;
+        if ($post->user_id !== Auth::id()) {
+            return redirect()->back()->with('error', 'Unauthorized to delete this post');
         }
+
+        if ($post->image_public_id) {
+            $cloudinary = new Cloudinary(env('CLOUDINARY_URL'));
+            $cloudinary->uploadApi()->destroy($post->image_public_id);
+        }
+
+        $post->delete();
+
+        return redirect()->route('feed')->with('success', 'Post deleted successfully!');
     }
 }
