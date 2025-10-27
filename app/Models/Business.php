@@ -15,6 +15,7 @@ class Business extends Model
     protected $fillable = [
         'user_id',
         'profile_picture',
+        'profile_picture_public_id',
         'business_name',
         'contact_email',
         'phone_number',

@@ -19,4 +19,28 @@ class AppServiceProvider extends ServiceProvider
             Vite::useManifestFilename('manifest.json');
         }
     }
+
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        // Helper function to get image URL (handles both Cloudinary URLs and local storage)
+        if (!function_exists('getImageUrl')) {
+            function getImageUrl($path)
+            {
+                if (empty($path)) {
+                    return null;
+                }
+                
+                // If it's already a full URL (Cloudinary), return as-is
+                if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+                    return $path;
+                }
+                
+                // Otherwise, use storage URL for local files
+                return \Illuminate\Support\Facades\Storage::url($path);
+            }
+        }
+    }
 }

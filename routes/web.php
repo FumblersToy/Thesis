@@ -217,7 +217,7 @@ Route::get('/api/search', function () {
                 'user_id' => $m->user_id,
                 'stage_name' => $m->stage_name,
                 'genre' => $m->genre,
-                'profile_image' => $m->profile_picture ? \Illuminate\Support\Facades\Storage::url($m->profile_picture) : null,
+                'profile_image' => $m->profile_picture ? getImageUrl($m->profile_picture) : null,
             ];
         });
 
@@ -279,7 +279,7 @@ Route::get('/api/map/users', function () {
             'instrument' => $musician->instrument,
             'genre' => $musician->genre,
             'bio' => $musician->bio,
-            'avatar' => $musician->profile_picture ? \Illuminate\Support\Facades\Storage::url($musician->profile_picture) : '/images/sample-profile.jpg'
+            'avatar' => $musician->profile_picture ? getImageUrl($musician->profile_picture) : '/images/sample-profile.jpg'
         ]);
     }
     
@@ -300,7 +300,7 @@ Route::get('/api/map/users', function () {
             'venue' => $business->venue,
             'address' => $business->address,
             'bio' => null,
-            'avatar' => $business->profile_picture ? \Illuminate\Support\Facades\Storage::url($business->profile_picture) : '/images/sample-profile.jpg'
+            'avatar' => $business->profile_picture ? getImageUrl($business->profile_picture) : '/images/sample-profile.jpg'
         ]);
     }
     

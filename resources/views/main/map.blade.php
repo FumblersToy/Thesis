@@ -78,8 +78,8 @@
                         $user = Auth::user();
                         $musician = $user->musician;
                         $business = $user->business;
-                        $avatar = $musician?->profile_picture ? Storage::url($musician->profile_picture) : 
-                                 ($business?->profile_picture ? Storage::url($business->profile_picture) : '/images/sample-profile.jpg');
+                        $avatar = $musician?->profile_picture ? getImageUrl($musician->profile_picture) : 
+                                 ($business?->profile_picture ? getImageUrl($business->profile_picture) : '/images/sample-profile.jpg');
                         $displayName = $musician?->stage_name ?: ($business?->business_name ?: $user->name);
                     @endphp
                     

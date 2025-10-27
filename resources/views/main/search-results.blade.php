@@ -21,9 +21,9 @@
         $currentRoleLabel = $currentUserMusician?->instrument ?: ($currentUserBusiness?->venue ?: 'Member');
         $currentProfileImage = null;
         if ($currentUserMusician && $currentUserMusician->profile_picture) {
-            $currentProfileImage = \Illuminate\Support\Facades\Storage::url($currentUserMusician->profile_picture);
+            $currentProfileImage = getImageUrl($currentUserMusician->profile_picture);
         } elseif ($currentUserBusiness && $currentUserBusiness->profile_picture) {
-            $currentProfileImage = \Illuminate\Support\Facades\Storage::url($currentUserBusiness->profile_picture);
+            $currentProfileImage = getImageUrl($currentUserBusiness->profile_picture);
         } else {
             $currentProfileImage = '/images/sample-profile.jpg';
         }
@@ -160,7 +160,7 @@
                                     <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-200 group-hover:scale-105">
                                         <div class="flex items-center gap-4 mb-4">
                                             @if($musician->profile_picture)
-                                                <img src="{{ \Illuminate\Support\Facades\Storage::url($musician->profile_picture) }}" 
+                                                <img src="{{ getImageUrl($musician->profile_picture) }}" 
                                                      alt="{{ $musician->stage_name }}" 
                                                      class="w-12 h-12 rounded-full object-cover border-2 border-gray-200">
                                             @else
@@ -192,7 +192,7 @@
                                     <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-200 group-hover:scale-105">
                                         <div class="flex items-center gap-4 mb-4">
                                             @if($venue->profile_picture)
-                                                <img src="{{ \Illuminate\Support\Facades\Storage::url($venue->profile_picture) }}" 
+                                                <img src="{{ getImageUrl($venue->profile_picture) }}" 
                                                      alt="{{ $venue->business_name }}" 
                                                      class="w-12 h-12 rounded-full object-cover border-2 border-gray-200">
                                             @else

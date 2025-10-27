@@ -134,9 +134,9 @@
                                         @php
                                             $avatar = null;
                                             if ($user->musician && $user->musician->profile_picture) {
-                                                $avatar = \Illuminate\Support\Facades\Storage::url($user->musician->profile_picture);
+                                                $avatar = getImageUrl($user->musician->profile_picture);
                                             } elseif ($user->business && $user->business->profile_picture) {
-                                                $avatar = \Illuminate\Support\Facades\Storage::url($user->business->profile_picture);
+                                                $avatar = getImageUrl($user->business->profile_picture);
                                             }
                                         @endphp
                                         @if($avatar)

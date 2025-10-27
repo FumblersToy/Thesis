@@ -8,6 +8,9 @@ use App\Models\Post;
 use App\Models\Musician;
 use App\Models\Business;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Cloudinary\Cloudinary;
+use Exception;
 
 class DashboardController extends Controller
 {
@@ -36,9 +39,18 @@ class DashboardController extends Controller
     {
         $post = Post::findOrFail($postId);
         
-        // Delete the image file if it exists
-        if ($post->image_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($post->image_path)) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($post->image_path);
+        // Delete the image from Cloudinary if it exists
+        if ($post->image_public_id) {
+            try {
+                $cloudinaryUrl = config('cloudinary.cloud_url');
+                if ($cloudinaryUrl) {
+                    $cloudinary = new Cloudinary($cloudinaryUrl);
+                    $cloudinary->uploadApi()->destroy($post->image_public_id);
+                }
+            } catch (Exception $e) {
+                Log::error('Cloudinary delete error: ' . $e->getMessage());
+                // Continue with post deletion even if Cloudinary deletion fails
+            }
         }
         
         $post->delete();
@@ -64,12 +76,41 @@ class DashboardController extends Controller
     {
         $user = User::findOrFail($userId);
         
-        // Delete all user's posts and their images
-        $posts = Post::where('user_id', $userId)->get();
-        foreach ($posts as $post) {
-            if ($post->image_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($post->image_path)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($post->image_path);
+        try {
+            $cloudinaryUrl = config('cloudinary.cloud_url');
+            $cloudinary = $cloudinaryUrl ? new Cloudinary($cloudinaryUrl) : null;
+
+            // Delete all user's posts and their images from Cloudinary
+            $posts = Post::where('user_id', $userId)->get();
+            foreach ($posts as $post) {
+                if ($post->image_public_id && $cloudinary) {
+                    try {
+                        $cloudinary->uploadApi()->destroy($post->image_public_id);
+                    } catch (Exception $e) {
+                        Log::error('Cloudinary delete error for post: ' . $e->getMessage());
+                        // Continue deletion even if Cloudinary deletion fails
+                    }
+                }
             }
+
+            // Delete profile pictures from Cloudinary if they exist
+            if ($user->musician && $user->musician->profile_picture_public_id && $cloudinary) {
+                try {
+                    $cloudinary->uploadApi()->destroy($user->musician->profile_picture_public_id);
+                } catch (Exception $e) {
+                    Log::error('Cloudinary delete error for musician profile: ' . $e->getMessage());
+                }
+            }
+
+            if ($user->business && $user->business->profile_picture_public_id && $cloudinary) {
+                try {
+                    $cloudinary->uploadApi()->destroy($user->business->profile_picture_public_id);
+                } catch (Exception $e) {
+                    Log::error('Cloudinary delete error for business profile: ' . $e->getMessage());
+                }
+            }
+        } catch (Exception $e) {
+            Log::error('Error deleting user assets from Cloudinary: ' . $e->getMessage());
         }
         
         // Delete user (cascade will handle related records)

@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Musician;
 use App\Models\Business;
+use Cloudinary\Cloudinary;
+use Exception;
 
 class SettingsController extends Controller
 {
@@ -68,8 +71,43 @@ class SettingsController extends Controller
             ]);
 
             if ($request->hasFile('musician.profile_picture')) {
-                $path = $request->file('musician.profile_picture')->store('profiles', 'public');
-                $musician->profile_picture = $path;
+                $file = $request->file('musician.profile_picture');
+                if ($file->isValid()) {
+                    // Delete old profile picture from Cloudinary if it exists
+                    if ($musician->profile_picture_public_id) {
+                        try {
+                            $cloudinaryUrl = config('cloudinary.cloud_url');
+                            if ($cloudinaryUrl) {
+                                $cloudinary = new Cloudinary($cloudinaryUrl);
+                                $cloudinary->uploadApi()->destroy($musician->profile_picture_public_id);
+                            }
+                        } catch (Exception $e) {
+                            Log::error('Cloudinary delete error for old musician profile: ' . $e->getMessage());
+                        }
+                    }
+
+                    // Upload new profile picture to Cloudinary
+                    try {
+                        $cloudinaryUrl = config('cloudinary.cloud_url');
+                        if ($cloudinaryUrl) {
+                            $cloudinary = new Cloudinary($cloudinaryUrl);
+                            $uploadedFile = $cloudinary->uploadApi()->upload($file->getRealPath(), [
+                                'folder' => 'profile_pictures',
+                                'transformation' => [
+                                    'width' => 500,
+                                    'height' => 500,
+                                    'crop' => 'fill',
+                                    'gravity' => 'face',
+                                ],
+                            ]);
+
+                            $musician->profile_picture = $uploadedFile['secure_url'] ?? '';
+                            $musician->profile_picture_public_id = $uploadedFile['public_id'] ?? null;
+                        }
+                    } catch (Exception $e) {
+                        Log::error('Cloudinary upload error for musician profile: ' . $e->getMessage());
+                    }
+                }
             }
             $musician->first_name = $request->input('musician.first_name');
             $musician->last_name = $request->input('musician.last_name');
@@ -99,8 +137,43 @@ class SettingsController extends Controller
             ]);
 
             if ($request->hasFile('business.profile_picture')) {
-                $path = $request->file('business.profile_picture')->store('profiles', 'public');
-                $business->profile_picture = $path;
+                $file = $request->file('business.profile_picture');
+                if ($file->isValid()) {
+                    // Delete old profile picture from Cloudinary if it exists
+                    if ($business->profile_picture_public_id) {
+                        try {
+                            $cloudinaryUrl = config('cloudinary.cloud_url');
+                            if ($cloudinaryUrl) {
+                                $cloudinary = new Cloudinary($cloudinaryUrl);
+                                $cloudinary->uploadApi()->destroy($business->profile_picture_public_id);
+                            }
+                        } catch (Exception $e) {
+                            Log::error('Cloudinary delete error for old business profile: ' . $e->getMessage());
+                        }
+                    }
+
+                    // Upload new profile picture to Cloudinary
+                    try {
+                        $cloudinaryUrl = config('cloudinary.cloud_url');
+                        if ($cloudinaryUrl) {
+                            $cloudinary = new Cloudinary($cloudinaryUrl);
+                            $uploadedFile = $cloudinary->uploadApi()->upload($file->getRealPath(), [
+                                'folder' => 'business_profiles',
+                                'transformation' => [
+                                    'width' => 500,
+                                    'height' => 500,
+                                    'crop' => 'fill',
+                                    'gravity' => 'face',
+                                ],
+                            ]);
+
+                            $business->profile_picture = $uploadedFile['secure_url'] ?? '';
+                            $business->profile_picture_public_id = $uploadedFile['public_id'] ?? null;
+                        }
+                    } catch (Exception $e) {
+                        Log::error('Cloudinary upload error for business profile: ' . $e->getMessage());
+                    }
+                }
             }
             $business->business_name = $request->input('business.business_name');
             $business->contact_email = $request->input('business.contact_email');

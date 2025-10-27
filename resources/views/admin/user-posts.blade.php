@@ -39,9 +39,9 @@
                     @php
                         $avatar = null;
                         if ($user->musician && $user->musician->profile_picture) {
-                            $avatar = \Illuminate\Support\Facades\Storage::url($user->musician->profile_picture);
+                            $avatar = getImageUrl($user->musician->profile_picture);
                         } elseif ($user->business && $user->business->profile_picture) {
-                            $avatar = \Illuminate\Support\Facades\Storage::url($user->business->profile_picture);
+                            $avatar = getImageUrl($user->business->profile_picture);
                         }
                         
                         $displayName = $user->musician?->stage_name ?: ($user->business?->business_name ?: $user->name);
@@ -88,9 +88,7 @@
                     <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
                         <div class="relative">
                             @php
-                                $imageUrl = $post->image_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($post->image_path) 
-                                    ? \Illuminate\Support\Facades\Storage::url($post->image_path) 
-                                    : '/images/sample-post-1.jpg';
+                                $imageUrl = $post->image_path ? getImageUrl($post->image_path) : '/images/sample-post-1.jpg';
                             @endphp
                             <img src="{{ $imageUrl }}" alt="Post image" class="w-full h-48 object-cover">
                             <button onclick="deletePost({{ $post->id }})" 

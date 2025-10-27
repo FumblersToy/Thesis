@@ -64,7 +64,7 @@
                             <label class="block text-white/80 mb-2 text-center">Profile Picture</label>
                             <div class="flex items-center justify-center gap-4">
                                 @php
-                                    $musicianAvatar = $musician->profile_picture ? \Illuminate\Support\Facades\Storage::url($musician->profile_picture) : '/images/sample-profile.jpg';
+                                    $musicianAvatar = $musician->profile_picture ? getImageUrl($musician->profile_picture) : '/images/sample-profile.jpg';
                                 @endphp
                                 <img src="{{ $musicianAvatar }}" alt="Current avatar" class="w-20 h-20 rounded-full object-cover border-2 border-white/30 shadow">
                                 <div>
@@ -140,7 +140,7 @@
                             <label class="block text-white/80 mb-2 text-center">Profile Picture</label>
                             <div class="flex items-center justify-center gap-4">
                                 @php
-                                    $businessAvatar = $business->profile_picture ? \Illuminate\Support\Facades\Storage::url($business->profile_picture) : '/images/sample-profile.jpg';
+                                    $businessAvatar = $business->profile_picture ? getImageUrl($business->profile_picture) : '/images/sample-profile.jpg';
                                 @endphp
                                 <img src="{{ $businessAvatar }}" alt="Current logo" class="w-20 h-20 rounded-full object-cover border-2 border-white/30 shadow">
                                 <div>

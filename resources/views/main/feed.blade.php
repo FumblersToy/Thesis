@@ -152,9 +152,9 @@
                     $roleLabel = $musician?->instrument ?: ($business?->venue ?: 'Member');
                     $profileImage = null;
                     if ($musician && $musician->profile_picture) {
-                        $profileImage = \Illuminate\Support\Facades\Storage::url($musician->profile_picture);
+                        $profileImage = getImageUrl($musician->profile_picture);
                     } elseif ($business && $business->profile_picture) {
-                        $profileImage = \Illuminate\Support\Facades\Storage::url($business->profile_picture);
+                        $profileImage = getImageUrl($business->profile_picture);
                     } else {
                         $profileImage = '/images/sample-profile.jpg';
                     }

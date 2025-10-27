@@ -5,9 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use App\Models\Post;
 use Cloudinary\Cloudinary;
-use Throwable;
+use Exception;
 
 class PostController extends Controller
 {
@@ -29,18 +30,27 @@ class PostController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             if ($file->isValid()) {
-                $cloudinary = new Cloudinary(env('CLOUDINARY_URL'));
-                $uploadedFile = $cloudinary->uploadApi()->upload($file->getRealPath(), [
-                    'folder' => 'posts',
-                    'transformation' => [
-                        'width' => 800,
-                        'height' => 800,
-                        'crop' => 'limit',
-                    ],
-                ]);
+                try {
+                    $cloudinaryUrl = config('cloudinary.cloud_url');
+                    if ($cloudinaryUrl) {
+                        $cloudinary = new Cloudinary($cloudinaryUrl);
+                        $uploadedFile = $cloudinary->uploadApi()->upload($file->getRealPath(), [
+                            'folder' => 'posts',
+                            'transformation' => [
+                                'width' => 800,
+                                'height' => 800,
+                                'crop' => 'limit',
+                            ],
+                        ]);
 
-                $imageUrl = $uploadedFile['secure_url'] ?? '';
-                $imagePublicId = $uploadedFile['public_id'] ?? null;
+                        $imageUrl = $uploadedFile['secure_url'] ?? '';
+                        $imagePublicId = $uploadedFile['public_id'] ?? null;
+                    } else {
+                        Log::warning('Cloudinary URL not configured');
+                    }
+                } catch (Exception $e) {
+                    Log::error('Cloudinary upload error: ' . $e->getMessage());
+                }
             }
         }
 
@@ -62,9 +72,18 @@ class PostController extends Controller
             return redirect()->back()->with('error', 'Unauthorized to delete this post');
         }
 
+        // Delete image from Cloudinary if public_id exists
         if ($post->image_public_id) {
-            $cloudinary = new Cloudinary(env('CLOUDINARY_URL'));
-            $cloudinary->uploadApi()->destroy($post->image_public_id);
+            try {
+                $cloudinaryUrl = config('cloudinary.cloud_url');
+                if ($cloudinaryUrl) {
+                    $cloudinary = new Cloudinary($cloudinaryUrl);
+                    $cloudinary->uploadApi()->destroy($post->image_public_id);
+                }
+            } catch (Exception $e) {
+                Log::error('Cloudinary delete error: ' . $e->getMessage());
+                // Continue with post deletion even if Cloudinary deletion fails
+            }
         }
 
         $post->delete();
