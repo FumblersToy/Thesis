@@ -426,16 +426,13 @@ Route::get('/debug/csrf', function () {
 });
 
 Route::get('/debug-build', function() {
-    $manifestPath = public_path('build/manifest.json');
-    $buildPath = public_path('build');
-    
     return response()->json([
-        'manifest_exists' => file_exists($manifestPath),
-        'manifest_path' => $manifestPath,
-        'build_dir_exists' => is_dir($buildPath),
-        'build_contents' => is_dir($buildPath) ? scandir($buildPath) : 'not a directory',
+        'manifest_exists' => file_exists(public_path('build/manifest.json')),
+        'build_dir_exists' => is_dir(public_path('build')),
         'public_hot_exists' => file_exists(public_path('hot')),
+        'storage_link_exists' => is_link(public_path('storage')),
+        'storage_path' => storage_path('app/public'),
+        'storage_writable' => is_writable(storage_path('app/public')),
         'app_env' => config('app.env'),
-        'app_debug' => config('app.debug'),
     ]);
 });
