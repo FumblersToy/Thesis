@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Feed page loaded');
+    
     // Get CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     
@@ -6,6 +8,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const createPostForm = document.getElementById('createPostForm');
     const postsGrid = document.getElementById('postsGrid');
     const loadMoreBtn = document.getElementById('loadMore');
+    
+    console.log('Elements found:', {
+        createPostForm: !!createPostForm,
+        postsGrid: !!postsGrid,
+        loadMoreBtn: !!loadMoreBtn
+    });
     const fileInput = document.getElementById('image');
     const fileName = document.getElementById('fileName');
     const fileText = document.getElementById('fileText');
@@ -243,6 +251,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         loading = true;
         
+        // Show loading state if not appending
+        if (!append && postsGrid) {
+            postsGrid.innerHTML = '<div class="col-span-full text-center py-12"><div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div><p class="mt-4 text-gray-600">Loading posts...</p></div>';
+        }
+        
         try {
             const filters = getActiveFilters();
             const params = new URLSearchParams({
@@ -258,7 +271,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const data = await response.json();
+            console.log('Posts loaded:', data);
 
             if (data.success) {
                 if (append) {
@@ -267,16 +285,31 @@ document.addEventListener('DOMContentLoaded', function() {
                     renderPostsGrid(data.posts);
                 }
                 
+                // Show message if no posts
+                if (data.posts.length === 0) {
+                    postsGrid.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-gray-600 text-lg">No posts yet. Be the first to post!</p></div>';
+                }
+                
                 // Update load more button
-                if (data.pagination.has_more) {
-                    loadMoreBtn.style.display = 'block';
+                if (data.pagination && data.pagination.has_more) {
+                    if (loadMoreBtn) {
+                        loadMoreBtn.style.display = 'block';
+                    }
                     currentPage = data.pagination.current_page;
                 } else {
-                    loadMoreBtn.style.display = 'none';
+                    if (loadMoreBtn) {
+                        loadMoreBtn.style.display = 'none';
+                    }
                 }
+            } else {
+                console.error('API returned unsuccessful:', data);
+                showNotification('Error loading posts', 'error');
             }
         } catch (error) {
             console.error('Error loading posts:', error);
+            if (postsGrid) {
+                postsGrid.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-red-600 text-lg">Error loading posts. Please refresh the page.</p></div>';
+            }
             showNotification('Error loading posts', 'error');
         } finally {
             loading = false;
@@ -388,13 +421,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Render posts grid
     function renderPostsGrid(posts) {
+        if (!postsGrid) {
+            console.error('Posts grid element not found');
+            return;
+        }
         postsGrid.innerHTML = '';
-        appendPostsToGrid(posts);
+        if (posts && posts.length > 0) {
+            appendPostsToGrid(posts);
+        } else {
+            postsGrid.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-gray-600 text-lg">No posts yet. Be the first to post!</p></div>';
+        }
     }
 
     // Append posts to grid
     function appendPostsToGrid(posts) {
+        if (!postsGrid) {
+            console.error('Posts grid element not found');
+            return;
+        }
         posts.forEach(post => {
+            console.log('Creating post element for:', post.id, post);
             const postElement = createPostElement(post);
             postsGrid.appendChild(postElement);
         });
@@ -415,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Create post element
     function createPostElement(post) {
-        const safeImage = post.image_path || '/images/sample-post-1.jpg';
+        const hasImage = post.image_path && post.image_path.trim() !== '';
         const userName = post.user_name || 'User';
         const userGenre = post.user_genre || '';
         const userType = post.user_type || 'member';
@@ -429,23 +475,34 @@ document.addEventListener('DOMContentLoaded', function() {
                              userType === 'business' ? '🏢' : '👤';
         
         const avatarElement = userAvatar ? 
-            `<img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200" src="${userAvatar}" alt="avatar">` :
+            `<img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200" src="${userAvatar}" alt="avatar" onerror="this.parentElement.innerHTML='<div class=\\'w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold\\'>${userName.charAt(0).toUpperCase()}</div>'">` :
             `<div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">${userName.charAt(0).toUpperCase()}</div>`;
 
-        postDiv.innerHTML = `
-            <div class="relative">
+        // Format date for display
+        const formattedDate = new Date(createdAt).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        });
+
+        const imageSection = hasImage ? `
                 <img class="post-image w-full h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity" 
-                     src="${safeImage}" 
+                     src="${post.image_path}" 
                      alt="Post image" 
                      loading="lazy"
+                     onerror="this.src='/images/sample-post-1.jpg'"
                      data-post-id="${post.id}"
-                     data-image-url="${safeImage}"
+                     data-image-url="${post.image_path}"
                      data-user-name="${userName}"
                      data-user-genre="${userGenre}"
                      data-user-type="${userType}"
                      data-user-avatar="${userAvatar || ''}"
                      data-description="${post.description || ''}"
-                     data-created-at="${createdAt}">
+                     data-created-at="${createdAt}">` : '';
+
+        postDiv.innerHTML = `
+            <div class="relative">
+                ${imageSection}
                 <div class="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
                     ${userTypeEmoji} ${userType}
                 </div>
@@ -467,9 +524,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         <p class="text-gray-600">${userGenre}</p>
                     </div>
                 </div>
-                <p class="text-gray-700 mb-4 leading-relaxed">${post.description || ''}</p>
+                <p class="text-gray-700 mb-4 leading-relaxed">${post.description || 'No description'}</p>
                 <div class="flex justify-between items-center text-gray-500 text-sm">
-                    <span>${createdAt}</span>
+                    <span>${formattedDate}</span>
                     <div class="flex gap-4">
                         <button class="hover:text-red-500 transition-colors flex items-center gap-1">
                             ❤️ <span>0</span>
@@ -1158,6 +1215,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Initialize the page
+    console.log('Initializing filters and loading posts...');
     initializeFilters();
     loadPosts(1, false);
+    
+    console.log('Feed page initialization complete');
 });
