@@ -4,15 +4,24 @@ import express from 'express';
 import cors from 'cors';
 
 const app = express();
+
+// Allow both local and production origins
+const allowedOrigins = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    process.env.FRONTEND_URL, // Set this in Railway
+    process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` : null
+].filter(Boolean);
+
 app.use(cors({
-    origin: ["http://localhost:8000", "http://127.0.0.1:8000"],
+    origin: allowedOrigins,
     credentials: true
 }));
 
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:8000", "http://127.0.0.1:8000"],
+        origin: allowedOrigins,
         methods: ["GET", "POST"],
         credentials: true
     }
@@ -185,7 +194,7 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = process.env.SOCKET_PORT || 3001;
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
     console.log(`Socket.IO server running on port ${PORT}`);
 });
