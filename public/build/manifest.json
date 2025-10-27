@@ -1,0 +1,122 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-UKQ1UnQs.css",
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "names": [
+      "app.css"
+    ]
+  },
+  "resources/css/create-business.css": {
+    "file": "assets/create-business-DlmER59C.css",
+    "src": "resources/css/create-business.css",
+    "isEntry": true,
+    "names": [
+      "create-business.css"
+    ]
+  },
+  "resources/css/create-musician.css": {
+    "file": "assets/create-musician-DQ7HTmjE.css",
+    "src": "resources/css/create-musician.css",
+    "isEntry": true,
+    "names": [
+      "create-musician.css"
+    ]
+  },
+  "resources/css/create.css": {
+    "file": "assets/create-CO36t_2k.css",
+    "src": "resources/css/create.css",
+    "isEntry": true,
+    "names": [
+      "create.css"
+    ]
+  },
+  "resources/css/feed.css": {
+    "file": "assets/feed-Brfkpzr3.css",
+    "src": "resources/css/feed.css",
+    "isEntry": true,
+    "names": [
+      "feed.css"
+    ]
+  },
+  "resources/css/login.css": {
+    "file": "assets/login-CFy4I-Bg.css",
+    "src": "resources/css/login.css",
+    "isEntry": true,
+    "names": [
+      "login.css"
+    ]
+  },
+  "resources/css/register.css": {
+    "file": "assets/register-3FHWR8WY.css",
+    "src": "resources/css/register.css",
+    "isEntry": true,
+    "names": [
+      "register.css"
+    ]
+  },
+  "resources/css/socket.css": {
+    "file": "assets/socket-Ca9ESUwZ.css",
+    "src": "resources/css/socket.css",
+    "isEntry": true,
+    "names": [
+      "socket.css"
+    ]
+  },
+  "resources/css/welcome.css": {
+    "file": "assets/welcome-CHHkq-M_.css",
+    "src": "resources/css/welcome.css",
+    "isEntry": true,
+    "names": [
+      "welcome.css"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-C0G0cght.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/create-business.js": {
+    "file": "assets/create-business-DxkF5Qxq.js",
+    "name": "create-business",
+    "src": "resources/js/create-business.js",
+    "isEntry": true
+  },
+  "resources/js/create-musician.js": {
+    "file": "assets/create-musician-BRevj3Fr.js",
+    "name": "create-musician",
+    "src": "resources/js/create-musician.js",
+    "isEntry": true
+  },
+  "resources/js/create.js": {
+    "file": "assets/create-DJ-fMAde.js",
+    "name": "create",
+    "src": "resources/js/create.js",
+    "isEntry": true
+  },
+  "resources/js/feed.js": {
+    "file": "assets/feed-CmMS-95I.js",
+    "name": "feed",
+    "src": "resources/js/feed.js",
+    "isEntry": true
+  },
+  "resources/js/layout.js": {
+    "file": "assets/layout-CV0I59q4.js",
+    "name": "layout",
+    "src": "resources/js/layout.js",
+    "isEntry": true
+  },
+  "resources/js/messages.js": {
+    "file": "assets/messages-CJMJAsEc.js",
+    "name": "messages",
+    "src": "resources/js/messages.js",
+    "isEntry": true
+  },
+  "resources/js/socket.js": {
+    "file": "assets/socket-JrXd-oCs.js",
+    "name": "socket",
+    "src": "resources/js/socket.js",
+    "isEntry": true
+  }
+}
