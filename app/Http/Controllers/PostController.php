@@ -110,14 +110,34 @@ class PostController extends Controller
 
             // Handle AJAX requests
             if ($request->wantsJson() || $request->ajax()) {
+                // Get user info for the post
+                $user = Auth::user();
+                $musician = \App\Models\Musician::where('user_id', $user->id)->first();
+                $business = $musician ? null : \App\Models\Business::where('user_id', $user->id)->first();
+                
+                $userType = $musician ? 'musician' : ($business ? 'business' : 'member');
+                $userName = $musician?->stage_name ?: ($business?->business_name ?: ($user->name ?? 'User'));
+                $userGenre = $musician?->instrument ?: ($business?->venue ?: '');
+                $userAvatarPath = $musician?->profile_picture ?: ($business?->profile_picture ?: null);
+                $userAvatar = $userAvatarPath ? getImageUrl($userAvatarPath) : null;
+                
                 return response()->json([
                     'success' => true,
                     'message' => 'Post created successfully!',
                     'post' => [
                         'id' => $post->id,
                         'description' => $post->description,
-                        'image_path' => $post->image_path,
+                        'image_path' => $post->image_path ? getImageUrl($post->image_path) : null,
                         'created_at' => $post->created_at->toDateTimeString(),
+                        'user_type' => $userType,
+                        'user_name' => $userName,
+                        'user_genre' => $userGenre,
+                        'user_avatar' => $userAvatar,
+                        'user_id' => $post->user_id,
+                        'is_owner' => true,
+                        'like_count' => 0,
+                        'comment_count' => 0,
+                        'is_liked' => false,
                     ]
                 ]);
             }

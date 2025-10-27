@@ -396,7 +396,7 @@ Route::get('/api/posts', function () {
         $userName = $musician?->stage_name ?: ($business?->business_name ?: ($user->name ?? 'User'));
         $userGenre = $musician?->instrument ?: ($business?->venue ?: '');
         $userAvatarPath = $musician?->profile_picture ?: ($business?->profile_picture ?: null);
-        $userAvatar = $userAvatarPath ? \Illuminate\Support\Facades\Storage::url($userAvatarPath) : null;
+        $userAvatar = $userAvatarPath ? getImageUrl($userAvatarPath) : null;
 
         // Get like and comment counts
         $likeCount = $post->likes()->count();
@@ -407,7 +407,7 @@ Route::get('/api/posts', function () {
         return [
             'id' => $post->id,
             'description' => $post->description,
-            'image_path' => $post->image_path ? \Illuminate\Support\Facades\Storage::url($post->image_path) : null,
+            'image_path' => $post->image_path ? getImageUrl($post->image_path) : null,
             'created_at' => optional($post->created_at)->toDateTimeString(),
             'user_type' => $userType,
             'user_name' => $userName,

@@ -254,73 +254,9 @@
                 </form>
             </div>
 
-            <!-- Static Posts Grid -->
+            <!-- Posts Grid (loaded dynamically) -->
             <div id="postsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                <article class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
-                    <img src="/images/sample-post-1.jpg" 
-                         alt="post" 
-                         class="post-image w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                         data-post-id="sample-1"
-                         data-image-url="/images/sample-post-1.jpg"
-                         data-user-name="{{ $displayName }}"
-                         data-user-genre="{{ $roleLabel }}"
-                         data-user-type="member"
-                         data-user-avatar=""
-                         data-description="Looking for guitarist to join an indie-rock jam this weekend."
-                         data-created-at="{{ now()->toDateTimeString() }}"
-                         data-like-count="0"
-                         data-comment-count="0"
-                         data-is-liked="false">
-                    <div class="p-4">
-                        <h3 class="font-semibold text-lg">Open Jam Night</h3>
-                        <p class="text-gray-600 mt-2">Looking for guitarist to join an indie-rock jam this weekend.</p>
-                        <p class="mt-3 text-sm text-gray-500">Posted by {{ $displayName }} · {{ $roleLabel }}</p>
-                    </div>
-                </article>
-
-                <article class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
-                    <img src="/images/sample-post-2.jpg" 
-                         alt="post" 
-                         class="post-image w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                         data-post-id="sample-2"
-                         data-image-url="/images/sample-post-2.jpg"
-                         data-user-name="{{ $displayName }}"
-                         data-user-genre="{{ $roleLabel }}"
-                         data-user-type="member"
-                         data-user-avatar=""
-                         data-description="2 hours free studio time for collaboration — bring ideas."
-                         data-created-at="{{ now()->toDateTimeString() }}"
-                         data-like-count="0"
-                         data-comment-count="0"
-                         data-is-liked="false">
-                    <div class="p-4">
-                        <h3 class="font-semibold text-lg">Studio Session Available</h3>
-                        <p class="text-gray-600 mt-2">2 hours free studio time for collaboration — bring ideas.</p>
-                        <p class="mt-3 text-sm text-gray-500">Posted by {{ $displayName }} · {{ $roleLabel }}</p>
-                    </div>
-                </article>
-
-                <article class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
-                    <img src="/images/sample-post-3.jpg" 
-                         alt="post" 
-                         class="post-image w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                         data-post-id="sample-3"
-                         data-image-url="/images/sample-post-3.jpg"
-                         data-user-name="{{ $displayName }}"
-                         data-user-genre="{{ $roleLabel }}"
-                         data-user-type="member"
-                         data-user-avatar=""
-                         data-description="Indie-pop project looking for a lead vocalist with harmony experience."
-                         data-created-at="{{ now()->toDateTimeString() }}"
-                         data-like-count="0"
-                         data-comment-count="0"
-                         data-is-liked="false">
-                    <div class="p-4">
-                        <h3 class="font-semibold text-lg">Looking for Vocalist</h3>
-                        <p class="text-gray-600 mt-2">Indie-pop project looking for a lead vocalist with harmony experience.</p>
-                        <p class="mt-3 text-sm text-gray-500">Posted by {{ $displayName }} · {{ $roleLabel }}</p>
-                    </div>
-                </article>
+                <!-- Posts will be loaded here via JavaScript -->
             </div>
 
             <div class="text-center mt-12">
