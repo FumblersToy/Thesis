@@ -22,6 +22,7 @@ class MusicianController extends Controller
 
     public function createMusicianProfile(Request $request)
     {
+        // Validate input
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -32,27 +33,33 @@ class MusicianController extends Controller
             'profile_picture' => 'nullable|image|max:2048',
         ]);
 
+        // Prevent duplicate musician profile
         if (Musician::where('user_id', Auth::id())->exists()) {
             return redirect()->back()->with('error', 'You already have a musician profile.');
         }
 
-        // Cloudinary upload
-        $profilePictureUrl = '';
+        // Handle Cloudinary upload safely
+        $profilePictureUrl = ''; // default empty string
         if ($request->hasFile('profile_picture')) {
-            $uploadedFile = Cloudinary::upload($request->file('profile_picture')->getRealPath(), [
-                'folder' => 'profile_pictures',
-                'transformation' => [
-                    'width' => 500,
-                    'height' => 500,
-                    'crop' => 'fill',
-                    'gravity' => 'face'
-                ]
-            ]);
-            if ($uploadedFile && method_exists($uploadedFile, 'getSecurePath')) {
-                $profilePictureUrl = $uploadedFile->getSecurePath();
+            $file = $request->file('profile_picture');
+            if ($file->isValid()) {
+                $uploadedFile = Cloudinary::upload($file->getRealPath(), [
+                    'folder' => 'profile_pictures',
+                    'transformation' => [
+                        'width' => 500,
+                        'height' => 500,
+                        'crop' => 'fill',
+                        'gravity' => 'face',
+                    ]
+                ]);
+
+                if ($uploadedFile && method_exists($uploadedFile, 'getSecurePath')) {
+                    $profilePictureUrl = $uploadedFile->getSecurePath();
+                }
             }
         }
 
+        // Create musician profile
         $musician = Musician::create([
             'user_id' => Auth::id(),
             'first_name' => $request->first_name,

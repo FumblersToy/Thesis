@@ -35,19 +35,23 @@ class BusinessController extends Controller
             return redirect()->back()->with('error', 'You already have a business profile.');
         }
 
-        $profilePictureUrl = '';
+        $profilePictureUrl = ''; // default empty string
         if ($request->hasFile('profile_picture')) {
-            $uploadedFile = Cloudinary::upload($request->file('profile_picture')->getRealPath(), [
-                'folder' => 'business_profiles',
-                'transformation' => [
-                    'width' => 500,
-                    'height' => 500,
-                    'crop' => 'fill',
-                    'gravity' => 'face'
-                ]
-            ]);
-            if ($uploadedFile && method_exists($uploadedFile, 'getSecurePath')) {
-                $profilePictureUrl = $uploadedFile->getSecurePath();
+            $file = $request->file('profile_picture');
+            if ($file->isValid()) {
+                $uploadedFile = Cloudinary::upload($file->getRealPath(), [
+                    'folder' => 'business_profiles',
+                    'transformation' => [
+                        'width' => 500,
+                        'height' => 500,
+                        'crop' => 'fill',
+                        'gravity' => 'face',
+                    ]
+                ]);
+
+                if ($uploadedFile && method_exists($uploadedFile, 'getSecurePath')) {
+                    $profilePictureUrl = $uploadedFile->getSecurePath();
+                }
             }
         }
 
