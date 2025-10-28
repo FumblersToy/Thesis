@@ -51,9 +51,10 @@ class SettingsController extends Controller
         if (!empty($validatedUser['email'])) {
             $user->email = $validatedUser['email'];
         }
-        if (!empty($validatedUser['password'])) {
-            $user->password = bcrypt($validatedUser['password']);
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->input('password'));
         }
+
         $user->save();
 
         if ($musician) {
