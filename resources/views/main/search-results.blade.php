@@ -159,7 +159,7 @@
                                         <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-200 group-hover:scale-105">
                                             <div class="flex items-center gap-4 mb-4">
                                                 @if($musician->profile_picture)
-                                                    <img src="<img src="{{ getImageUrl($musician->profile_picture) }}"" 
+                                                    <img src="{{ getImageUrl($musician->profile_picture) }}"" 
                                                         alt="{{ $musician->stage_name }}" 
                                                         class="w-12 h-12 rounded-full object-cover border-2 border-gray-200">
                                                 @else
@@ -191,7 +191,7 @@
                                         <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all duration-300 border border-gray-200 group-hover:scale-105">
                                             <div class="flex items-center gap-4 mb-4">
                                                 @if($venue->profile_picture)
-                                                    <img src="<img src="{{ getImageUrl($venue->profile_picture) }}"" 
+                                                    <img src="{{ getImageUrl($venue->profile_picture) }}"" 
                                                         alt="{{ $venue->business_name }}" 
                                                         class="w-12 h-12 rounded-full object-cover border-2 border-gray-200">
                                                 @else
