@@ -260,11 +260,17 @@ class PostController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $post = Post::findOrFail($id);
 
         if ($post->user_id !== Auth::id()) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized to delete this post'
+                ], 403);
+            }
             return redirect()->back()->with('error', 'Unauthorized to delete this post');
         }
 
