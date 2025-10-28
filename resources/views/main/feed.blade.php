@@ -285,6 +285,15 @@
                 }
             @endauth
         });
+
+                document.addEventListener("click", e => {
+        const deleteBtn = e.target.closest(".delete-post");
+        if (!deleteBtn) return;
+
+        const postId = deleteBtn.dataset.postId;
+        showDeleteConfirmation(postId);
+        });
+
     </script>
     @vite(['resources/js/app.js', 'resources/js/feed.js', 'resources/js/socket.js'])
 </body> 

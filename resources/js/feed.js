@@ -629,6 +629,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    
     // Delete post functionality
     document.addEventListener('click', function(e) {
         if (e.target.closest('.delete-post-btn')) {
