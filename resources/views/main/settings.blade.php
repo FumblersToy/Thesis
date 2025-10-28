@@ -403,6 +403,39 @@
                 })
                 .catch(error => console.log('Address search error:', error));
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+    const passwordInput = document.querySelector('input[name="password"]');
+    const form = document.querySelector('form');
+    
+    // Create a warning element
+    const warning = document.createElement('p');
+    warning.className = 'text-red-400 text-sm mt-1';
+    warning.style.display = 'none';
+    warning.textContent = 'Password must be at least 8 characters long.';
+    passwordInput.parentNode.appendChild(warning);
+
+    // Live validation as the user types
+    passwordInput.addEventListener('input', () => {
+        if (passwordInput.value.length > 0 && passwordInput.value.length < 8) {
+            warning.style.display = 'block';
+        } else {
+            warning.style.display = 'none';
+        }
+    });
+
+    // Prevent submission if too short
+    form.addEventListener('submit', (e) => {
+        if (passwordInput.value.length > 0 && passwordInput.value.length < 8) {
+            e.preventDefault();
+            warning.style.display = 'block';
+
+            // Optional: add a small shake animation
+            passwordInput.classList.add('ring-2', 'ring-red-500');
+            setTimeout(() => passwordInput.classList.remove('ring-2', 'ring-red-500'), 500);
+        }
+    });
+    });
     </script>
 </body>
 </html>
