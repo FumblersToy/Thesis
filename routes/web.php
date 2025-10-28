@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\PostController;
 
 Route::get('/', function () {
     return response()->view('welcome')
@@ -53,9 +54,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/business', [App\Http\Controllers\Auth\BusinessController::class, 'createBusinessProfile'])->name('business.store');
     // Accept POST to /create/business as well, in case of older forms
     Route::post('/create/business', [App\Http\Controllers\Auth\BusinessController::class, 'createBusinessProfile']);
-    // Posts
-    Route::post('/posts', [App\Http\Controllers\PostController::class, 'store'])->name('posts.store');
-    Route::delete('/posts/{id}', [App\Http\Controllers\PostController::class, 'destroy'])->name('posts.destroy');
+    
+    // Posts - Using PostController
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
     
     // Likes
     Route::post('/posts/{id}/like', [App\Http\Controllers\LikeController::class, 'toggle'])->name('posts.like');
@@ -108,8 +110,44 @@ Route::get('/debug-images', function() {
             'profile_picture_public_id' => $business->profile_picture_public_id,
             'image_url' => $business->profile_picture ? getImageUrl($business->profile_picture) : null,
         ] : null,
-        'cloudinary_configured' => !empty(config('cloudinary.cloud_url')),
+        'cloudinary_url' => env('CLOUDINARY_URL') ? 'Set' : 'Not Set',
     ]);
+})->middleware('auth');
+
+// Test Cloudinary connection
+Route::get('/test-cloudinary', function() {
+    try {
+        $cloudinaryUrl = env('CLOUDINARY_URL');
+        
+        if (!$cloudinaryUrl) {
+            return response()->json([
+                'success' => false,
+                'message' => 'CLOUDINARY_URL not set in .env'
+            ]);
+        }
+        
+        $cloudinary = new \Cloudinary\Cloudinary($cloudinaryUrl);
+        
+        // Test upload with a placeholder image
+        $result = $cloudinary->uploadApi()->upload('https://via.placeholder.com/300', [
+            'folder' => 'test',
+            'public_id' => 'test_upload_' . time()
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'cloudinary_url' => substr($cloudinaryUrl, 0, 30) . '...',
+            'uploaded_url' => $result['secure_url'] ?? null,
+            'public_id' => $result['public_id'] ?? null,
+            'message' => 'Cloudinary is working perfectly!'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ], 500);
+    }
 })->middleware('auth');
 
 Route::get('/debug-admin', function() {
@@ -283,7 +321,6 @@ Route::prefix('api/messages')->middleware('auth')->group(function () {
     Route::get('/search/users', [App\Http\Controllers\MessageController::class, 'searchUsers']);
 });
 
-// API: posts list with filters
 // API route for map users
 Route::get('/api/map/users', function () {
     $users = collect();
@@ -336,100 +373,8 @@ Route::get('/api/map/users', function () {
     ]);
 })->middleware('auth');
 
-Route::get('/api/posts', function () {
-    $perPage = max(1, (int) request('per_page', 12));
-    $instruments = collect(explode(',', (string) request('instruments', '')))->filter()->values();
-    $venues = collect(explode(',', (string) request('venues', '')))->filter()->values();
-    $sortBy = request('sort_by', 'recent');
-    $userLat = request('user_latitude');
-    $userLng = request('user_longitude');
-    $maxDistance = request('max_distance');
-
-    $query = \App\Models\Post::query();
-
-    if ($instruments->isNotEmpty()) {
-        $query->whereHas('user.musician', function ($q) use ($instruments) {
-            $q->whereIn('instrument', $instruments);
-        });
-    }
-
-    if ($venues->isNotEmpty()) {
-        $query->whereHas('user.business', function ($q) use ($venues) {
-            $q->whereIn('venue', $venues);
-        });
-    }
-
-    // Distance filtering and sorting
-    if ($sortBy === 'distance' && $userLat && $userLng) {
-        // Add distance calculation using Haversine formula
-        $query->select('posts.*')
-            ->selectRaw('
-                COALESCE(
-                    (6371 * acos(cos(radians(?)) * cos(radians(COALESCE(musicians.latitude, businesses.latitude))) 
-                    * cos(radians(COALESCE(musicians.longitude, businesses.longitude)) - radians(?)) 
-                    + sin(radians(?)) * sin(radians(COALESCE(musicians.latitude, businesses.latitude))))),
-                    999999
-                ) AS distance', [$userLat, $userLng, $userLat])
-            ->leftJoin('users', 'posts.user_id', '=', 'users.id')
-            ->leftJoin('musicians', 'users.id', '=', 'musicians.user_id')
-            ->leftJoin('businesses', 'users.id', '=', 'businesses.user_id');
-
-        // Filter by maximum distance if specified
-        if ($maxDistance) {
-            $query->havingRaw('distance <= ?', [$maxDistance]);
-        }
-
-        $query->orderBy('distance', 'asc');
-    } else {
-        // Default sorting by creation date
-        $query->orderByDesc('created_at');
-    }
-
-    $paginator = $query->paginate($perPage);
-
-    $posts = collect($paginator->items())->map(function ($post) {
-        $user = \App\Models\User::find($post->user_id);
-        $musician = $user ? \App\Models\Musician::where('user_id', $user->id)->first() : null;
-        $business = $user && !$musician ? \App\Models\Business::where('user_id', $user->id)->first() : null;
-
-        $userType = $musician ? 'musician' : ($business ? 'business' : 'member');
-        $userName = $musician?->stage_name ?: ($business?->business_name ?: ($user->name ?? 'User'));
-        $userGenre = $musician?->instrument ?: ($business?->venue ?: '');
-        $userAvatarPath = $musician?->profile_picture ?: ($business?->profile_picture ?: null);
-        $userAvatar = $userAvatarPath ? getImageUrl($userAvatarPath) : null;
-
-        // Get like and comment counts
-        $likeCount = $post->likes()->count();
-        $commentCount = $post->comments()->count();
-        $isLiked = \Illuminate\Support\Facades\Auth::check() ? 
-            $post->likes()->where('user_id', \Illuminate\Support\Facades\Auth::id())->exists() : false;
-
-        return [
-            'id' => $post->id,
-            'description' => $post->description,
-            'image_path' => $post->image_path ? getImageUrl($post->image_path) : null,
-            'created_at' => optional($post->created_at)->toDateTimeString(),
-            'user_type' => $userType,
-            'user_name' => $userName,
-            'user_genre' => $userGenre,
-            'user_avatar' => $userAvatar,
-            'user_id' => $post->user_id,
-            'is_owner' => $post->user_id === \Illuminate\Support\Facades\Auth::id(),
-            'like_count' => $likeCount,
-            'comment_count' => $commentCount,
-            'is_liked' => $isLiked,
-        ];
-    });
-
-    return response()->json([
-        'success' => true,
-        'posts' => $posts,
-        'pagination' => [
-            'current_page' => $paginator->currentPage(),
-            'has_more' => $paginator->hasMorePages(),
-        ],
-    ]);
-})->middleware('auth');
+// API: posts list with filters - NOW USING PostController
+Route::get('/api/posts', [PostController::class, 'index'])->middleware('auth');
 
 // Venue detail: redirect to user profile for business owner
 Route::get('/venue/{id}', function ($id) {
