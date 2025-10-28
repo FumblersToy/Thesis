@@ -110,7 +110,7 @@
                             id="login-btn"
                             class="btn-hover w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl py-4 font-semibold text-lg shadow-lg transition-all duration-300">
                         <span id="btn-text">Sign In</span>
-                        <svg id="loading-spinner" class="hidden w-5 h-5 ml-2 animate-spin inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg id="loading-spinner" class="hidden w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                         </svg>
                     </button>
@@ -160,6 +160,7 @@
             // Show loading state
             btnText.textContent = 'Signing In...';
             spinner.classList.remove('hidden');
+            spinner.classList.add('animate-spin', 'inline');
             btn.disabled = true;
             btn.classList.add('opacity-75');
             errorContainer.classList.add('hidden');
@@ -213,6 +214,7 @@
                 // Reset button state
                 btnText.textContent = 'Sign In';
                 spinner.classList.add('hidden');
+                spinner.classList.remove('animate-spin', 'inline');
                 btn.disabled = false;
                 btn.classList.remove('opacity-75');
             });
