@@ -40,10 +40,18 @@ class SettingsController extends Controller
         $business = Business::where('user_id', $user->id)->first();
 
         $validatedUser = $request->validate([
-            'name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'password' => 'nullable|string|min:8|confirmed',
+        'name' => 'nullable|string|max:255',
+        'email' => 'nullable|email|max:255',
         ]);
+
+        // Validate password separately to avoid blocking all updates
+        if ($request->filled('password')) {
+            $request->validate([
+                'password' => 'string|min:8|confirmed',
+            ]);
+            $user->password = bcrypt($request->input('password'));
+        }
+
 
         if (!empty($validatedUser['name'])) {
             $user->name = $validatedUser['name'];
@@ -51,10 +59,6 @@ class SettingsController extends Controller
         if (!empty($validatedUser['email'])) {
             $user->email = $validatedUser['email'];
         }
-        if ($request->filled('password')) {
-            $user->password = bcrypt($request->input('password'));
-        }
-
         $user->save();
 
         if ($musician) {
