@@ -18,13 +18,13 @@
         $currentDisplayName = $currentUserMusician?->stage_name
             ?: ($currentUserBusiness?->business_name ?: ($user->name ?? 'User'));
         $currentRoleLabel = $currentUserMusician?->instrument ?: ($currentUserBusiness?->venue ?: 'Member');
-        $currentProfileImage = null;
-        if ($currentUserMusician && $currentUserMusician->profile_picture) {
-            $currentProfileImage = \Illuminate\Support\Facades\Storage::url($currentUserMusician->profile_picture);
-        } elseif ($currentUserBusiness && $currentUserBusiness->profile_picture) {
-            $currentProfileImage = \Illuminate\Support\Facades\Storage::url($currentUserBusiness->profile_picture);
+       $profileImage = null;
+        if ($musician && $musician->profile_picture) {
+            $profileImage = getImageUrl($musician->profile_picture);
+        } elseif ($business && $business->profile_picture) {
+            $profileImage = getImageUrl($business->profile_picture);
         } else {
-            $currentProfileImage = '/images/sample-profile.jpg';
+            $profileImage = '/assets/default1.jpg';
         }
     @endphp
 
