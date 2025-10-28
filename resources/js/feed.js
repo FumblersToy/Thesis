@@ -250,6 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (loading) return;
         
         loading = true;
+        console.log('🔄 loadPosts called - page:', page, 'append:', append);
         
         // Show loading state if not appending
         if (!append && postsGrid) {
@@ -258,12 +259,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             const filters = getActiveFilters();
+            console.log('📋 Active filters:', filters);
+            
             const params = new URLSearchParams({
                 page: page,
                 per_page: 12,
                 ...filters
             });
 
+            console.log('🌐 Fetching URL:', `/api/posts?${params}`);
             const response = await fetch(`/api/posts?${params}`, {
                 headers: {
                     'Accept': 'application/json',
@@ -271,12 +275,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
+            console.log('✅ Response status:', response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
-            console.log('Posts loaded:', data);
+            console.log('📦 Posts loaded:', data);
 
             if (data.success) {
                 if (append) {
@@ -302,11 +307,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             } else {
-                console.error('API returned unsuccessful:', data);
+                console.error('❌ API returned unsuccessful:', data);
                 showNotification('Error loading posts', 'error');
             }
         } catch (error) {
-            console.error('Error loading posts:', error);
+            console.error('❌ Error loading posts:', error);
             if (postsGrid) {
                 postsGrid.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-red-600 text-lg">Error loading posts. Please refresh the page.</p></div>';
             }
@@ -1221,3 +1226,4 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Feed page initialization complete');
 });
+
