@@ -27,7 +27,7 @@
                         <h3 class="font-semibold text-white/90 mb-4 text-lg">🎵 Instruments</h3>
                         <div class="space-y-3" id="instruments">
                             <label class="flex items-center gap-3 text-white">
-                                <input type="checkbox" class="form-checkbox" checked> Guitar
+                                <input type="checkbox" class="form-checkbox"> Guitar
                             </label>
                             <label class="flex items-center gap-3 text-white">
                                 <input type="checkbox" class="form-checkbox"> Drums
@@ -42,7 +42,7 @@
                         <h3 class="font-semibold text-white/90 mb-4 text-lg">🏢 Venues</h3>
                         <div class="space-y-3" id="venues">
                             <label class="flex items-center gap-3 text-white">
-                                <input type="checkbox" class="form-checkbox" checked> Studio
+                                <input type="checkbox" class="form-checkbox"> Studio
                             </label>
                             <label class="flex items-center gap-3 text-white">
                                 <input type="checkbox" class="form-checkbox"> Club

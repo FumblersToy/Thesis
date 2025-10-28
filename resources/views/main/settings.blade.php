@@ -8,7 +8,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen relative overflow-x-hidden gradient-bg">
     <div class="floating-elements fixed inset-0 pointer-events-none"></div>
@@ -64,7 +63,7 @@
                             <label class="block text-white/80 mb-2 text-center">Profile Picture</label>
                             <div class="flex items-center justify-center gap-4">
                                 @php
-                                    $musicianAvatar = $musician->profile_picture ? getImageUrl($musician->profile_picture) : '/images/sample-profile.jpg';
+                                    $musicianAvatar = $musician->profile_picture ? \Illuminate\Support\Facades\Storage::url($musician->profile_picture) : '/images/sample-profile.jpg';
                                 @endphp
                                 <img src="{{ $musicianAvatar }}" alt="Current avatar" class="w-20 h-20 rounded-full object-cover border-2 border-white/30 shadow">
                                 <div>
@@ -140,7 +139,7 @@
                             <label class="block text-white/80 mb-2 text-center">Profile Picture</label>
                             <div class="flex items-center justify-center gap-4">
                                 @php
-                                    $businessAvatar = $business->profile_picture ? getImageUrl($business->profile_picture) : '/images/sample-profile.jpg';
+                                    $businessAvatar = $business->profile_picture ? \Illuminate\Support\Facades\Storage::url($business->profile_picture) : '/images/sample-profile.jpg';
                                 @endphp
                                 <img src="{{ $businessAvatar }}" alt="Current logo" class="w-20 h-20 rounded-full object-cover border-2 border-white/30 shadow">
                                 <div>
