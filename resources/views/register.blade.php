@@ -161,7 +161,6 @@
         </section>
     </main>
     <script>
-        <script>
     function togglePassword(fieldId, iconId) {
         const passwordInput = document.getElementById(fieldId);
         const eyeIcon = document.getElementById(iconId);
@@ -261,6 +260,5 @@
         });
     });
 </script>
-        </script>
 </body>
 </html>
