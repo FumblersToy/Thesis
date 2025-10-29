@@ -18,12 +18,7 @@ if (!function_exists('getImageUrl')) {
             return $path;
         }
         
-        // If it already has /storage/, return as is
-        if (str_starts_with($path, '/storage/')) {
-            return $path;
-        }
-        
-        // Otherwise, prepend /storage/ for local files
-        return '/storage/' . $path;
+        // Otherwise, use storage URL for local files
+        return \Illuminate\Support\Facades\Storage::url($path);
     }
 }
