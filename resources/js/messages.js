@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="flex items-center space-x-3">
                 <div class="relative">
                     ${avatar ? 
-                        `<img src="/storage/${avatar}" alt="${displayName}" class="w-12 h-12 rounded-full object-cover">` :
+                        `<img src="${getImageUrl(avatar)}" alt="${displayName}" class="w-12 h-12 rounded-full object-cover">` :
                         `<div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">${displayName.charAt(0).toUpperCase()}</div>`
                     }
                     <div class="online-status absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
@@ -378,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const avatarElement = document.getElementById('chatUserAvatar');
         if (avatar) {
-            avatarElement.innerHTML = `<img src="/storage/${avatar}" alt="${displayName}" class="w-full h-full rounded-full object-cover">`;
+            avatarElement.innerHTML = `<img src="${getImageUrl(avatar)}" alt="${displayName}" class="w-full h-full rounded-full object-cover">`;
         } else {
             avatarElement.innerHTML = displayName.charAt(0).toUpperCase();
         }
@@ -543,7 +543,7 @@ document.addEventListener('DOMContentLoaded', function() {
             div.className = 'flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-100 rounded-xl transition-colors';
             div.innerHTML = `
                 <div class="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
-                    ${avatar ? `<img src="/storage/${avatar}" alt="${displayName}" class="w-full h-full object-cover">` : displayName.charAt(0).toUpperCase()}
+                    ${avatar ? `<img src="${getImageUrl(avatar)}" alt="${displayName}" class="w-full h-full object-cover">` : displayName.charAt(0).toUpperCase()}
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="font-semibold text-gray-800 truncate">${displayName}</div>
