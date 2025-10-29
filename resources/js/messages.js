@@ -1,3 +1,16 @@
+// Helper function to get proper image URL - MUST be defined BEFORE DOMContentLoaded
+function getImageUrl(path) {
+    if (!path) return '/images/sample-profile.jpg';
+    
+    // If path already starts with http or /, return as is
+    if (path.startsWith('http') || path.startsWith('/storage/')) {
+        return path;
+    }
+    
+    // Otherwise prepend /storage/
+    return `/storage/${path}`;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Get CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -94,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             searchResults.classList.add('hidden');
                         }
                     } catch (error) {
-                        // Optionally show error
+                        console.error('Search error:', error);
                     }
                 }
             });
@@ -346,7 +359,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Create message element
     function createMessageElement(message) {
-    const isOwn = message.sender_id === window.currentUserId;
+        const isOwn = message.sender_id === window.currentUserId;
         const senderName = message.sender?.musician?.stage_name || message.sender?.business?.business_name || message.sender?.name || 'Unknown';
         
         const div = document.createElement('div');
@@ -381,7 +394,7 @@ document.addEventListener('DOMContentLoaded', function() {
             avatarElement.innerHTML = `<img src="${getImageUrl(avatar)}" alt="${displayName}" class="w-full h-full rounded-full object-cover">`;
         } else {
             avatarElement.innerHTML = displayName.charAt(0).toUpperCase();
-        }   
+        }
     }
     
     // Send message
