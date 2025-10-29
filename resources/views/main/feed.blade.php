@@ -96,11 +96,62 @@
             </svg>
         </button>
 
-        <!-- Mobile Sidebar -->
-        <aside id="mobileMenu" class="fixed inset-y-0 left-0 z-40 w-80 glass-effect backdrop-blur-xl p-6 transform -translate-x-full lg:hidden transition-transform duration-300 gradient-bg">
-            <!-- Static mobile sidebar content -->
-            <h3 class="text-white font-semibold mb-4">Filters</h3>
-            <div class="text-white">Instruments & venues (static)</div>
+        <aside id="mobileMenu" class="fixed inset-y-0 left-0 z-40 w-80 glass-effect backdrop-blur-xl p-6 transform -translate-x-full lg:hidden transition-transform duration-300 gradient-bg overflow-y-auto">
+            <div class="mb-6">
+                <h2 class="font-bold text-2xl mb-6 text-white flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse-slow"></div>
+                    Filters
+                </h2>
+                
+                <div class="space-y-8">
+                    <div class="animate-fade-in">
+                        <h3 class="font-semibold text-white/90 mb-4 text-lg">🎵 Instruments</h3>
+                        <div class="space-y-3" id="mobileInstruments">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="animate-fade-in" style="animation-delay: 0.1s">
+                        <h3 class="font-semibold text-white/90 mb-4 text-lg">🏢 Venues</h3>
+                        <div class="space-y-3" id="mobileVenues">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="animate-fade-in" style="animation-delay: 0.2s">
+                        <h3 class="font-semibold text-white/90 mb-4 text-lg">📍 Distance</h3>
+                        <div class="space-y-3">
+                            <button type="button" id="mobileGetCurrentLocation" class="w-full px-4 py-2 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-colors text-sm">
+                                📍 Use My Location
+                            </button>
+                            <div id="mobileLocationStatus" class="text-white/70 text-sm hidden"></div>
+                            <div class="space-y-2">
+                                <label class="block text-white/80 text-sm">Sort by:</label>
+                                <select id="mobileSortBy" class="w-full px-3 py-2 bg-white/20 text-white rounded-xl border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/30">
+                                    <option value="recent" class="text-black">Most Recent</option>
+                                    <option value="distance" class="text-black">Nearest First</option>
+                                </select>
+                            </div>
+                            <div id="mobileDistanceFilter" class="space-y-2 hidden">
+                                <label class="block text-white/80 text-sm">Within:</label>
+                                <select id="mobileMaxDistance" class="w-full px-3 py-2 bg-white/20 text-white rounded-xl border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/30">
+                                    <option value="" class="text-black">Any Distance</option>
+                                    <option value="5" class="text-black">5 km</option>
+                                    <option value="10" class="text-black">10 km</option>
+                                    <option value="25" class="text-black">25 km</option>
+                                    <option value="50" class="text-black">50 km</option>
+                                    <option value="100" class="text-black">100 km</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" id="mobileApplyFilters"
+                        class="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 font-semibold text-lg shadow-lg hover-glow animate-scale-in border-2">
+                        Apply Filters ✨
+                    </button>
+                </div>
+            </div>
         </aside>
 
         <!-- Main Content -->

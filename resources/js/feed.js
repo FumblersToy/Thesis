@@ -595,6 +595,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         populateFilterSection('instruments', instruments);
         populateFilterSection('venues', venues);
+        populateFilterSection('mobileInstruments', instruments);
+        populateFilterSection('mobileVenues', venues);
     }
 
     function populateFilterSection(sectionId, options) {
