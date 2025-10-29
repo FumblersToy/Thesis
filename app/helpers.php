@@ -14,11 +14,16 @@ if (!function_exists('getImageUrl')) {
         }
         
         // If it's already a full URL (Cloudinary), return as-is
-        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+        if (strpos($path, 'http://') === 0 || strpos($path, 'https://') === 0) {
             return $path;
         }
         
-        // Otherwise, use storage URL for local files
-        return \Illuminate\Support\Facades\Storage::url($path);
+        // If it already has /storage/, return as is
+        if (strpos($path, '/storage/') === 0) {
+            return $path;
+        }
+        
+        // Otherwise, prepend /storage/ for local files
+        return '/storage/' . $path;
     }
 }
