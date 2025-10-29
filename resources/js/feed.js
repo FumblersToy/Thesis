@@ -1,13 +1,16 @@
 function getImageUrl(path) {
     if (!path) return '/images/sample-profile.jpg';
     
-    // Fix double-processing: remove /storage/ if it's followed by http
-    if (path.includes('/storage/http')) {
-        path = path.replace('/storage/', '');
-    }
+    // Fix double-processing: remove ALL instances of /storage/ before http/https
+    path = path.replace('/storage/https://', 'https://');
+    path = path.replace('/storage/http://', 'http://');
     
     // If path already starts with http or /storage/, return as-is
-    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/storage/')) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+    }
+    
+    if (path.startsWith('/storage/')) {
         return path;
     }
     
