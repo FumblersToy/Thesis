@@ -1189,6 +1189,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add comment to modal function
     function addCommentToModal(comment, modal) {
         console.log('Adding comment to modal:', comment);
+        console.log('User avatar value:', comment.user_avatar); // ADD THIS LINE
+        console.log('Avatar URL:', comment.user_avatar ? getImageUrl(comment.user_avatar) : 'No avatar'); // ADD THIS LINE
         const commentsContainer = modal.querySelector('.space-y-3');
         console.log('Comments container found:', commentsContainer);
         
