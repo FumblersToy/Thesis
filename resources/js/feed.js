@@ -1,15 +1,3 @@
-function getImageUrl(path) {
-    if (!path) return '/images/sample-profile.jpg';
-    
-    // If path already starts with http or /, return as-is
-    if (path.startsWith('http') || path.startsWith('/')) {
-        return path;
-    }
-    
-    // Otherwise prepend your storage path
-    return `/storage/${path}`;
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Feed page loaded');
     
