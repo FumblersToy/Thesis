@@ -53,7 +53,7 @@ class CommentController extends Controller
                         'content' => $comment->content,
                         'created_at' => $comment->created_at->toDateTimeString(),
                         'user_name' => $displayName,
-                        'user_avatar' => $avatar ? getImageUrl($avatar) : null,
+                        'user_avatar' => $avatar,
                     ],
                 ], 201);
             }
@@ -94,7 +94,7 @@ class CommentController extends Controller
                     'content' => $comment->content,
                     'created_at' => $comment->created_at->toDateTimeString(),
                     'user_name' => $displayName,
-                    'user_avatar' => $avatar ? getImageUrl($avatar) : null,
+                    'user_avatar' => $avatar,
                 ];
             });
 
