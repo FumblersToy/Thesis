@@ -1,3 +1,7 @@
+function getImageUrl(path) {
+    if (!path) return '/images/sample-profile.jpg';
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Feed page loaded');
     
