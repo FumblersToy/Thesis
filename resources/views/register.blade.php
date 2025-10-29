@@ -60,7 +60,7 @@
                 </div>
 
                 <!-- Registration Form -->
-                <form method="POST" action="{{ route('register') }}" class="space-y-6" onsubmit="return validateForm()"
+                <form method="POST" action="{{ route('register') }}" class="space-y-6" onsubmit="return validateForm()">
                 <!-- Email Field -->
                 @csrf
                     <div class="relative">
@@ -160,5 +160,107 @@
             </div>
         </section>
     </main>
+    <script>
+        <script>
+    function togglePassword(fieldId, iconId) {
+        const passwordInput = document.getElementById(fieldId);
+        const eyeIcon = document.getElementById(iconId);
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.innerHTML = `
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+            `;
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.innerHTML = `
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            `;
+        }
+    }
+
+    function validateForm() {
+        const email = document.getElementById('email').value;
+        const confirmEmail = document.getElementById('confirm-email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        const emailMatchError = document.getElementById('email-match-error');
+        const passwordMatchError = document.getElementById('password-match-error');
+        const errorContainer = document.getElementById('error-container');
+        const errorList = document.getElementById('error-list');
+        
+        let isValid = true;
+        errorList.innerHTML = '';
+        emailMatchError.classList.add('hidden');
+        passwordMatchError.classList.add('hidden');
+        errorContainer.classList.add('hidden');
+
+        // Check if emails match
+        if (email !== confirmEmail) {
+            emailMatchError.classList.remove('hidden');
+            isValid = false;
+        }
+
+        // Check if passwords match
+        if (password !== confirmPassword) {
+            passwordMatchError.classList.remove('hidden');
+            isValid = false;
+        }
+
+        // Check password length
+        if (password.length < 8) {
+            const errorItem = document.createElement('li');
+            errorItem.textContent = 'Password must be at least 8 characters long.';
+            errorList.appendChild(errorItem);
+            errorContainer.classList.remove('hidden');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    // Real-time email validation
+    document.getElementById('confirm-email').addEventListener('input', function() {
+        const email = document.getElementById('email').value;
+        const confirmEmail = this.value;
+        const emailMatchError = document.getElementById('email-match-error');
+        
+        if (confirmEmail && email !== confirmEmail) {
+            emailMatchError.classList.remove('hidden');
+        } else {
+            emailMatchError.classList.add('hidden');
+        }
+    });
+
+    // Real-time password validation
+    document.getElementById('confirm-password').addEventListener('input', function() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+        const passwordMatchError = document.getElementById('password-match-error');
+        
+        if (confirmPassword && password !== confirmPassword) {
+            passwordMatchError.classList.remove('hidden');
+        } else {
+            passwordMatchError.classList.add('hidden');
+        }
+    });
+
+    // Add subtle parallax effect to background elements
+    document.addEventListener('mousemove', (e) => {
+        const mouseX = e.clientX / window.innerWidth;
+        const mouseY = e.clientY / window.innerHeight;
+        
+        const elements = document.querySelectorAll('.floating-animation');
+        elements.forEach((el, index) => {
+            const speed = (index + 1) * 0.05;
+            const x = (mouseX - 0.5) * speed * 50;
+            const y = (mouseY - 0.5) * speed * 50;
+            
+            el.style.transform = `translate(${x}px, ${y}px)`;
+        });
+    });
+</script>
+        </script>
 </body>
 </html>
