@@ -14,11 +14,16 @@ Route::get('/', function () {
 
 
 Route::get('/login', function () {
+    // If user is already authenticated, redirect to feed
+    if (Auth::check()) {
+        return redirect()->route('feed');
+    }
+    
     return response()->view('login')
         ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
         ->header('Pragma', 'no-cache')
         ->header('Expires', '0');
-})->middleware('guest')->name('login');
+})->name('login');
 
 Route::Post('/login', 
 [LoginController::class, 'login']);
