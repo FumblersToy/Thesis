@@ -1,13 +1,13 @@
 function getImageUrl(path) {
     if (!path) return '/images/sample-profile.jpg';
     
-    // Check for http/https FIRST (Cloudinary URLs)
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-        return path;
+    // Fix double-processing: remove /storage/ if it's followed by http
+    if (path.includes('/storage/http')) {
+        path = path.replace('/storage/', '');
     }
     
-    // If path already starts with /storage/, return as-is
-    if (path.startsWith('/storage/')) {
+    // If path already starts with http or /storage/, return as-is
+    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/storage/')) {
         return path;
     }
     
@@ -1209,7 +1209,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let avatarHtml = '';
         if (comment.user_avatar) {
-            avatarHtml = `<img src="${comment.user_avatar}" alt="${userName}" class="w-8 h-8 rounded-full object-cover">`; // Remove getImageUrl()
+            avatarHtml = `<img src="${comment.user_avatar}" alt="${userName}" class="w-8 h-8 rounded-full object-cover">`;
         } else {
             avatarHtml = `<div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-sm">${userInitial}</div>`;
         }
