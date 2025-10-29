@@ -39,91 +39,97 @@
                 </div>
                 
                 <!-- User Profile Section -->
-                @php
-                    $user = Auth::user();
-                    $musician = $user ? \App\Models\Musician::where('user_id', $user->id)->first() : null;
-                    $business = $user ? \App\Models\Business::where('user_id', $user->id)->first() : null;
-                    $displayName = $musician?->stage_name
-                        ?: ($business?->business_name ?: ($user->name ?? 'User'));
-                    $roleLabel = $musician?->instrument ?: ($business?->venue ?: 'Member');
-                    $profileImage = null;
-                    if ($musician && $musician->profile_picture) {
-                        $profileImage = getImageUrl($musician->profile_picture);
-                    } elseif ($business && $business->profile_picture) {
-                        $profileImage = getImageUrl($business->profile_picture);
-                    } else {
-                        $profileImage = '/images/sample-profile.jpg';
-                    }
-                @endphp
-                <div class="relative">
-                    <button id="profileButton" class="flex items-center gap-3 bg-white/80 backdrop-blur-xl p-4 rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 group border border-gray-200">
-                        <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
-                             src="{{ $profileImage }}"
-                             alt="profile">
-                        
-                        <div class="hidden sm:block text-left">
-                            <p class="text-gray-800 font-semibold">
-                                {{ $displayName }}
-                            </p>
-                            <p class="text-gray-600 text-sm">{{ $roleLabel }}</p>
-                        </div>
+                <!-- Replace the User Profile Section in your messages index.blade.php -->
 
-                        <svg class="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
+@php
+    $user = Auth::user();
+    $musician = $user ? \App\Models\Musician::where('user_id', $user->id)->first() : null;
+    $business = $user ? \App\Models\Business::where('user_id', $user->id)->first() : null;
+    $displayName = $musician?->stage_name
+        ?: ($business?->business_name ?: ($user->name ?? 'User'));
+    $roleLabel = $musician?->instrument ?: ($business?->venue ?: 'Member');
+    
+    // Fix: Use getImageUrl() helper function like in settings
+    $profileImage = null;
+    if ($musician && $musician->profile_picture) {
+        $profileImage = getImageUrl($musician->profile_picture);
+    } elseif ($business && $business->profile_picture) {
+        $profileImage = getImageUrl($business->profile_picture);
+    } else {
+        $profileImage = '/images/sample-profile.jpg';
+    }
+@endphp
 
-                    <div id="profileDropdown" class="absolute right-0 top-full mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden hidden animate-scale-in z-50 border border-gray-200">
-                        <div class="p-4 border-b border-gray-200">
-                            <div class="flex items-center gap-3">
-                                <img class="w-16 h-16 rounded-full object-cover border-2 border-gray-200" src="{{ $profileImage }}" alt="profile">
-                                <div>
-                                    <p class="text-gray-800 font-semibold text-lg">{{ $displayName }}</p>
-                                    <p class="text-gray-600">{{ $roleLabel }}</p>
-                                    <p class="text-gray-500 text-sm">{{ $user->email ?? '' }}</p>
-                                </div>
-                            </div>
-                        </div>
+<div class="relative">
+    <button id="profileButton" class="flex items-center gap-3 bg-white/80 backdrop-blur-xl p-4 rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 group border border-gray-200">
+        <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+             src="{{ $profileImage }}"
+             alt="profile">
+        
+        <div class="hidden sm:block text-left">
+            <p class="text-gray-800 font-semibold">
+                {{ $displayName }}
+            </p>
+            <p class="text-gray-600 text-sm">{{ $roleLabel }}</p>
+        </div>
 
-                        <div class="p-2">
-                            <a href="{{ route('profile.show', $user->id) }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-black hover:text-gray-900">
-                                <span class="text-lg">👤</span>
-                                View Profile
-                            </a>
+        <svg class="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+    </button>
 
-                <a href="{{ route('settings.show') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
-                    <span class="text-lg">⚙️</span>
-                    Settings
-                </a>
-                
-                <a href="{{ route('map') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
-                    <span class="text-lg">🗺️</span>
-                    Map
-                </a>
-
-                            <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
-                                <span class="text-lg">🎵</span>
-                                My Music
-                            </a>
-                            
-                            <a href="{{ route('messages.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900 bg-blue-50">
-                                <span class="text-lg">💬</span>
-                                Messages
-                            </a>
-
-                            <div class="border-t border-gray-200 my-2"></div>
-
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 transition-colors text-red-600 hover:text-red-700">
-                                    <span class="text-lg">🚪</span>
-                                    Logout
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+    <div id="profileDropdown" class="absolute right-0 top-full mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden hidden animate-scale-in z-50 border border-gray-200">
+        <div class="p-4 border-b border-gray-200">
+            <div class="flex items-center gap-3">
+                <img class="w-16 h-16 rounded-full object-cover border-2 border-gray-200" 
+                     src="{{ $profileImage }}" 
+                     alt="profile">
+                <div>
+                    <p class="text-gray-800 font-semibold text-lg">{{ $displayName }}</p>
+                    <p class="text-gray-600">{{ $roleLabel }}</p>
+                    <p class="text-gray-500 text-sm">{{ $user->email ?? '' }}</p>
                 </div>
             </div>
+        </div>
+
+        <div class="p-2">
+            <a href="{{ route('profile.show', $user->id) }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-black hover:text-gray-900">
+                <span class="text-lg">👤</span>
+                View Profile
+            </a>
+
+            <a href="{{ route('settings.show') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
+                <span class="text-lg">⚙️</span>
+                Settings
+            </a>
+            
+            <a href="{{ route('map') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
+                <span class="text-lg">🗺️</span>
+                Map
+            </a>
+
+            <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
+                <span class="text-lg">🎵</span>
+                My Music
+            </a>
+            
+            <a href="{{ route('messages.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900 bg-blue-50">
+                <span class="text-lg">💬</span>
+                Messages
+            </a>
+
+            <div class="border-t border-gray-200 my-2"></div>
+
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 transition-colors text-red-600 hover:text-red-700">
+                    <span class="text-lg">🚪</span>
+                    Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
 
             <!-- Messages Container -->
             <div class="flex-1 glass-effect backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
