@@ -1,8 +1,13 @@
 function getImageUrl(path) {
     if (!path) return '/images/sample-profile.jpg';
     
-    // If path already starts with http or /storage/, return as-is
-    if (path.startsWith('http') || path.startsWith('/storage/')) {
+    // Check for http/https FIRST (Cloudinary URLs)
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+    }
+    
+    // If path already starts with /storage/, return as-is
+    if (path.startsWith('/storage/')) {
         return path;
     }
     
