@@ -387,6 +387,18 @@
     </div>
 
     <script>
+        function getImageUrl(path) {
+    if (!path) return '/images/sample-profile.jpg';
+    
+    // If path already starts with http or /, return as is
+    if (path.startsWith('http') || path.startsWith('/storage/')) {
+        return path;
+    }
+    
+    // Otherwise prepend /storage/
+    return `/storage/${path}`;
+}
+
         document.addEventListener('DOMContentLoaded', function() {
             // Profile dropdown functionality
             const profileButton = document.getElementById('profileButton');
