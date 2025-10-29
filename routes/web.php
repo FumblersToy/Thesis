@@ -412,3 +412,21 @@ Route::get('/debug-build', function() {
         'app_env' => config('app.env'),
     ]);
 });
+
+Route::get('/debug-comment', function() {
+    $user = Auth::user();
+    
+    $avatar = null;
+    if ($user->musician) {
+        $avatar = $user->musician->profile_picture;
+    } elseif ($user->business) {
+        $avatar = $user->business->profile_picture;
+    }
+    
+    return response()->json([
+        'raw_avatar' => $avatar,
+        'processed_avatar' => $avatar ? getImageUrl($avatar) : null,
+        'is_valid_url' => $avatar ? filter_var($avatar, FILTER_VALIDATE_URL) : null,
+        'starts_with_http' => $avatar ? (strpos($avatar, 'http') === 0) : null,
+    ]);
+})->middleware('auth');
