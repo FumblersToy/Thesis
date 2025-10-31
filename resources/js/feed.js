@@ -785,47 +785,69 @@ function initFeed() {
 
     // Delete post function
     async function deletePost(postId, buttonElement) {
-        const originalContent = buttonElement.innerHTML;
-        
+        const originalContent = buttonElement && buttonElement.innerHTML;
+        const csrfTokenLocal = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || csrfToken;
+
         try {
             // Show loading state
-            buttonElement.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
-            buttonElement.disabled = true;
-            
+            if (buttonElement) {
+                buttonElement.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+                buttonElement.disabled = true;
+            }
+
             const response = await fetch(`/posts/${postId}`, {
                 method: 'DELETE',
                 headers: {
-                    'X-CSRF-TOKEN': csrfToken,
+                    'X-CSRF-TOKEN': csrfTokenLocal,
                     'Accept': 'application/json'
                 }
             });
 
-            const data = await response.json();
+            let data = null;
+            try {
+                data = await response.json();
+            } catch (e) {
+                // non-JSON response
+                data = { success: response.ok, message: response.ok ? 'Deleted' : 'Error' };
+            }
 
-            if (data.success) {
+            if (response.ok && data && data.success) {
                 showNotification('Post deleted successfully!', 'success');
-                
-                // Find and remove the post element
-                const postElement = buttonElement.closest('.bg-white\\/80');
+
+                // Prefer to locate the post by data attribute so we remove the correct element
+                let target = document.querySelector(`[data-post-id="${postId}"]`);
+                let postElement = null;
+
+                if (target) {
+                    // remove the nearest logical container (article for profile, div for feed)
+                    postElement = target.closest('article, div');
+                }
+
+                // fallback: try to use the delete button's ancestor
+                if (!postElement && buttonElement) {
+                    postElement = buttonElement.closest('article, div');
+                }
+
                 if (postElement) {
                     postElement.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
                     postElement.style.opacity = '0';
                     postElement.style.transform = 'scale(0.95)';
-                    
-                    setTimeout(() => {
-                        postElement.remove();
-                    }, 300);
+                    setTimeout(() => postElement.remove(), 300);
                 }
             } else {
-                showNotification(data.message || 'Error deleting post', 'error');
-                buttonElement.innerHTML = originalContent;
-                buttonElement.disabled = false;
+                showNotification((data && data.message) || 'Error deleting post', 'error');
+                if (buttonElement) {
+                    buttonElement.innerHTML = originalContent;
+                    buttonElement.disabled = false;
+                }
             }
         } catch (error) {
             console.error('Error:', error);
             showNotification('Network error. Please try again.', 'error');
-            buttonElement.innerHTML = originalContent;
-            buttonElement.disabled = false;
+            if (buttonElement) {
+                buttonElement.innerHTML = originalContent;
+                buttonElement.disabled = false;
+            }
         }
     }
 
