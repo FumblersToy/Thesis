@@ -640,105 +640,464 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ... [everything in your feed.js stays exactly as-is above] ...
+    /* ===============================
+       🖼️ MODAL + COMMENTS + LIKES (copied from profile page)
+       - includes debugging logs
+       =============================== */
 
-    // Delete post functionality
+    // Image modal functionality - WITH MORE DEBUGGING
     document.addEventListener('click', function(e) {
-        if (e.target.closest('.delete-post-btn')) {
+        console.log('🔍 Click detected on:', e.target);
+        console.log('🔍 Target classes:', e.target.className);
+        console.log('🔍 Closest .post-image:', e.target.closest('.post-image'));
+        
+        if (e.target.closest('.post-image')) {
             e.preventDefault();
-            const button = e.target.closest('.delete-post-btn');
-            const postId = button.getAttribute('data-post-id');
+            console.log('✅ Post image clicked!'); // Debug log
+            const img = e.target.closest('.post-image');
+            const postData = extractPostDataFromImage(img);
             
-            showDeleteConfirmation(postId, button);
+            console.log('📦 Post data:', postData); // Debug log
+            showImageModal(postData);
+        } else {
+            console.log('❌ Not a post image');
         }
     });
 
-    /* ===============================
-       🖼️ MODAL FUNCTIONALITY (from profile page)
-       =============================== */
+    // (Optional) Search / follow logic is profile-only; skipped here if no elements exist
+    // but functions below are included from profile modal script.
 
-    // Create modal if not already in HTML
-    let imageModal = document.getElementById('imageModal');
-    if (!imageModal) {
-        imageModal = document.createElement('div');
-        imageModal.id = 'imageModal';
-        imageModal.className = 'hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center';
-        imageModal.innerHTML = `
-            <div id="modalContent" class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 overflow-hidden relative animate-fade-in">
-                <button id="closeModal" class="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition">
-                    ✖
-                </button>
-                <div id="modalInner" class="p-6 flex flex-col md:flex-row gap-6 items-center justify-center">
-                    <img id="modalImage" src="" alt="Post image" class="max-h-[80vh] rounded-lg object-contain mx-auto">
-                    <div class="text-center md:text-left">
-                        <div class="flex items-center gap-3 mb-3">
-                            <img id="modalAvatar" class="w-12 h-12 rounded-full object-cover border-2 border-gray-200" src="" alt="Avatar">
-                            <div>
-                                <h3 id="modalUserName" class="font-bold text-gray-800 text-lg"></h3>
-                                <p id="modalUserGenre" class="text-gray-600 text-sm"></p>
-                            </div>
-                        </div>
-                        <p id="modalDescription" class="text-gray-700 mb-3 leading-relaxed"></p>
-                        <span id="modalCreatedAt" class="text-gray-500 text-sm"></span>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(imageModal);
+    // Toggle follow function (kept for completeness if called from modal)
+    async function toggleFollow(userId, isFollowing, button) {
+        const csrfTokenLocal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const followText = button.querySelector('.follow-text');
+        const followingText = button.querySelector('.following-text');
+        
+        try {
+            const response = await fetch(`/users/${userId}/follow`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfTokenLocal,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    follow: !isFollowing
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                if (data.following) {
+                    // Now following
+                    button.setAttribute('data-following', 'true');
+                    button.classList.remove('from-purple-500', 'to-pink-500', 'hover:from-purple-600', 'hover:to-pink-600');
+                    button.classList.add('bg-gray-500', 'hover:bg-gray-600');
+                    if (followText) followText.classList.add('hidden');
+                    if (followingText) followingText.classList.remove('hidden');
+                } else {
+                    // No longer following
+                    button.setAttribute('data-following', 'false');
+                    button.classList.add('from-purple-500', 'to-pink-500', 'hover:from-purple-600', 'hover:to-pink-600');
+                    button.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+                    if (followText) followText.classList.remove('hidden');
+                    if (followingText) followingText.classList.add('hidden');
+                }
+                
+                // Update follower count if available
+                const followerCount = document.querySelector('[data-follower-count]');
+                if (followerCount && data.follower_count !== undefined) {
+                    followerCount.textContent = data.follower_count;
+                }
+            } else {
+                console.error('Follow action failed:', data.message);
+                alert(data.message || 'Failed to update follow status');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Network error. Please try again.');
+        }
     }
 
-    // Extract post data from clicked image
+    // Extract post data from image element
     function extractPostDataFromImage(img) {
+        if (!img) return null;
+        
         return {
-            imageUrl: img.dataset.imageUrl,
-            userName: img.dataset.userName,
-            userGenre: img.dataset.userGenre,
-            userType: img.dataset.userType,
-            userAvatar: img.dataset.userAvatar || '/images/sample-profile.jpg',
-            description: img.dataset.description,
-            createdAt: new Date(img.dataset.createdAt).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            })
+            id: img.getAttribute('data-post-id'),
+            imageUrl: img.getAttribute('data-image-url'),
+            userName: img.getAttribute('data-user-name'),
+            userGenre: img.getAttribute('data-user-genre'),
+            userType: img.getAttribute('data-user-type'),
+            userAvatar: img.getAttribute('data-user-avatar'),
+            description: img.getAttribute('data-description'),
+            createdAt: img.getAttribute('data-created-at'),
+            like_count: parseInt(img.getAttribute('data-like-count')) || 0,
+            comment_count: parseInt(img.getAttribute('data-comment-count')) || 0,
+            is_liked: img.getAttribute('data-is-liked') === 'true'
         };
     }
 
-    // Show modal with post data
-    function showImageModal(data) {
-        const modalImage = document.getElementById('modalImage');
-        const modalAvatar = document.getElementById('modalAvatar');
-        const modalUserName = document.getElementById('modalUserName');
-        const modalUserGenre = document.getElementById('modalUserGenre');
-        const modalDescription = document.getElementById('modalDescription');
-        const modalCreatedAt = document.getElementById('modalCreatedAt');
+    // Show image modal
+    function showImageModal(postData) {
+        if (!postData) return;
+        
+        // Create modal overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center';
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.3s ease-out';
+        
+        // Create modal content
+        const modal = document.createElement('div');
+        modal.className = 'bg-white rounded-2xl shadow-2xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-hidden transform scale-95 transition-transform duration-300';
+        
+        const userTypeEmoji = postData.userType === 'musician' ? '🎵' : 
+                             postData.userType === 'business' ? '🏢' : '👤';
+        
+        const avatarElement = postData.userAvatar ? 
+            `<img class="w-16 h-16 rounded-full object-cover border-2 border-gray-200" src="${postData.userAvatar}" alt="avatar">` :
+            `<div class="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-xl">${postData.userName ? postData.userName.charAt(0).toUpperCase() : 'U'}</div>`;
+        
+        modal.innerHTML = `
+            <div class="flex h-full max-h-[90vh]">
+                <!-- Image Section -->
+                <div class="flex-1 bg-black flex items-center justify-center">
+                    <img src="${postData.imageUrl}" 
+                         alt="Post image" 
+                         class="max-w-full max-h-full object-contain">
+                </div>
+                
+                <!-- Details Section -->
+                <div class="w-96 bg-white flex flex-col">
+                    <!-- Header -->
+                    <div class="p-6 border-b border-gray-200">
+                        <div class="flex items-center gap-4 mb-4">
+                            ${avatarElement}
+                            <div>
+                                <h3 class="font-bold text-gray-800 text-xl">${postData.userName || 'Unknown'}</h3>
+                                <p class="text-gray-600">${postData.userGenre || ''}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-500">
+                            <span>${userTypeEmoji} ${postData.userType || ''}</span>
+                            <span>•</span>
+                            <span>${new Date(postData.createdAt).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="flex-1 p-6 overflow-y-auto">
+                        ${postData.description ? `
+                            <div class="mb-6">
+                                <p class="text-gray-700 leading-relaxed">${postData.description}</p>
+                            </div>
+                        ` : ''}
+                        
+                        <!-- Comments Section -->
+                        <div class="space-y-4">
+                            <h4 class="font-semibold text-gray-800">Comments</h4>
+                            <div class="space-y-3">
+                                <div class="text-center py-8 text-gray-500">
+                                    <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                    </svg>
+                                    <p>No comments yet</p>
+                                    <p class="text-sm">Be the first to comment!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="p-6 border-t border-gray-200">
+                        <div class="flex items-center gap-6 mb-4">
+                            <button class="like-btn flex items-center gap-2 transition-colors" 
+                                    data-post-id="${postData.id}"
+                                    data-liked="${postData.is_liked || false}">
+                                <svg class="w-6 h-6 ${postData.is_liked ? 'fill-red-500 text-red-500' : 'fill-none text-gray-600 hover:text-red-500'}" 
+                                     stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                                <span class="font-medium like-count">${postData.like_count || 0}</span>
+                            </button>
+                            <button class="comment-btn flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                                <span class="font-medium comment-count">${postData.comment_count || 0}</span>
+                            </button>
+                            <button class="share-btn flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
+                                </svg>
+                                <span class="font-medium">Share</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Comment Input -->
+                        <div class="flex gap-3">
+                            <input type="text" 
+                                   placeholder="Add a comment..." 
+                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <button class="comment-submit-btn px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
+                                Post
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Close Button -->
+            <button class="close-modal absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors z-10">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        `;
+        
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+        
+        // Animate in
+        setTimeout(() => {
+            overlay.style.opacity = '1';
+            modal.style.transform = 'scale(1)';
+        }, 10);
+        
+        // Handle close button
+        const closeBtn = modal.querySelector('.close-modal');
+        const closeModal = () => {
+            overlay.style.opacity = '0';
+            modal.style.transform = 'scale(0.95)';
+            document.body.style.overflow = '';
+            setTimeout(() => {
+                if (document.body.contains(overlay)) {
+                    document.body.removeChild(overlay);
+                }
+            }, 300);
+        };
+        
+        closeBtn.addEventListener('click', closeModal);
+        
+        // Close on overlay click (but not on modal content)
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closeModal();
+            }
+        });
+        
+        // Close on Escape key
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', handleEscape);
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
 
-        modalImage.src = data.imageUrl || '/images/sample-post-1.jpg';
-        modalAvatar.src = data.userAvatar || '/images/sample-profile.jpg';
-        modalUserName.textContent = data.userName || 'Unknown User';
-        modalUserGenre.textContent = data.userGenre || '';
-        modalDescription.textContent = data.description || '';
-        modalCreatedAt.textContent = data.createdAt || '';
+        // Add like functionality
+        const likeBtn = modal.querySelector('.like-btn');
+        if (likeBtn) {
+            likeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                toggleLike(likeBtn, postData.id);
+            });
+        }
 
-        imageModal.classList.remove('hidden');
-        document.body.classList.add('overflow-hidden'); // prevent background scroll
+        // Add comment functionality
+        const commentInput = modal.querySelector('input[type="text"]');
+        const commentSubmitBtn = modal.querySelector('.comment-submit-btn');
+        if (commentInput && commentSubmitBtn) {
+            commentSubmitBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const content = commentInput.value.trim();
+                if (content) {
+                    addComment(postData.id, content, commentInput, modal);
+                }
+            });
+            
+            commentInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const content = commentInput.value.trim();
+                    if (content) {
+                        addComment(postData.id, content, commentInput, modal);
+                    }
+                }
+            });
+        }
+
+        // Load comments
+        loadComments(postData.id, modal);
     }
 
-    // Close modal when clicking background or ✖ button
-    imageModal.addEventListener('click', function(e) {
-        if (e.target.id === 'imageModal' || e.target.id === 'closeModal') {
-            imageModal.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
+    // Toggle like function
+    async function toggleLike(likeBtn, postId) {
+        // Check if this is a sample post (not a real database post)
+        if (postId.startsWith('sample-')) {
+            alert('Like functionality is only available for real posts. Create a post to test this feature!');
+            return;
         }
-    });
+        
+        const csrfTokenLocal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const isLiked = likeBtn.getAttribute('data-liked') === 'true';
+        
+        try {
+            const response = await fetch(`/posts/${postId}/like`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfTokenLocal,
+                    'Accept': 'application/json'
+                }
+            });
 
-    // Delegated click listener for dynamically loaded post images
-    document.addEventListener('click', function(e) {
-        const img = e.target.closest('.post-image');
-        if (!img) return;
-        e.preventDefault();
-        const postData = extractPostDataFromImage(img);
-        showImageModal(postData);
-    });
+            const data = await response.json();
 
+            if (data.success) {
+                // Update like button state
+                const svg = likeBtn.querySelector('svg');
+                const likeCount = likeBtn.querySelector('.like-count');
+                
+                if (data.liked) {
+                    svg.setAttribute('class', 'w-6 h-6 fill-red-500 text-red-500');
+                    likeBtn.setAttribute('data-liked', 'true');
+                } else {
+                    svg.setAttribute('class', 'w-6 h-6 fill-none text-gray-600 hover:text-red-500');
+                    likeBtn.setAttribute('data-liked', 'false');
+                }
+                
+                likeCount.textContent = data.like_count;
+                
+                // Also update the original post data for consistency
+                const originalPostImage = document.querySelector(`[data-post-id="${postId}"]`);
+                if (originalPostImage) {
+                    originalPostImage.setAttribute('data-like-count', data.like_count);
+                    originalPostImage.setAttribute('data-is-liked', data.liked);
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling like:', error);
+        }
+    }
+
+    // Add comment function
+    async function addComment(postId, content, commentInput, modal) {
+        // Check if this is a sample post (not a real database post)
+        if (postId.startsWith('sample-')) {
+            alert('Comment functionality is only available for real posts. Create a post to test this feature!');
+            return;
+        }
+        
+        const csrfTokenLocal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        try {
+            const response = await fetch(`/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfTokenLocal,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ content: content })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Clear input
+                commentInput.value = '';
+                
+                // Add comment to the list
+                addCommentToModal(data.comment, modal);
+                
+                // Update comment count
+                const commentCount = modal.querySelector('.comment-count');
+                if (commentCount) {
+                    commentCount.textContent = parseInt(commentCount.textContent) + 1;
+                }
+            } else {
+                console.error('Failed to add comment:', data);
+            }
+        } catch (error) {
+            console.error('Error adding comment:', error);
+        }
+    }
+
+    // Load comments function
+    async function loadComments(postId, modal) {
+        // Check if this is a sample post (not a real database post)
+        if (postId.startsWith('sample-')) {
+            return;
+        }
+        
+        const csrfTokenLocal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        try {
+            const response = await fetch(`/posts/${postId}/comments`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': csrfTokenLocal,
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.comments.length > 0) {
+                const commentsContainer = modal.querySelector('.space-y-3');
+                if (commentsContainer) {
+                    // Clear the "no comments" message
+                    commentsContainer.innerHTML = '';
+                    
+                    // Add each comment
+                    data.comments.forEach(comment => {
+                        addCommentToModal(comment, modal);
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error loading comments:', error);
+        }
+    }
+
+    // Add comment to modal function
+    function addCommentToModal(comment, modal) {
+        const commentsContainer = modal.querySelector('.space-y-3');
+        
+        if (!commentsContainer) {
+            return;
+        }
+
+        const commentElement = document.createElement('div');
+        commentElement.className = 'flex gap-3 p-3 bg-gray-50 rounded-lg';
+        const userName = comment.user_name || 'Unknown User';
+        const userInitial = userName.charAt(0).toUpperCase();
+        
+        // Check if user has an avatar
+        let avatarHtml = '';
+        if (comment.user_avatar) {
+            avatarHtml = `<img src="${comment.user_avatar}" alt="${userName}" class="w-8 h-8 rounded-full object-cover">`;                } else {
+            avatarHtml = `<div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-sm">${userInitial}</div>`;
+        }
+        
+        commentElement.innerHTML = `
+            <div class="w-8 h-8 flex-shrink-0">
+                ${avatarHtml}
+            </div>
+            <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="font-semibold text-sm text-gray-800">${userName}</span>
+                    <span class="text-xs text-gray-500">${new Date(comment.created_at).toLocaleDateString()}</span>
+                </div>
+                <p class="text-sm text-gray-700">${comment.content}</p>
+            </div>
+        `;
+        
+        commentsContainer.appendChild(commentElement);
+    }
+    
 });
