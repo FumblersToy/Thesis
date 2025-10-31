@@ -305,12 +305,27 @@
                 postsGrid.innerHTML = '';
                 data.posts.forEach(post => {
                     const div = document.createElement('div');
-                    div.className = 'bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg overflow-hidden p-6';
-                    div.innerHTML = `
-                        <h3 class="font-bold text-gray-800">${(post.user_name||'User')}</h3>
-                        <p class="text-sm text-gray-600">${(post.user_genre||'')}</p>
-                        <p class="mt-3 text-gray-700">${(post.description||'')}</p>
+                    div.className = 'bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg overflow-hidden';
+
+                    // Build inner content: include image if available
+                    let inner = '';
+                    if (post.image_path) {
+                        inner += `
+                            <div class="relative">
+                                <img src="${post.image_path}" alt="Post image" loading="lazy" class="w-full h-80 object-cover" onerror="this.src='/images/sample-post-1.jpg'" />
+                            </div>
+                        `;
+                    }
+
+                    inner += `
+                        <div class="p-6">
+                            <h3 class="font-bold text-gray-800">${(post.user_name||'User')}</h3>
+                            <p class="text-sm text-gray-600">${(post.user_genre||'')}</p>
+                            <p class="mt-3 text-gray-700">${(post.description||'')}</p>
+                        </div>
                     `;
+
+                    div.innerHTML = inner;
                     postsGrid.appendChild(div);
                 });
             } catch (e) {
