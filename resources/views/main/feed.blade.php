@@ -330,6 +330,14 @@
             email: '{{ addslashes(Auth::user()->email) }}'
         };
     @endauth
+
+    document.addEventListener('click', function(e) {
+    console.log('INLINE: Click detected anywhere');
+    if (e.target.closest('.post-image')) {
+        e.preventDefault();
+        alert('POST IMAGE CLICKED! This works inline!');
+    }
+});
 </script>
 </body> 
 </html>
