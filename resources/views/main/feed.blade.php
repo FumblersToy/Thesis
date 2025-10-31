@@ -286,6 +286,38 @@
             @endauth
         });
     </script>
+    <!-- Fallback inline fetch: ensure posts render even if feed.js throws earlier -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const postsGrid = document.getElementById('postsGrid');
+                if (!postsGrid) return;
+
+                console.log('Fallback fetch: requesting posts for initial render');
+                const resp = await fetch('/api/posts?page=1&per_page=12', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
+                if (!resp.ok) {
+                    console.warn('Fallback fetch failed with', resp.status);
+                    return;
+                }
+                const data = await resp.json();
+                if (!data.success || !data.posts) return;
+
+                postsGrid.innerHTML = '';
+                data.posts.forEach(post => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg overflow-hidden p-6';
+                    div.innerHTML = `
+                        <h3 class="font-bold text-gray-800">${(post.user_name||'User')}</h3>
+                        <p class="text-sm text-gray-600">${(post.user_genre||'')}</p>
+                        <p class="mt-3 text-gray-700">${(post.description||'')}</p>
+                    `;
+                    postsGrid.appendChild(div);
+                });
+            } catch (e) {
+                console.warn('Fallback inline fetch error:', e);
+            }
+        });
+    </script>
     <!-- Inline modal implementation for feed page (kept here to match profile.blade.php behavior) -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {

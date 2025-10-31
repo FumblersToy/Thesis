@@ -1,3 +1,4 @@
+try {
 function initFeed() {
     console.log('Feed page loaded');
 
@@ -30,6 +31,15 @@ function initFeed() {
     let currentPage = 1;
     let loading = false;
     let userLocation = null;
+
+    // Initialize the page early so posts are fetched before any later runtime errors
+    try {
+        console.log('Initializing filters and loading posts (early)...');
+        initializeFilters();
+        loadPosts(1, false);
+    } catch (e) {
+        console.warn('Early initialization failed:', e);
+    }
 
     // Mobile menu functionality
     if (mobileMenuButton && mobileMenu) {
@@ -652,29 +662,38 @@ function initFeed() {
         }
     });
 
-    // Tailwind config
-    tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    primary: '#6366f1',
-                    'primary-dark': '#4f46e5',
-                    'glass': 'rgba(255, 255, 255, 0.1)',
-                    'glass-dark': 'rgba(0, 0, 0, 0.1)',
-                    'bg-main': '#f2f4f7',
-                },
-                backdropBlur: {
-                    xs: '2px',
-                },
-                animation: {
-                    'float': 'float 3s ease-in-out infinite',
-                    'pulse-slow': 'pulse 3s ease-in-out infinite',
-                    'slide-up': 'slideUp 0.3s ease-out',
-                    'fade-in': 'fadeIn 0.5s ease-out',
-                    'scale-in': 'scaleIn 0.3s ease-out',
+    // Tailwind config - guard in case `tailwind` global is not available in the runtime
+    try {
+        if (typeof window !== 'undefined' && typeof window.tailwind !== 'undefined') {
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            primary: '#6366f1',
+                            'primary-dark': '#4f46e5',
+                            'glass': 'rgba(255, 255, 255, 0.1)',
+                            'glass-dark': 'rgba(0, 0, 0, 0.1)',
+                            'bg-main': '#f2f4f7',
+                        },
+                        backdropBlur: {
+                            xs: '2px',
+                        },
+                        animation: {
+                            'float': 'float 3s ease-in-out infinite',
+                            'pulse-slow': 'pulse 3s ease-in-out infinite',
+                            'slide-up': 'slideUp 0.3s ease-out',
+                            'fade-in': 'fadeIn 0.5s ease-out',
+                            'scale-in': 'scaleIn 0.3s ease-out',
+                        }
+                    }
                 }
             }
+        } else {
+            // tailwind not present — skip runtime config
+            console.debug('tailwind not present; skipping runtime tailwind.config assignment');
         }
+    } catch (e) {
+        console.warn('Skipping tailwind.config assignment due to error:', e);
     }
 
     // Delete post functionality
@@ -833,4 +852,7 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initFeed);
 } else {
     initFeed();
+}
+} catch (e) {
+    console.error('Top-level error in feed.js:', e);
 }
