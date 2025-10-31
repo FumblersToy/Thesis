@@ -1,14 +1,14 @@
-document.addEventListener('DOMContentLoaded', function() {
+function initFeed() {
     console.log('Feed page loaded');
-    
+
     // Get CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    
+
     // Elements
     const createPostForm = document.getElementById('createPostForm');
     const postsGrid = document.getElementById('postsGrid');
     const loadMoreBtn = document.getElementById('loadMore');
-    
+
     console.log('Elements found:', {
         createPostForm: !!createPostForm,
         postsGrid: !!postsGrid,
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const locationStatus = document.getElementById('locationStatus');
     const sortBySelect = document.getElementById('sortBy');
     const distanceFilter = document.getElementById('distanceFilter');
-    
+
     let currentPage = 1;
     let loading = false;
     let userLocation = null;
@@ -258,15 +258,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             const filters = getActiveFilters();
-            const params = new URLSearchParams({
-                page: page,
-                per_page: 12,
-                ...filters
-            });
+            const params = new URLSearchParams({ page: page, per_page: 12, ...filters });
+
+            // Build URL: if there are no filters, hit a simple canonical endpoint to request all posts
+            let url;
+            if (Object.keys(filters).length === 0) {
+                url = `/api/posts?page=${page}&per_page=12`;
+            } else {
+                url = `/api/posts?${params.toString()}`;
+            }
 
             // First try: include credentials in case server requires session cookies
-            console.log('Fetching posts with params:', params.toString());
-            let response = await fetch(`/api/posts?${params}`, {
+            console.log('Fetching posts from URL:', url);
+            let response = await fetch(url, {
                 credentials: 'same-origin',
                 headers: {
                     'Accept': 'application/json',
@@ -274,17 +278,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            // If the response is 401/403 or not OK, try fetching without credentials as a fallback and log both responses
+            // If the response is not OK, log the body and try a fallback without credentials
             if (!response.ok) {
+                try {
+                    const text = await response.text();
+                    console.warn('Initial fetch returned non-OK status', response.status, 'body:', text);
+                } catch (readErr) {
+                    console.warn('Initial fetch returned non-OK status', response.status, 'and response text could not be read');
+                }
+
                 console.warn('Initial fetch failed with status', response.status, '- trying without credentials as a fallback');
                 try {
-                    const fallbackResponse = await fetch(`/api/posts?${params}`, {
+                    const fallbackResponse = await fetch(url, {
                         headers: {
                             'Accept': 'application/json',
                             'X-CSRF-TOKEN': csrfToken
                         }
                     });
                     console.log('Fallback fetch status:', fallbackResponse.status);
+                    if (!fallbackResponse.ok) {
+                        try {
+                            const fbText = await fallbackResponse.text();
+                            console.warn('Fallback fetch body:', fbText);
+                        } catch (e) {
+                            console.warn('Fallback fetch failed and body could not be read');
+                        }
+                    }
                     // prefer the fallback if initial failed
                     response = fallbackResponse;
                 } catch (fallbackError) {
@@ -805,6 +824,13 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Initializing filters and loading posts...');
     initializeFilters();
     loadPosts(1, false);
-    
+
     console.log('Feed page initialization complete');
-});
+}
+
+// Run initFeed immediately if DOM is already loaded, otherwise wait for DOMContentLoaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFeed);
+} else {
+    initFeed();
+}
