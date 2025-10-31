@@ -445,13 +445,22 @@
                 });
             }
 
-            // Post image modal functionality
+            // Image modal functionality - WITH MORE DEBUGGING
             document.addEventListener('click', function(e) {
+                console.log('🔍 Click detected on:', e.target);
+                console.log('🔍 Target classes:', e.target.className);
+                console.log('🔍 Closest .post-image:', e.target.closest('.post-image'));
+                
                 if (e.target.closest('.post-image')) {
                     e.preventDefault();
+                    console.log('✅ Post image clicked!'); // Debug log
                     const img = e.target.closest('.post-image');
                     const postData = extractPostDataFromImage(img);
+                    
+                    console.log('📦 Post data:', postData); // Debug log
                     showImageModal(postData);
+                } else {
+                    console.log('❌ Not a post image');
                 }
             });
 
@@ -968,7 +977,7 @@
                 let avatarHtml = '';
                 if (comment.user_avatar) {
                     avatarHtml = `<img src="${comment.user_avatar}" alt="${userName}" class="w-8 h-8 rounded-full object-cover">`;                } else {
-                    avatarHtml = `<div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-sm">${userInitial}</div>`;
+                    avatarHtml = `<div class="w-8 h-8 bg-gradient-to-r f    rom-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-sm">${userInitial}</div>`;
                 }
                 
                 commentElement.innerHTML = `
