@@ -310,9 +310,27 @@
                     // Build inner content: include image if available
                     let inner = '';
                     if (post.image_path) {
+                        // include data attributes so existing modal/listeners pick this up
                         inner += `
                             <div class="relative">
-                                <img src="${post.image_path}" alt="Post image" loading="lazy" class="w-full h-80 object-cover" onerror="this.src='/images/sample-post-1.jpg'" />
+                                <img 
+                                    src="${post.image_path}" 
+                                    alt="Post image" 
+                                    loading="lazy" 
+                                    class="post-image w-full h-80 object-cover cursor-pointer" 
+                                    onerror="this.src='/images/sample-post-1.jpg'"
+                                    data-post-id="${post.id}"
+                                    data-image-url="${post.image_path}"
+                                    data-user-name="${(post.user_name||'') }"
+                                    data-user-genre="${(post.user_genre||'') }"
+                                    data-user-type="${(post.user_type||'member') }"
+                                    data-user-avatar="${(post.user_avatar||'') }"
+                                    data-description="${(post.description||'') }"
+                                    data-created-at="${(post.created_at||'') }"
+                                    data-like-count="${(post.like_count||post.likes_count||0)}"
+                                    data-comment-count="${(post.comment_count||post.comments_count||0)}"
+                                    data-is-liked="${(post.is_liked? 'true' : 'false')}"
+                                />
                             </div>
                         `;
                     }
