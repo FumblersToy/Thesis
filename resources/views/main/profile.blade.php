@@ -967,8 +967,7 @@
                 // Check if user has an avatar
                 let avatarHtml = '';
                 if (comment.user_avatar) {
-                    avatarHtml = `<img src="{getImageUrl(comment.user_avatar)}" alt="${userName}" class="w-8 h-8 rounded-full object-cover">`;
-                } else {
+                    avatarHtml = `<img src="${comment.user_avatar}" alt="${userName}" class="w-8 h-8 rounded-full object-cover">`;                } else {
                     avatarHtml = `<div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-sm">${userInitial}</div>`;
                 }
                 
