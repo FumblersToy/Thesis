@@ -330,7 +330,10 @@
             email: '{{ addslashes(Auth::user()->email) }}'
         };
     @endauth
+</script>
 
+<script>
+    
     function getImageUrl(path) {
     if (!path) return '/images/sample-profile.jpg';
     
@@ -1587,8 +1590,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Feed page initialization complete');
 });
-
-
-</script>
+    </script>
 </body> 
 </html>
