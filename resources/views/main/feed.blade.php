@@ -286,6 +286,233 @@
             @endauth
         });
     </script>
+    <!-- Inline modal implementation for feed page (kept here to match profile.blade.php behavior) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delegate clicks on images to open modal (mirrors profile modal behavior)
+            document.addEventListener('click', function(e) {
+                const imgEl = e.target.closest('.post-image');
+                if (imgEl) {
+                    e.preventDefault();
+                    const postData = extractPostDataFromImage(imgEl);
+                    showImageModal(postData);
+                }
+            });
+
+            function extractPostDataFromImage(img) {
+                if (!img) return null;
+
+                return {
+                    id: img.getAttribute('data-post-id'),
+                    imageUrl: img.getAttribute('data-image-url'),
+                    userName: img.getAttribute('data-user-name'),
+                    userGenre: img.getAttribute('data-user-genre'),
+                    userType: img.getAttribute('data-user-type'),
+                    userAvatar: img.getAttribute('data-user-avatar'),
+                    description: img.getAttribute('data-description'),
+                    createdAt: img.getAttribute('data-created-at'),
+                    like_count: parseInt(img.getAttribute('data-like-count')) || 0,
+                    comment_count: parseInt(img.getAttribute('data-comment-count')) || 0,
+                    is_liked: img.getAttribute('data-is-liked') === 'true'
+                };
+            }
+
+            function showImageModal(postData) {
+                if (!postData) return;
+
+                // Create overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+                overlay.style.opacity = '0';
+                overlay.style.transition = 'opacity 0.2s ease-out';
+
+                // Modal container
+                const modal = document.createElement('div');
+                modal.className = 'bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden transform scale-95 transition-transform duration-200';
+
+                const userTypeEmoji = postData.userType === 'musician' ? '🎵' : (postData.userType === 'business' ? '🏢' : '👤');
+
+                const avatarHtml = postData.userAvatar ?
+                    `<img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200" src="${postData.userAvatar}" alt="avatar">` :
+                    `<div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">${(postData.userName||'U').charAt(0).toUpperCase()}</div>`;
+
+                modal.innerHTML = `
+                    <div class="flex flex-col md:flex-row h-full max-h-[80vh]">
+                        <div class="md:w-1/2 bg-black flex items-center justify-center">
+                            <img src="${postData.imageUrl || '/images/sample-post-1.jpg'}" alt="post image" class="object-contain max-h-[80vh] w-full h-full">
+                        </div>
+                        <div class="md:w-1/2 p-6 flex flex-col">
+                            <div class="flex items-center gap-4 mb-4">
+                                ${avatarHtml}
+                                <div>
+                                    <div class="font-bold text-gray-800">${postData.userName || 'User'} ${userTypeEmoji}</div>
+                                    <div class="text-gray-500 text-sm">${postData.userGenre || ''}</div>
+                                </div>
+                                <div class="ml-auto text-gray-400 text-sm">${new Date(postData.createdAt).toLocaleString()}</div>
+                            </div>
+
+                            <div class="flex-1 overflow-auto mb-4">
+                                <p class="text-gray-700 leading-relaxed">${postData.description || ''}</p>
+
+                                <div class="mt-6 border-t pt-4">
+                                    <div class="flex items-center gap-4 text-sm text-gray-600">
+                                        <button class="like-btn inline-flex items-center gap-2 px-3 py-2 bg-white/90 rounded-xl border" data-liked="${postData.is_liked}" aria-pressed="${postData.is_liked}">
+                                            <span class="like-emoji">${postData.is_liked ? '❤️' : '🤍'}</span>
+                                            <span class="like-count">${postData.like_count}</span>
+                                        </button>
+                                        <div class="flex items-center gap-2">
+                                            <span>💬</span>
+                                            <span class="comment-count">${postData.comment_count}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 comments-section">
+                                    <div class="comments-list space-y-3 max-h-40 overflow-auto"></div>
+                                </div>
+                            </div>
+
+                            <div class="pt-4 border-t">
+                                <div class="flex gap-2">
+                                    <input type="text" class="comment-input flex-1 px-3 py-2 border rounded-xl" placeholder="Write a comment...">
+                                    <button class="comment-submit-btn px-4 py-2 bg-blue-600 text-white rounded-xl">Send</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="close-modal absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full">✕</button>
+                `;
+
+                overlay.appendChild(modal);
+                document.body.appendChild(overlay);
+                document.body.style.overflow = 'hidden';
+
+                setTimeout(() => { overlay.style.opacity = '1'; modal.style.transform = 'scale(1)'; }, 10);
+
+                // wire up buttons
+                const closeBtn = modal.querySelector('.close-modal');
+                const likeBtn = modal.querySelector('.like-btn');
+                const commentInput = modal.querySelector('.comment-input');
+                const commentSubmitBtn = modal.querySelector('.comment-submit-btn');
+
+                const removeModal = () => {
+                    overlay.style.opacity = '0';
+                    modal.style.transform = 'scale(0.95)';
+                    document.body.style.overflow = '';
+                    setTimeout(() => overlay.remove(), 220);
+                    document.removeEventListener('keydown', handleEsc);
+                };
+
+                closeBtn.addEventListener('click', removeModal);
+                overlay.addEventListener('click', (ev) => { if (ev.target === overlay) removeModal(); });
+
+                function handleEsc(ev) { if (ev.key === 'Escape') removeModal(); }
+                document.addEventListener('keydown', handleEsc);
+
+                if (likeBtn) {
+                    likeBtn.addEventListener('click', () => toggleLike(likeBtn, postData.id));
+                }
+
+                if (commentSubmitBtn) {
+                    commentSubmitBtn.addEventListener('click', async () => {
+                        const value = commentInput.value.trim();
+                        if (!value) return;
+                        await addComment(postData.id, value, commentInput, modal);
+                    });
+                }
+
+                // load existing comments
+                loadComments(postData.id, modal);
+            }
+
+            async function toggleLike(likeBtn, postId) {
+                if (!postId) return;
+                // sample posts may have sample- prefix
+                if (postId.startsWith && postId.startsWith('sample-')) {
+                    alert('Like available only for real posts.');
+                    return;
+                }
+                const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const isLiked = likeBtn.getAttribute('data-liked') === 'true';
+                try {
+                    const res = await fetch(`/posts/${postId}/like`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
+                        body: JSON.stringify({})
+                    });
+                    const data = await res.json();
+                    if (data && data.success) {
+                        const countEl = likeBtn.querySelector('.like-count');
+                        const emoji = likeBtn.querySelector('.like-emoji');
+                        const newCount = data.like_count ?? (parseInt(countEl.textContent||'0') + (isLiked ? -1 : 1));
+                        countEl.textContent = newCount;
+                        likeBtn.setAttribute('data-liked', (!isLiked).toString());
+                        emoji.textContent = (!isLiked) ? '❤️' : '🤍';
+                    }
+                } catch (err) {
+                    console.error('Like error', err);
+                }
+            }
+
+            async function addComment(postId, content, commentInput, modal) {
+                if (!postId) return;
+                if (postId.startsWith && postId.startsWith('sample-')) {
+                    alert('Commenting available only for real posts.');
+                    return;
+                }
+                const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                try {
+                    const res = await fetch(`/posts/${postId}/comments`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
+                        body: JSON.stringify({ content })
+                    });
+                    const data = await res.json();
+                    if (data && data.success) {
+                        addCommentToModal(data.comment, modal);
+                        const commentCountEl = modal.querySelector('.comment-count');
+                        if (commentCountEl) commentCountEl.textContent = (parseInt(commentCountEl.textContent||'0')+1).toString();
+                        commentInput.value = '';
+                    }
+                } catch (err) { console.error('Comment error', err); }
+            }
+
+            async function loadComments(postId, modal) {
+                const commentsList = modal.querySelector('.comments-list');
+                if (!commentsList) return;
+                commentsList.innerHTML = '<div class="text-sm text-gray-500">Loading comments...</div>';
+                if (postId.startsWith && postId.startsWith('sample-')) {
+                    commentsList.innerHTML = '<div class="text-sm text-gray-500">No comments for sample posts.</div>';
+                    return;
+                }
+                try {
+                    const res = await fetch(`/posts/${postId}/comments`, { headers: { 'Accept': 'application/json' } });
+                    const data = await res.json();
+                    commentsList.innerHTML = '';
+                    if (Array.isArray(data.comments)) {
+                        data.comments.forEach(c => addCommentToModal(c, modal));
+                    }
+                } catch (err) { commentsList.innerHTML = '<div class="text-sm text-gray-500">Failed to load comments.</div>'; }
+            }
+
+            function addCommentToModal(comment, modal) {
+                const commentsList = modal.querySelector('.comments-list');
+                if (!commentsList) return;
+                const el = document.createElement('div');
+                el.className = 'flex gap-3 p-3 bg-gray-50 rounded-lg';
+                const avatar = comment.user_avatar ? `<img class="w-8 h-8 rounded-full object-cover" src="${comment.user_avatar}"/>` : `<div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">${(comment.user_name||'U').charAt(0).toUpperCase()}</div>`;
+                el.innerHTML = `
+                    <div class="flex-shrink-0">${avatar}</div>
+                    <div>
+                        <div class="font-semibold text-sm">${comment.user_name || 'Unknown'}</div>
+                        <div class="text-sm text-gray-600">${comment.content}</div>
+                    </div>
+                `;
+                commentsList.appendChild(el);
+            }
+        });
+    </script>
+
     @vite(['resources/js/app.js', 'resources/js/feed.js', 'resources/js/socket.js'])
 </body> 
 </html>
