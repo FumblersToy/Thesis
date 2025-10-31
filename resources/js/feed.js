@@ -485,20 +485,28 @@ document.addEventListener('DOMContentLoaded', function() {
             year: 'numeric'
         });
 
-        const imageSection = hasImage ? `
-                <img class="post-image w-full h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity" 
-                     src="${post.image_path}" 
-                     alt="Post image" 
-                     loading="lazy"
-                     onerror="this.src='/images/sample-post-1.jpg'"
-                     data-post-id="${post.id}"
-                     data-image-url="${post.image_path}"
-                     data-user-name="${userName}"
-                     data-user-genre="${userGenre}"
-                     data-user-type="${userType}"
-                     data-user-avatar="${userAvatar || ''}"
-                     data-description="${post.description || ''}"
-                     data-created-at="${createdAt}">` : '';
+    // Ensure like/comment counts and liked state are present so modal can display them
+    const likeCountAttr = post.like_count || post.likes_count || 0;
+    const commentCountAttr = post.comment_count || post.comments_count || 0;
+    const isLikedAttr = post.is_liked ? 'true' : 'false';
+
+    const imageSection = hasImage ? `
+        <img class="post-image w-full h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity" 
+             src="${post.image_path}" 
+             alt="Post image" 
+             loading="lazy"
+             onerror="this.src='/images/sample-post-1.jpg'"
+             data-post-id="${post.id}"
+             data-image-url="${post.image_path}"
+             data-user-name="${userName}"
+             data-user-genre="${userGenre}"
+             data-user-type="${userType}"
+             data-user-avatar="${userAvatar || ''}"
+             data-description="${post.description || ''}"
+             data-created-at="${createdAt}"
+             data-like-count="${likeCountAttr}"
+             data-comment-count="${commentCountAttr}"
+             data-is-liked="${isLikedAttr}">` : '';
 
         postDiv.innerHTML = `
             <div class="relative">
