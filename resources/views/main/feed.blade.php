@@ -416,7 +416,7 @@
                                 <div class="flex gap-3">
                                     <input type="text" 
                                            placeholder="Add a comment..." 
-                                           class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                           class="comment-input flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                     <button class="comment-submit-btn px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
                                         Post
                                     </button>
@@ -550,14 +550,22 @@
                     if (data.success) {
                         // Clear input
                         commentInput.value = '';
-                        
+
                         // Add comment to the list
                         addCommentToModal(data.comment, modal);
-                        
-                        // Update comment count
+
+                        // Update comment count in modal
                         const commentCount = modal.querySelector('.comment-count');
                         if (commentCount) {
-                            commentCount.textContent = parseInt(commentCount.textContent) + 1;
+                            const newCount = parseInt(commentCount.textContent || '0') + 1;
+                            commentCount.textContent = newCount;
+                        }
+
+                        // Also update the original post element's data attribute so counts stay consistent
+                        const originalPostImage = document.querySelector(`[data-post-id="${postId}"]`);
+                        if (originalPostImage) {
+                            const origCount = parseInt(originalPostImage.getAttribute('data-comment-count') || '0') + 1;
+                            originalPostImage.setAttribute('data-comment-count', origCount);
                         }
                     } else {
                         console.error('Failed to add comment:', data);
