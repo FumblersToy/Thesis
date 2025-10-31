@@ -41,10 +41,62 @@ function initFeed() {
         console.warn('Early initialization failed:', e);
     }
 
-    // Mobile menu functionality
+    // Mobile menu functionality — clone desktop filters into mobile menu on first open
+    let mobileFiltersInitialized = false;
     if (mobileMenuButton && mobileMenu) {
         mobileMenuButton.addEventListener('click', function() {
             mobileMenu.classList.toggle('-translate-x-full');
+
+            // If opening (menu moved into view), initialize mobile filters
+            const isOpen = !mobileMenu.classList.contains('-translate-x-full');
+            if (isOpen && !mobileFiltersInitialized) {
+                try {
+                    const desktopFilters = document.getElementById('filters');
+                    if (desktopFilters) {
+                        const cloneWrapper = document.createElement('div');
+                        cloneWrapper.id = 'mobileFilters';
+                        cloneWrapper.className = 'space-y-6 overflow-y-auto';
+                        // clone desktop filters HTML
+                        cloneWrapper.innerHTML = desktopFilters.innerHTML;
+
+                        // Fix duplicated IDs inside the clone (applyFilters)
+                        const mobileApply = cloneWrapper.querySelector('#applyFilters');
+                        if (mobileApply) {
+                            // prevent duplicate id conflict
+                            mobileApply.id = 'applyFiltersMobile';
+                            mobileApply.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                if (applyFiltersBtn) applyFiltersBtn.click();
+                                // close mobile menu after applying
+                                mobileMenu.classList.add('-translate-x-full');
+                            });
+                        } else {
+                            // Add a fallback apply button
+                            const btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.id = 'applyFiltersMobile';
+                            btn.className = 'w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl font-semibold';
+                            btn.textContent = 'Apply Filters ✨';
+                            btn.addEventListener('click', function() {
+                                if (applyFiltersBtn) applyFiltersBtn.click();
+                                mobileMenu.classList.add('-translate-x-full');
+                            });
+                            cloneWrapper.appendChild(btn);
+                        }
+
+                        // Replace mobile menu content
+                        mobileMenu.innerHTML = '';
+                        const title = document.createElement('h3');
+                        title.className = 'text-white font-semibold mb-4';
+                        title.textContent = 'Filters';
+                        mobileMenu.appendChild(title);
+                        mobileMenu.appendChild(cloneWrapper);
+                        mobileFiltersInitialized = true;
+                    }
+                } catch (err) {
+                    console.warn('Failed to initialize mobile filters:', err);
+                }
+            }
         });
     }
 
@@ -435,12 +487,13 @@ function initFeed() {
     function getActiveFilters() {
         const filters = {};
         
+        // Gather checked options both from desktop and mobile filters (if cloned)
         const checkedInstruments = Array.from(
-            document.querySelectorAll('#instruments input[type="checkbox"]:checked')
+            document.querySelectorAll('#instruments input[type="checkbox"]:checked, #mobileFilters #instruments input[type="checkbox"]:checked')
         ).map(cb => cb.value);
         
         const checkedVenues = Array.from(
-            document.querySelectorAll('#venues input[type="checkbox"]:checked')
+            document.querySelectorAll('#venues input[type="checkbox"]:checked, #mobileFilters #venues input[type="checkbox"]:checked')
         ).map(cb => cb.value);
         
         if (checkedInstruments.length > 0) {
@@ -451,16 +504,19 @@ function initFeed() {
             filters.venues = checkedVenues.join(',');
         }
 
-        // Add distance and sorting filters
-        if (sortBySelect) {
-            filters.sort_by = sortBySelect.value;
+        // Add distance and sorting filters: prefer desktop, fall back to mobile clone
+        const sortVal = (sortBySelect && sortBySelect.value) || (document.querySelector('#mobileFilters #sortBy')?.value);
+        if (sortVal) {
+            filters.sort_by = sortVal;
         }
 
-        if (userLocation && sortBySelect.value === 'distance') {
+        const usingDistance = sortVal === 'distance' || (sortBySelect && sortBySelect.value === 'distance');
+        if (userLocation && usingDistance) {
             filters.user_latitude = userLocation.latitude;
             filters.user_longitude = userLocation.longitude;
-            
-            const maxDistance = document.getElementById('maxDistance').value;
+
+            const maxDistanceEl = document.getElementById('maxDistance') || document.querySelector('#mobileFilters #maxDistance');
+            const maxDistance = maxDistanceEl ? maxDistanceEl.value : '';
             if (maxDistance) {
                 filters.max_distance = maxDistance;
             }
