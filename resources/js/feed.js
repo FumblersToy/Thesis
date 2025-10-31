@@ -1,36 +1,8 @@
-function getImageUrl(path) {
-    if (!path) return '/images/sample-profile.jpg';
-    
-    // Fix double-processing: remove ALL instances of /storage/ before http/https
-    path = path.replace('/storage/https://', 'https://');
-    path = path.replace('/storage/http://', 'http://');
-    
-    // If path already starts with http or /storage/, return as-is
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-        return path;
-    }
-    
-    if (path.startsWith('/storage/')) {
-        return path;
-    }
-    
-    // Otherwise prepend /storage/
-    return `/storage/${path}`;
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Feed page loaded');
     
-    // Initialize Socket.IO with user data (if available)
-    if (window.userData && window.socketManager) {
-        window.socketManager.init(window.userData);
-        console.log('Socket.IO initialized with user data:', window.userData);
-    }
-    
     // Get CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    
-    // ... rest of your existing code
     
     // Elements
     const createPostForm = document.getElementById('createPostForm');
@@ -514,22 +486,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         const imageSection = hasImage ? `
-        <img class="post-image w-full h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity" 
-             src="${post.image_path}" 
-             alt="Post image" 
-             loading="lazy"
-             onerror="this.src='/images/sample-post-1.jpg'"
-             data-post-id="${post.id}"
-             data-image-url="${post.image_path}"
-             data-user-name="${userName}"
-             data-user-genre="${userGenre}"
-             data-user-type="${userType}"
-             data-user-avatar="${userAvatar || ''}"
-             data-description="${post.description || ''}"
-             data-created-at="${createdAt}"
-             data-like-count="${post.like_count || 0}"
-             data-comment-count="${post.comment_count || 0}"
-             data-is-liked="${post.is_liked ? 'true' : 'false'}">` : '';
+                <img class="post-image w-full h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity" 
+                     src="${post.image_path}" 
+                     alt="Post image" 
+                     loading="lazy"
+                     onerror="this.src='/images/sample-post-1.jpg'"
+                     data-post-id="${post.id}"
+                     data-image-url="${post.image_path}"
+                     data-user-name="${userName}"
+                     data-user-genre="${userGenre}"
+                     data-user-type="${userType}"
+                     data-user-avatar="${userAvatar || ''}"
+                     data-description="${post.description || ''}"
+                     data-created-at="${createdAt}">` : '';
 
         postDiv.innerHTML = `
             <div class="relative">
@@ -606,8 +575,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         populateFilterSection('instruments', instruments);
         populateFilterSection('venues', venues);
-        populateFilterSection('mobileInstruments', instruments);
-        populateFilterSection('mobileVenues', venues);
     }
 
     function populateFilterSection(sectionId, options) {
@@ -662,7 +629,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    
     // Delete post functionality
     document.addEventListener('click', function(e) {
         if (e.target.closest('.delete-post-btn')) {
@@ -1223,9 +1189,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const userName = comment.user_name || 'Unknown User';
         const userInitial = userName.charAt(0).toUpperCase();
         
+        // Check if user has an avatar
         let avatarHtml = '';
         if (comment.user_avatar) {
-            avatarHtml = `<img src="${comment.user_avatar}" alt="${userName}" class="w-8 h-8 rounded-full object-cover">`;
+            avatarHtml = `<img src="/storage/${comment.user_avatar}" alt="${userName}" class="w-8 h-8 rounded-full object-cover">`;
         } else {
             avatarHtml = `<div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-sm">${userInitial}</div>`;
         }
@@ -1254,4 +1221,3 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Feed page initialization complete');
 });
-
