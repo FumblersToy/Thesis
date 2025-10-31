@@ -475,90 +475,174 @@
                 loadComments(postData.id, modal);
             }
 
+            // Match profile modal behavior for likes/comments
             async function toggleLike(likeBtn, postId) {
-                if (!postId) return;
-                // sample posts may have sample- prefix
-                if (postId.startsWith && postId.startsWith('sample-')) {
-                    alert('Like available only for real posts.');
+                // Check if this is a sample post (not a real database post)
+                if (postId.startsWith('sample-')) {
+                    alert('Like functionality is only available for real posts. Create a post to test this feature!');
                     return;
                 }
-                const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 const isLiked = likeBtn.getAttribute('data-liked') === 'true';
+                
                 try {
-                    const res = await fetch(`/posts/${postId}/like`, {
+                    const response = await fetch(`/posts/${postId}/like`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
-                        body: JSON.stringify({})
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        }
                     });
-                    const data = await res.json();
-                    if (data && data.success) {
-                        const countEl = likeBtn.querySelector('.like-count');
-                        const emoji = likeBtn.querySelector('.like-emoji');
-                        const newCount = data.like_count ?? (parseInt(countEl.textContent||'0') + (isLiked ? -1 : 1));
-                        countEl.textContent = newCount;
-                        likeBtn.setAttribute('data-liked', (!isLiked).toString());
-                        emoji.textContent = (!isLiked) ? '❤️' : '🤍';
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Update like button state
+                        const svg = likeBtn.querySelector('svg');
+                        const likeCount = likeBtn.querySelector('.like-count');
+                        
+                        if (data.liked) {
+                            svg.setAttribute('class', 'w-6 h-6 fill-red-500 text-red-500');
+                            likeBtn.setAttribute('data-liked', 'true');
+                        } else {
+                            svg.setAttribute('class', 'w-6 h-6 fill-none text-gray-600 hover:text-red-500');
+                            likeBtn.setAttribute('data-liked', 'false');
+                        }
+                        
+                        likeCount.textContent = data.like_count;
+                        
+                        // Also update the original post data for consistency
+                        const originalPostImage = document.querySelector(`[data-post-id="${postId}"]`);
+                        if (originalPostImage) {
+                            originalPostImage.setAttribute('data-like-count', data.like_count);
+                            originalPostImage.setAttribute('data-is-liked', data.liked);
+                        }
                     }
-                } catch (err) {
-                    console.error('Like error', err);
+                } catch (error) {
+                    console.error('Error toggling like:', error);
                 }
             }
 
+            // Add comment function
             async function addComment(postId, content, commentInput, modal) {
-                if (!postId) return;
-                if (postId.startsWith && postId.startsWith('sample-')) {
-                    alert('Commenting available only for real posts.');
+                // Check if this is a sample post (not a real database post)
+                if (postId.startsWith('sample-')) {
+                    alert('Comment functionality is only available for real posts. Create a post to test this feature!');
                     return;
                 }
-                const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                
                 try {
-                    const res = await fetch(`/posts/${postId}/comments`, {
+                    const response = await fetch(`/posts/${postId}/comments`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
-                        body: JSON.stringify({ content })
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ content: content })
                     });
-                    const data = await res.json();
-                    if (data && data.success) {
-                        addCommentToModal(data.comment, modal);
-                        const commentCountEl = modal.querySelector('.comment-count');
-                        if (commentCountEl) commentCountEl.textContent = (parseInt(commentCountEl.textContent||'0')+1).toString();
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Clear input
                         commentInput.value = '';
+                        
+                        // Add comment to the list
+                        addCommentToModal(data.comment, modal);
+                        
+                        // Update comment count
+                        const commentCount = modal.querySelector('.comment-count');
+                        if (commentCount) {
+                            commentCount.textContent = parseInt(commentCount.textContent) + 1;
+                        }
+                    } else {
+                        console.error('Failed to add comment:', data);
                     }
-                } catch (err) { console.error('Comment error', err); }
+                } catch (error) {
+                    console.error('Error adding comment:', error);
+                }
             }
 
+            // Load comments function
             async function loadComments(postId, modal) {
-                const commentsList = modal.querySelector('.comments-list');
-                if (!commentsList) return;
-                commentsList.innerHTML = '<div class="text-sm text-gray-500">Loading comments...</div>';
-                if (postId.startsWith && postId.startsWith('sample-')) {
-                    commentsList.innerHTML = '<div class="text-sm text-gray-500">No comments for sample posts.</div>';
+                // Check if this is a sample post (not a real database post)
+                if (postId.startsWith('sample-')) {
                     return;
                 }
+                
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                
                 try {
-                    const res = await fetch(`/posts/${postId}/comments`, { headers: { 'Accept': 'application/json' } });
-                    const data = await res.json();
-                    commentsList.innerHTML = '';
-                    if (Array.isArray(data.comments)) {
-                        data.comments.forEach(c => addCommentToModal(c, modal));
+                    const response = await fetch(`/posts/${postId}/comments`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success && data.comments.length > 0) {
+                        const commentsContainer = modal.querySelector('.space-y-3');
+                        if (commentsContainer) {
+                            // Clear the "no comments" message
+                            commentsContainer.innerHTML = '';
+                            
+                            // Add each comment
+                            data.comments.forEach(comment => {
+                                addCommentToModal(comment, modal);
+                            });
+                        }
+                    } else if (data.success && data.comments.length === 0) {
+                        // No comments found — leave the placeholder
+                    } else {
+                        console.log('Error loading comments:', data);
                     }
-                } catch (err) { commentsList.innerHTML = '<div class="text-sm text-gray-500">Failed to load comments.</div>'; }
+                } catch (error) {
+                    console.error('Error loading comments:', error);
+                }
             }
 
+            // Add comment to modal function
             function addCommentToModal(comment, modal) {
-                const commentsList = modal.querySelector('.comments-list');
-                if (!commentsList) return;
-                const el = document.createElement('div');
-                el.className = 'flex gap-3 p-3 bg-gray-50 rounded-lg';
-                const avatar = comment.user_avatar ? `<img class="w-8 h-8 rounded-full object-cover" src="${comment.user_avatar}"/>` : `<div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">${(comment.user_name||'U').charAt(0).toUpperCase()}</div>`;
-                el.innerHTML = `
-                    <div class="flex-shrink-0">${avatar}</div>
-                    <div>
-                        <div class="font-semibold text-sm">${comment.user_name || 'Unknown'}</div>
-                        <div class="text-sm text-gray-600">${comment.content}</div>
+                const commentsContainer = modal.querySelector('.space-y-3');
+                
+                if (!commentsContainer) {
+                    return;
+                }
+
+                const commentElement = document.createElement('div');
+                commentElement.className = 'flex gap-3 p-3 bg-gray-50 rounded-lg';
+                const userName = comment.user_name || 'Unknown User';
+                const userInitial = userName.charAt(0).toUpperCase();
+                
+                // Check if user has an avatar
+                let avatarHtml = '';
+                if (comment.user_avatar) {
+                    avatarHtml = `<img src="${comment.user_avatar}" alt="${userName}" class="w-8 h-8 rounded-full object-cover">`;
+                } else {
+                    avatarHtml = `<div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-sm">${userInitial}</div>`;
+                }
+                
+                commentElement.innerHTML = `
+                    <div class="w-8 h-8 flex-shrink-0">
+                        ${avatarHtml}
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="font-semibold text-sm text-gray-800">${userName}</span>
+                            <span class="text-xs text-gray-500">${new Date(comment.created_at).toLocaleDateString()}</span>
+                        </div>
+                        <p class="text-sm text-gray-700">${comment.content}</p>
                     </div>
                 `;
-                commentsList.appendChild(el);
+                
+                commentsContainer.appendChild(commentElement);
             }
         });
     </script>
