@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modern Musician Feed</title>
     @vite(['resources/css/app.css', 'resources/css/feed.css', 'resources/css/socket.css'])
-    @vite(['resources/js/app.js', 'resources/js/socket.js'])
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -330,6 +329,14 @@
             email: '{{ addslashes(Auth::user()->email) }}'
         };
     @endauth
+
+    document.addEventListener('click', function(e) {
+    console.log('INLINE: Click detected anywhere');
+    if (e.target.closest('.post-image')) {
+        e.preventDefault();
+        alert('POST IMAGE CLICKED! This works inline!');
+    }
+});
 
     function getImageUrl(path) {
     if (!path) return '/images/sample-profile.jpg';
@@ -1587,8 +1594,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Feed page initialization complete');
 });
-
-
 </script>
+@vite(['resources/js/app.js', 'resources/js/socket.js'])
 </body> 
 </html>
