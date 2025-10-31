@@ -586,12 +586,7 @@ function initFeed() {
                 <div class="flex justify-between items-center text-gray-500 text-sm">
                     <span>${formattedDate}</span>
                     <div class="flex gap-4">
-                        <button class="hover:text-red-500 transition-colors flex items-center gap-1">
-                            ❤️ <span>0</span>
-                        </button>
-                        <button class="hover:text-blue-500 transition-colors flex items-center gap-1">
-                            💬 <span>0</span>
-                        </button>
+                        <!-- Like/comment icons removed from preview; available in modal only -->
                     </div>
                 </div>
             </div>

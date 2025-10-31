@@ -349,6 +349,24 @@
             } catch (e) {
                 console.warn('Fallback inline fetch error:', e);
             }
+
+            // Defensive: ensure the profile button is visible after refresh
+            try {
+                const profileButton = document.getElementById('profileButton');
+                const profileDropdown = document.getElementById('profileDropdown');
+                if (profileButton) {
+                    profileButton.style.display = '';
+                }
+                if (profileDropdown) {
+                    // ensure dropdown is hidden by default
+                    if (!profileDropdown.classList.contains('hidden')) {
+                        profileDropdown.classList.add('hidden');
+                    }
+                    profileDropdown.style.display = 'none';
+                }
+            } catch (err) {
+                console.warn('Profile defensive restore failed:', err);
+            }
         });
     </script>
     <!-- Inline modal implementation for feed page (kept here to match profile.blade.php behavior) -->
