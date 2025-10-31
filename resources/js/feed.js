@@ -21,8 +21,16 @@ function getImageUrl(path) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Feed page loaded');
     
+    // Initialize Socket.IO with user data (if available)
+    if (window.userData && window.socketManager) {
+        window.socketManager.init(window.userData);
+        console.log('Socket.IO initialized with user data:', window.userData);
+    }
+    
     // Get CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    // ... rest of your existing code
     
     // Elements
     const createPostForm = document.getElementById('createPostForm');
@@ -515,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
              data-image-url="${post.image_path}"
              data-user-name="${userName}"
              data-user-genre="${userGenre}"
-             data-user-type="${userType}"~
+             data-user-type="${userType}"
              data-user-avatar="${userAvatar || ''}"
              data-description="${post.description || ''}"
              data-created-at="${createdAt}"
@@ -755,25 +763,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener('keydown', handleEscape);
     }
 
-        // Image modal functionality
-    document.addEventListener('click', function(e) {
-        console.log('Document clicked!', e.target); // ADD THIS
-        
-        if (e.target.closest('.post-image')) {
-            console.log('Post image found!'); // ADD THIS
-            e.preventDefault();
-            console.log('Post image clicked!');
-            const img = e.target.closest('.post-image');
-            console.log('Image element:', img); // ADD THIS
-            const postData = extractPostDataFromImage(img);
-            
-            console.log('Post data:', postData);
-            showImageModal(postData);
-        } else {
-            console.log('Not a post image'); // ADD THIS
-        }
-    });
-    
     // Delete post function
     async function deletePost(postId, buttonElement) {
         const originalContent = buttonElement.innerHTML;

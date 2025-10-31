@@ -319,33 +319,18 @@
     </div>
 
     <!-- Socket.IO Initialization Script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Socket.IO with user data
-            @auth
-                const userData = {
-                    id: {{ Auth::id() }},
-                    name: '{{ $displayName }}',
-                    type: '{{ $musician ? "musician" : ($business ? "business" : "member") }}',
-                    email: '{{ Auth::user()->email }}'
-                };
-                
-                // Initialize socket connection
-                if (window.socketManager) {
-                    window.socketManager.init(userData);
-                }
-            @endauth
-        });
-
-                document.addEventListener("click", e => {
-        const deleteBtn = e.target.closest(".delete-post");
-        if (!deleteBtn) return;
-
-        const postId = deleteBtn.dataset.postId;
-        showDeleteConfirmation(postId);
-        });
-
-    </script>
+<script>
+    // Pass user data to JavaScript (available before feed.js loads)
+    @auth
+        window.userData = {
+            id: {{ Auth::id() }},
+            name: '{{ addslashes($displayName) }}',
+            type: '{{ $musician ? "musician" : ($business ? "business" : "member") }}',
+            email: '{{ addslashes(Auth::user()->email) }}'
+        };
+    @endauth
+</script>
+@vite(['resources/js/app.js', 'resources/js/feed.js', 'resources/js/socket.js'])
     @vite(['resources/js/app.js', 'resources/js/feed.js', 'resources/js/socket.js'])
 </body> 
 </html>
