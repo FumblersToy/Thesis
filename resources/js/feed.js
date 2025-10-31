@@ -264,12 +264,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 ...filters
             });
 
-            const response = await fetch(`/api/posts?${params}`, {
+            // First try: include credentials in case server requires session cookies
+            console.log('Fetching posts with params:', params.toString());
+            let response = await fetch(`/api/posts?${params}`, {
+                credentials: 'same-origin',
                 headers: {
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': csrfToken
                 }
             });
+
+            // If the response is 401/403 or not OK, try fetching without credentials as a fallback and log both responses
+            if (!response.ok) {
+                console.warn('Initial fetch failed with status', response.status, '- trying without credentials as a fallback');
+                try {
+                    const fallbackResponse = await fetch(`/api/posts?${params}`, {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        }
+                    });
+                    console.log('Fallback fetch status:', fallbackResponse.status);
+                    // prefer the fallback if initial failed
+                    response = fallbackResponse;
+                } catch (fallbackError) {
+                    console.error('Fallback fetch error:', fallbackError);
+                }
+            }
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
