@@ -1,4 +1,4 @@
-function initFeedPage() {
+document.addEventListener('DOMContentLoaded', function() {
     console.log('Feed page loaded');
     
     // Get CSRF token
@@ -1220,12 +1220,4 @@ function initFeedPage() {
     loadPosts(1, false);
     
     console.log('Feed page initialization complete');
-}
-
-// If DOM is already loaded, initialize immediately, otherwise wait for event
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-    // small timeout to ensure other scripts have run
-    setTimeout(initFeedPage, 0);
-} else {
-    document.addEventListener('DOMContentLoaded', initFeedPage);
-}
+});
