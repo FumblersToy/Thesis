@@ -337,50 +337,100 @@
                     `<div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">${(postData.userName||'U').charAt(0).toUpperCase()}</div>`;
 
                 modal.innerHTML = `
-                    <div class="flex flex-col md:flex-row h-full max-h-[80vh]">
-                        <div class="md:w-1/2 bg-black flex items-center justify-center">
-                            <img src="${postData.imageUrl || '/images/sample-post-1.jpg'}" alt="post image" class="object-contain max-h-[80vh] w-full h-full">
+                    <div class="flex h-full max-h-[90vh]">
+                        <!-- Image Section -->
+                        <div class="flex-1 bg-black flex items-center justify-center">
+                            <img src="${postData.imageUrl}" 
+                                 alt="Post image" 
+                                 class="max-w-full max-h-full object-contain">
                         </div>
-                        <div class="md:w-1/2 p-6 flex flex-col">
-                            <div class="flex items-center gap-4 mb-4">
-                                ${avatarHtml}
-                                <div>
-                                    <div class="font-bold text-gray-800">${postData.userName || 'User'} ${userTypeEmoji}</div>
-                                    <div class="text-gray-500 text-sm">${postData.userGenre || ''}</div>
+                        
+                        <!-- Details Section -->
+                        <div class="w-96 bg-white flex flex-col">
+                            <!-- Header -->
+                            <div class="p-6 border-b border-gray-200">
+                                <div class="flex items-center gap-4 mb-4">
+                                    ${avatarHtml}
+                                    <div>
+                                        <h3 class="font-bold text-gray-800 text-xl">${postData.userName}</h3>
+                                        <p class="text-gray-600">${postData.userGenre}</p>
+                                    </div>
                                 </div>
-                                <div class="ml-auto text-gray-400 text-sm">${new Date(postData.createdAt).toLocaleString()}</div>
+                                <div class="flex items-center gap-2 text-sm text-gray-500">
+                                    <span>${userTypeEmoji} ${postData.userType}</span>
+                                    <span>•</span>
+                                    <span>${new Date(postData.createdAt).toLocaleDateString()}</span>
+                                </div>
                             </div>
-
-                            <div class="flex-1 overflow-auto mb-4">
-                                <p class="text-gray-700 leading-relaxed">${postData.description || ''}</p>
-
-                                <div class="mt-6 border-t pt-4">
-                                    <div class="flex items-center gap-4 text-sm text-gray-600">
-                                        <button class="like-btn inline-flex items-center gap-2 px-3 py-2 bg-white/90 rounded-xl border" data-liked="${postData.is_liked}" aria-pressed="${postData.is_liked}">
-                                            <span class="like-emoji">${postData.is_liked ? '❤️' : '🤍'}</span>
-                                            <span class="like-count">${postData.like_count}</span>
-                                        </button>
-                                        <div class="flex items-center gap-2">
-                                            <span>💬</span>
-                                            <span class="comment-count">${postData.comment_count}</span>
+                            
+                            <!-- Description -->
+                            <div class="flex-1 p-6 overflow-y-auto">
+                                ${postData.description ? `
+                                    <div class="mb-6">
+                                        <p class="text-gray-700 leading-relaxed">${postData.description}</p>
+                                    </div>
+                                ` : ''}
+                                
+                                <!-- Comments Section -->
+                                <div class="space-y-4">
+                                    <h4 class="font-semibold text-gray-800">Comments</h4>
+                                    <div class="space-y-3">
+                                        <div class="text-center py-8 text-gray-500">
+                                            <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                            </svg>
+                                            <p>No comments yet</p>
+                                            <p class="text-sm">Be the first to comment!</p>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="mt-4 comments-section">
-                                    <div class="comments-list space-y-3 max-h-40 overflow-auto"></div>
-                                </div>
                             </div>
-
-                            <div class="pt-4 border-t">
-                                <div class="flex gap-2">
-                                    <input type="text" class="comment-input flex-1 px-3 py-2 border rounded-xl" placeholder="Write a comment...">
-                                    <button class="comment-submit-btn px-4 py-2 bg-blue-600 text-white rounded-xl">Send</button>
+                            
+                            <!-- Actions -->
+                            <div class="p-6 border-t border-gray-200">
+                                <div class="flex items-center gap-6 mb-4">
+                                    <button class="like-btn flex items-center gap-2 transition-colors" 
+                                            data-post-id="${postData.id}"
+                                            data-liked="${postData.is_liked || false}">
+                                        <svg class="w-6 h-6 ${postData.is_liked ? 'fill-red-500 text-red-500' : 'fill-none text-gray-600 hover:text-red-500'}" 
+                                             stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                        </svg>
+                                        <span class="font-medium like-count">${postData.like_count || 0}</span>
+                                    </button>
+                                    <button class="comment-btn flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                        </svg>
+                                        <span class="font-medium comment-count">${postData.comment_count || 0}</span>
+                                    </button>
+                                    <button class="share-btn flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
+                                        </svg>
+                                        <span class="font-medium">Share</span>
+                                    </button>
+                                </div>
+                                
+                                <!-- Comment Input -->
+                                <div class="flex gap-3">
+                                    <input type="text" 
+                                           placeholder="Add a comment..." 
+                                           class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <button class="comment-submit-btn px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
+                                        Post
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <button class="close-modal absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full">✕</button>
+                    
+                    <!-- Close Button -->
+                    <button class="close-modal absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors z-10">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 `;
 
                 overlay.appendChild(modal);
