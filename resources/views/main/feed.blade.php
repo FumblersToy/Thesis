@@ -307,10 +307,35 @@
                     const div = document.createElement('div');
                     div.className = 'bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg overflow-hidden';
 
-                    // Build inner content: include image if available
+                    // localize fields with fallbacks to match feed.js createPostElement
+                    const userName = post.user_name || 'User';
+                    const userGenre = post.user_genre || '';
+                    const userType = post.user_type || 'member';
+                    const userAvatar = post.user_avatar || '';
+                    const createdAt = post.created_at || '';
+                    const likeCount = post.like_count || post.likes_count || 0;
+                    const commentCount = post.comment_count || post.comments_count || 0;
+
+                    const userTypeEmoji = userType === 'musician' ? '🎵' : (userType === 'business' ? '🏢' : '👤');
+
+                    // Build avatar HTML (fall back to initial if no avatar)
+                    const avatarHtml = userAvatar ?
+                        `<img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200" src="${userAvatar}" alt="avatar" onerror="this.src='/images/sample-profile.jpg'"/>` :
+                        `<div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">${userName.charAt(0).toUpperCase()}</div>`;
+
+                    // Format date similar to feed.js
+                    let formattedDate = '';
+                    try {
+                        if (createdAt) {
+                            formattedDate = new Date(createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        }
+                    } catch (e) {
+                        formattedDate = createdAt;
+                    }
+
+                    // include data attributes so existing modal/listeners pick this up
                     let inner = '';
                     if (post.image_path) {
-                        // include data attributes so existing modal/listeners pick this up
                         inner += `
                             <div class="relative">
                                 <img 
@@ -327,19 +352,33 @@
                                     data-user-avatar="${(post.user_avatar||'') }"
                                     data-description="${(post.description||'') }"
                                     data-created-at="${(post.created_at||'') }"
-                                    data-like-count="${(post.like_count||post.likes_count||0)}"
-                                    data-comment-count="${(post.comment_count||post.comments_count||0)}"
+                                    data-like-count="${likeCount}"
+                                    data-comment-count="${commentCount}"
                                     data-is-liked="${(post.is_liked? 'true' : 'false')}"
                                 />
+                                <div class="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
+                                    ${userTypeEmoji} ${userType}
+                                </div>
                             </div>
                         `;
                     }
 
                     inner += `
                         <div class="p-6">
-                            <h3 class="font-bold text-gray-800">${(post.user_name||'User')}</h3>
-                            <p class="text-sm text-gray-600">${(post.user_genre||'')}</p>
-                            <p class="mt-3 text-gray-700">${(post.description||'')}</p>
+                            <div class="flex items-center gap-4 mb-4">
+                                ${avatarHtml}
+                                <div>
+                                    <h3 class="font-bold text-gray-800 text-lg">${userName}</h3>
+                                    <p class="text-gray-600">${userGenre}</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-700 mb-4 leading-relaxed">${(post.description||'')}</p>
+                            <div class="flex justify-between items-center text-gray-500 text-sm">
+                                <span>${formattedDate}</span>
+                                <div class="flex gap-4">
+                                    <!-- Preview icons intentionally omitted -->
+                                </div>
+                            </div>
                         </div>
                     `;
 
