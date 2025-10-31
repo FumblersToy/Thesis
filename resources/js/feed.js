@@ -506,19 +506,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         const imageSection = hasImage ? `
-                <img class="post-image w-full h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity" 
-                     src="${post.image_path}" 
-                     alt="Post image" 
-                     loading="lazy"
-                     onerror="this.src='/images/sample-post-1.jpg'"
-                     data-post-id="${post.id}"
-                     data-image-url="${post.image_path}"
-                     data-user-name="${userName}"
-                     data-user-genre="${userGenre}"
-                     data-user-type="${userType}"
-                     data-user-avatar="${userAvatar || ''}"
-                     data-description="${post.description || ''}"
-                     data-created-at="${createdAt}">` : '';
+        <img class="post-image w-full h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity" 
+             src="${post.image_path}" 
+             alt="Post image" 
+             loading="lazy"
+             onerror="this.src='/images/sample-post-1.jpg'"
+             data-post-id="${post.id}"
+             data-image-url="${post.image_path}"
+             data-user-name="${userName}"
+             data-user-genre="${userGenre}"
+             data-user-type="${userType}"
+             data-user-avatar="${userAvatar || ''}"
+             data-description="${post.description || ''}"
+             data-created-at="${createdAt}"
+             data-like-count="${post.like_count || 0}"
+             data-comment-count="${post.comment_count || 0}"
+             data-is-liked="${post.is_liked ? 'true' : 'false'}">` : '';
 
         postDiv.innerHTML = `
             <div class="relative">
