@@ -640,464 +640,157 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    /* ===============================
-       🖼️ MODAL + COMMENTS + LIKES (copied from profile page)
-       - includes debugging logs
-       =============================== */
+    function showImageModal(post) {
+        console.log('🖼 Showing modal for post:', post);
+        let modal = document.getElementById('imageModal');
 
-    // Image modal functionality - WITH MORE DEBUGGING
-    document.addEventListener('click', function(e) {
-        console.log('🔍 Click detected on:', e.target);
-        console.log('🔍 Target classes:', e.target.className);
-        console.log('🔍 Closest .post-image:', e.target.closest('.post-image'));
-        
-        if (e.target.closest('.post-image')) {
-            e.preventDefault();
-            console.log('✅ Post image clicked!'); // Debug log
-            const img = e.target.closest('.post-image');
-            const postData = extractPostDataFromImage(img);
-            
-            console.log('📦 Post data:', postData); // Debug log
-            showImageModal(postData);
-        } else {
-            console.log('❌ Not a post image');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'imageModal';
+            modal.className = 'fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 hidden';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-xl w-[90%] max-w-3xl p-6 relative">
+                    <button id="closeModalBtn" class="absolute top-3 right-3 text-gray-600 hover:text-black text-2xl">&times;</button>
+                    <img id="modalImage" src="" class="w-full rounded-lg mb-4 object-cover max-h-[60vh]" alt="Post image">
+                    <div class="flex justify-between text-gray-700 mb-2">
+                        <span id="modalUserName"></span>
+                        <span id="modalCreatedAt" class="text-sm text-gray-500"></span>
+                    </div>
+                    <p id="modalDescription" class="text-gray-800 mb-4"></p>
+                    <div class="flex justify-between items-center text-gray-500 text-sm mb-3">
+                        <button id="likeButton" class="hover:text-red-500 flex items-center gap-1">❤️ <span id="likeCount">0</span></button>
+                        <button id="commentToggle" class="hover:text-blue-500 flex items-center gap-1">💬 <span id="commentCount">0</span></button>
+                    </div>
+                    <div id="commentSection" class="hidden">
+                        <div id="commentsList" class="space-y-2 mb-3 max-h-40 overflow-y-auto"></div>
+                        <input id="commentInput" type="text" placeholder="Add a comment..." class="w-full border rounded-xl px-3 py-2 text-sm">
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+        }
+
+        // Fill modal data
+        document.getElementById('modalImage').src = post.imageUrl;
+        document.getElementById('modalUserName').textContent = post.userName;
+        document.getElementById('modalCreatedAt').textContent = post.createdAt;
+        document.getElementById('modalDescription').textContent = post.description;
+        document.getElementById('likeCount').textContent = post.likeCount;
+        document.getElementById('commentCount').textContent = post.commentCount;
+
+        modal.classList.remove('hidden');
+
+        // Load comments
+        loadComments(post.id);
+
+        // Like button toggle
+        document.getElementById('likeButton').onclick = () => toggleLike(post.id);
+
+        // Comment section toggle
+        document.getElementById('commentToggle').onclick = () => {
+            document.getElementById('commentSection').classList.toggle('hidden');
+        };
+
+        // Add comment input
+        const commentInput = document.getElementById('commentInput');
+        commentInput.onkeydown = (e) => {
+            if (e.key === 'Enter' && commentInput.value.trim() !== '') {
+                addComment(post.id, commentInput.value.trim());
+                commentInput.value = '';
+            }
+        };
+    }
+
+    document.addEventListener('click', e => {
+        if (e.target.id === 'closeModalBtn' || e.target.id === 'imageModal') {
+            document.getElementById('imageModal')?.classList.add('hidden');
         }
     });
 
-    // (Optional) Search / follow logic is profile-only; skipped here if no elements exist
-    // but functions below are included from profile modal script.
+    // ================================================
+    // COMMENT + LIKE LOGIC
+    // ================================================
 
-    // Toggle follow function (kept for completeness if called from modal)
-    async function toggleFollow(userId, isFollowing, button) {
-        const csrfTokenLocal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const followText = button.querySelector('.follow-text');
-        const followingText = button.querySelector('.following-text');
-        
+    async function loadComments(postId) {
+        console.log(`💬 Loading comments for post ${postId}`);
+        const commentsList = document.getElementById('commentsList');
+        commentsList.innerHTML = `<p class="text-gray-400 text-sm">Loading...</p>`;
         try {
-            const response = await fetch(`/users/${userId}/follow`, {
+            const response = await fetch(`/posts/${postId}/comments`);
+            const comments = await response.json();
+            commentsList.innerHTML = '';
+            comments.forEach(addCommentToModal);
+            console.log(`✅ Loaded ${comments.length} comments`);
+        } catch (error) {
+            console.error('⚠️ Error loading comments:', error);
+            commentsList.innerHTML = `<p class="text-red-500 text-sm">Failed to load comments</p>`;
+        }
+    }
+
+    function addCommentToModal(comment) {
+        const commentsList = document.getElementById('commentsList');
+        const div = document.createElement('div');
+        div.className = 'bg-gray-100 p-2 rounded-lg';
+        div.innerHTML = `<strong>${comment.user_name}</strong>: ${comment.text}`;
+        commentsList.appendChild(div);
+    }
+
+    async function addComment(postId, commentText) {
+        console.log(`➕ Adding comment to post ${postId}: "${commentText}"`);
+        try {
+            const response = await fetch(`/comments`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': csrfTokenLocal,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
-                body: JSON.stringify({
-                    follow: !isFollowing
-                })
+                body: JSON.stringify({ post_id: postId, text: commentText })
             });
 
-            const data = await response.json();
-
-            if (data.success) {
-                if (data.following) {
-                    // Now following
-                    button.setAttribute('data-following', 'true');
-                    button.classList.remove('from-purple-500', 'to-pink-500', 'hover:from-purple-600', 'hover:to-pink-600');
-                    button.classList.add('bg-gray-500', 'hover:bg-gray-600');
-                    if (followText) followText.classList.add('hidden');
-                    if (followingText) followingText.classList.remove('hidden');
-                } else {
-                    // No longer following
-                    button.setAttribute('data-following', 'false');
-                    button.classList.add('from-purple-500', 'to-pink-500', 'hover:from-purple-600', 'hover:to-pink-600');
-                    button.classList.remove('bg-gray-500', 'hover:bg-gray-600');
-                    if (followText) followText.classList.remove('hidden');
-                    if (followingText) followingText.classList.add('hidden');
-                }
-                
-                // Update follower count if available
-                const followerCount = document.querySelector('[data-follower-count]');
-                if (followerCount && data.follower_count !== undefined) {
-                    followerCount.textContent = data.follower_count;
-                }
-            } else {
-                console.error('Follow action failed:', data.message);
-                alert(data.message || 'Failed to update follow status');
-            }
+            if (!response.ok) throw new Error('Failed to add comment');
+            const newComment = await response.json();
+            addCommentToModal(newComment);
+            console.log('✅ Comment added');
         } catch (error) {
-            console.error('Error:', error);
-            alert('Network error. Please try again.');
+            console.error('⚠️ Error adding comment:', error);
         }
     }
 
-    // Extract post data from image element
-    function extractPostDataFromImage(img) {
-        if (!img) return null;
-        
-        return {
-            id: img.getAttribute('data-post-id'),
-            imageUrl: img.getAttribute('data-image-url'),
-            userName: img.getAttribute('data-user-name'),
-            userGenre: img.getAttribute('data-user-genre'),
-            userType: img.getAttribute('data-user-type'),
-            userAvatar: img.getAttribute('data-user-avatar'),
-            description: img.getAttribute('data-description'),
-            createdAt: img.getAttribute('data-created-at'),
-            like_count: parseInt(img.getAttribute('data-like-count')) || 0,
-            comment_count: parseInt(img.getAttribute('data-comment-count')) || 0,
-            is_liked: img.getAttribute('data-is-liked') === 'true'
-        };
-    }
-
-    // Show image modal
-    function showImageModal(postData) {
-        if (!postData) return;
-        
-        // Create modal overlay
-        const overlay = document.createElement('div');
-        overlay.className = 'fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center';
-        overlay.style.opacity = '0';
-        overlay.style.transition = 'opacity 0.3s ease-out';
-        
-        // Create modal content
-        const modal = document.createElement('div');
-        modal.className = 'bg-white rounded-2xl shadow-2xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-hidden transform scale-95 transition-transform duration-300';
-        
-        const userTypeEmoji = postData.userType === 'musician' ? '🎵' : 
-                             postData.userType === 'business' ? '🏢' : '👤';
-        
-        const avatarElement = postData.userAvatar ? 
-            `<img class="w-16 h-16 rounded-full object-cover border-2 border-gray-200" src="${postData.userAvatar}" alt="avatar">` :
-            `<div class="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-xl">${postData.userName ? postData.userName.charAt(0).toUpperCase() : 'U'}</div>`;
-        
-        modal.innerHTML = `
-            <div class="flex h-full max-h-[90vh]">
-                <!-- Image Section -->
-                <div class="flex-1 bg-black flex items-center justify-center">
-                    <img src="${postData.imageUrl}" 
-                         alt="Post image" 
-                         class="max-w-full max-h-full object-contain">
-                </div>
-                
-                <!-- Details Section -->
-                <div class="w-96 bg-white flex flex-col">
-                    <!-- Header -->
-                    <div class="p-6 border-b border-gray-200">
-                        <div class="flex items-center gap-4 mb-4">
-                            ${avatarElement}
-                            <div>
-                                <h3 class="font-bold text-gray-800 text-xl">${postData.userName || 'Unknown'}</h3>
-                                <p class="text-gray-600">${postData.userGenre || ''}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-gray-500">
-                            <span>${userTypeEmoji} ${postData.userType || ''}</span>
-                            <span>•</span>
-                            <span>${new Date(postData.createdAt).toLocaleDateString()}</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Description -->
-                    <div class="flex-1 p-6 overflow-y-auto">
-                        ${postData.description ? `
-                            <div class="mb-6">
-                                <p class="text-gray-700 leading-relaxed">${postData.description}</p>
-                            </div>
-                        ` : ''}
-                        
-                        <!-- Comments Section -->
-                        <div class="space-y-4">
-                            <h4 class="font-semibold text-gray-800">Comments</h4>
-                            <div class="space-y-3">
-                                <div class="text-center py-8 text-gray-500">
-                                    <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                                    </svg>
-                                    <p>No comments yet</p>
-                                    <p class="text-sm">Be the first to comment!</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Actions -->
-                    <div class="p-6 border-t border-gray-200">
-                        <div class="flex items-center gap-6 mb-4">
-                            <button class="like-btn flex items-center gap-2 transition-colors" 
-                                    data-post-id="${postData.id}"
-                                    data-liked="${postData.is_liked || false}">
-                                <svg class="w-6 h-6 ${postData.is_liked ? 'fill-red-500 text-red-500' : 'fill-none text-gray-600 hover:text-red-500'}" 
-                                     stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                </svg>
-                                <span class="font-medium like-count">${postData.like_count || 0}</span>
-                            </button>
-                            <button class="comment-btn flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                                </svg>
-                                <span class="font-medium comment-count">${postData.comment_count || 0}</span>
-                            </button>
-                            <button class="share-btn flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
-                                </svg>
-                                <span class="font-medium">Share</span>
-                            </button>
-                        </div>
-                        
-                        <!-- Comment Input -->
-                        <div class="flex gap-3">
-                            <input type="text" 
-                                   placeholder="Add a comment..." 
-                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <button class="comment-submit-btn px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
-                                Post
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Close Button -->
-            <button class="close-modal absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors z-10">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
-        `;
-        
-        overlay.appendChild(modal);
-        document.body.appendChild(overlay);
-        
-        // Prevent body scroll
-        document.body.style.overflow = 'hidden';
-        
-        // Animate in
-        setTimeout(() => {
-            overlay.style.opacity = '1';
-            modal.style.transform = 'scale(1)';
-        }, 10);
-        
-        // Handle close button
-        const closeBtn = modal.querySelector('.close-modal');
-        const closeModal = () => {
-            overlay.style.opacity = '0';
-            modal.style.transform = 'scale(0.95)';
-            document.body.style.overflow = '';
-            setTimeout(() => {
-                if (document.body.contains(overlay)) {
-                    document.body.removeChild(overlay);
-                }
-            }, 300);
-        };
-        
-        closeBtn.addEventListener('click', closeModal);
-        
-        // Close on overlay click (but not on modal content)
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                closeModal();
-            }
-        });
-        
-        // Close on Escape key
-        const handleEscape = (e) => {
-            if (e.key === 'Escape') {
-                closeModal();
-                document.removeEventListener('keydown', handleEscape);
-            }
-        };
-        document.addEventListener('keydown', handleEscape);
-
-        // Add like functionality
-        const likeBtn = modal.querySelector('.like-btn');
-        if (likeBtn) {
-            likeBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                toggleLike(likeBtn, postData.id);
-            });
-        }
-
-        // Add comment functionality
-        const commentInput = modal.querySelector('input[type="text"]');
-        const commentSubmitBtn = modal.querySelector('.comment-submit-btn');
-        if (commentInput && commentSubmitBtn) {
-            commentSubmitBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const content = commentInput.value.trim();
-                if (content) {
-                    addComment(postData.id, content, commentInput, modal);
-                }
-            });
-            
-            commentInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    const content = commentInput.value.trim();
-                    if (content) {
-                        addComment(postData.id, content, commentInput, modal);
-                    }
-                }
-            });
-        }
-
-        // Load comments
-        loadComments(postData.id, modal);
-    }
-
-    // Toggle like function
-    async function toggleLike(likeBtn, postId) {
-        // Check if this is a sample post (not a real database post)
-        if (postId.startsWith('sample-')) {
-            alert('Like functionality is only available for real posts. Create a post to test this feature!');
-            return;
-        }
-        
-        const csrfTokenLocal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        const isLiked = likeBtn.getAttribute('data-liked') === 'true';
-        
+    async function toggleLike(postId) {
+        console.log(`❤️ Toggling like for post ${postId}`);
         try {
             const response = await fetch(`/posts/${postId}/like`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': csrfTokenLocal,
-                    'Accept': 'application/json'
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 }
             });
-
-            const data = await response.json();
-
-            if (data.success) {
-                // Update like button state
-                const svg = likeBtn.querySelector('svg');
-                const likeCount = likeBtn.querySelector('.like-count');
-                
-                if (data.liked) {
-                    svg.setAttribute('class', 'w-6 h-6 fill-red-500 text-red-500');
-                    likeBtn.setAttribute('data-liked', 'true');
-                } else {
-                    svg.setAttribute('class', 'w-6 h-6 fill-none text-gray-600 hover:text-red-500');
-                    likeBtn.setAttribute('data-liked', 'false');
-                }
-                
-                likeCount.textContent = data.like_count;
-                
-                // Also update the original post data for consistency
-                const originalPostImage = document.querySelector(`[data-post-id="${postId}"]`);
-                if (originalPostImage) {
-                    originalPostImage.setAttribute('data-like-count', data.like_count);
-                    originalPostImage.setAttribute('data-is-liked', data.liked);
-                }
-            }
+            const result = await response.json();
+            document.getElementById('likeCount').textContent = result.likeCount;
+            console.log('✅ Like updated:', result);
         } catch (error) {
-            console.error('Error toggling like:', error);
+            console.error('⚠️ Error toggling like:', error);
         }
     }
 
-    // Add comment function
-    async function addComment(postId, content, commentInput, modal) {
-        // Check if this is a sample post (not a real database post)
-        if (postId.startsWith('sample-')) {
-            alert('Comment functionality is only available for real posts. Create a post to test this feature!');
-            return;
-        }
-        
-        const csrfTokenLocal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        
-        try {
-            const response = await fetch(`/posts/${postId}/comments`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': csrfTokenLocal,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ content: content })
-            });
+    // ================================================
+    // IMAGE CLICK HANDLER FOR MODAL OPEN
+    // ================================================
 
-            const data = await response.json();
+    document.querySelectorAll('.post-image').forEach(img => {
+        img.addEventListener('click', () => {
+            const postData = {
+                id: img.dataset.postId,
+                imageUrl: img.dataset.imageUrl,
+                userName: img.dataset.userName,
+                description: img.dataset.description,
+                createdAt: img.dataset.createdAt,
+                likeCount: img.dataset.likeCount,
+                commentCount: img.dataset.commentCount
+            };
+            showImageModal(postData);
+        });
+    });
 
-            if (data.success) {
-                // Clear input
-                commentInput.value = '';
-                
-                // Add comment to the list
-                addCommentToModal(data.comment, modal);
-                
-                // Update comment count
-                const commentCount = modal.querySelector('.comment-count');
-                if (commentCount) {
-                    commentCount.textContent = parseInt(commentCount.textContent) + 1;
-                }
-            } else {
-                console.error('Failed to add comment:', data);
-            }
-        } catch (error) {
-            console.error('Error adding comment:', error);
-        }
-    }
+    console.log('✅ Modal + comment system loaded');
 
-    // Load comments function
-    async function loadComments(postId, modal) {
-        // Check if this is a sample post (not a real database post)
-        if (postId.startsWith('sample-')) {
-            return;
-        }
-        
-        const csrfTokenLocal = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        
-        try {
-            const response = await fetch(`/posts/${postId}/comments`, {
-                method: 'GET',
-                headers: {
-                    'X-CSRF-TOKEN': csrfTokenLocal,
-                    'Accept': 'application/json'
-                }
-            });
-
-            const data = await response.json();
-
-            if (data.success && data.comments.length > 0) {
-                const commentsContainer = modal.querySelector('.space-y-3');
-                if (commentsContainer) {
-                    // Clear the "no comments" message
-                    commentsContainer.innerHTML = '';
-                    
-                    // Add each comment
-                    data.comments.forEach(comment => {
-                        addCommentToModal(comment, modal);
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Error loading comments:', error);
-        }
-    }
-
-    // Add comment to modal function
-    function addCommentToModal(comment, modal) {
-        const commentsContainer = modal.querySelector('.space-y-3');
-        
-        if (!commentsContainer) {
-            return;
-        }
-
-        const commentElement = document.createElement('div');
-        commentElement.className = 'flex gap-3 p-3 bg-gray-50 rounded-lg';
-        const userName = comment.user_name || 'Unknown User';
-        const userInitial = userName.charAt(0).toUpperCase();
-        
-        // Check if user has an avatar
-        let avatarHtml = '';
-        if (comment.user_avatar) {
-            avatarHtml = `<img src="${comment.user_avatar}" alt="${userName}" class="w-8 h-8 rounded-full object-cover">`;                } else {
-            avatarHtml = `<div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-sm">${userInitial}</div>`;
-        }
-        
-        commentElement.innerHTML = `
-            <div class="w-8 h-8 flex-shrink-0">
-                ${avatarHtml}
-            </div>
-            <div class="flex-1">
-                <div class="flex items-center gap-2 mb-1">
-                    <span class="font-semibold text-sm text-gray-800">${userName}</span>
-                    <span class="text-xs text-gray-500">${new Date(comment.created_at).toLocaleDateString()}</span>
-                </div>
-                <p class="text-sm text-gray-700">${comment.content}</p>
-            </div>
-        `;
-        
-        commentsContainer.appendChild(commentElement);
-    }
-    
 });
