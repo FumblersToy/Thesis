@@ -326,57 +326,7 @@ Route::prefix('api/messages')->middleware('auth')->group(function () {
     Route::get('/search/users', [App\Http\Controllers\MessageController::class, 'searchUsers']);
 });
 
-// API route for map users
-Route::get('/api/map/users', function () {
-    $users = collect();
-    
-    // Get musicians with locations
-    $musicians = \App\Models\Musician::whereNotNull('latitude')
-        ->whereNotNull('longitude')
-        ->with('user')
-        ->get();
-    
-    foreach ($musicians as $musician) {
-        $users->push([
-            'user_id' => $musician->user_id,
-            'name' => $musician->stage_name ?: ($musician->first_name . ' ' . $musician->last_name),
-            'type' => 'musician',
-            'latitude' => (float) $musician->latitude,
-            'longitude' => (float) $musician->longitude,
-            'location_name' => $musician->location_name,
-            'instrument' => $musician->instrument,
-            'genre' => $musician->genre,
-            'bio' => $musician->bio,
-            'avatar' => $musician->profile_picture ? getImageUrl($musician->profile_picture) : '/images/sample-profile.jpg'
-        ]);
-    }
-    
-    // Get businesses with locations
-    $businesses = \App\Models\Business::whereNotNull('latitude')
-        ->whereNotNull('longitude')
-        ->with('user')
-        ->get();
-    
-    foreach ($businesses as $business) {
-        $users->push([
-            'user_id' => $business->user_id,
-            'name' => $business->business_name,
-            'type' => 'business',
-            'latitude' => (float) $business->latitude,
-            'longitude' => (float) $business->longitude,
-            'location_name' => $business->location_name,
-            'venue' => $business->venue,
-            'address' => $business->address,
-            'bio' => null,
-            'avatar' => $business->profile_picture ? getImageUrl($business->profile_picture) : '/images/sample-profile.jpg'
-        ]);
-    }
-    
-    return response()->json([
-        'success' => true,
-        'users' => $users->values()->all()
-    ]);
-})->middleware('auth');
+// Map feature removed: /api/map/users route deleted
 
 // API: posts list with filters - NOW USING PostController
 Route::get('/api/posts', [PostController::class, 'index'])->middleware('auth');

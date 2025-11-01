@@ -163,10 +163,7 @@
                                 Messages
                             </a>
                             
-                            <a href="{{ route('map') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
-                                <span class="text-lg">🗺️</span>
-                                Map
-                            </a>
+                            <!-- Map removed -->
 
                             <div class="border-t border-gray-200 my-2"></div>
 
