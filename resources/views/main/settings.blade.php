@@ -117,15 +117,7 @@
                             <label class="block text-white/80 mb-1">Bio</label>
                             <textarea name="musician[bio]" rows="4" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30">{{ old('musician.bio', $musician->bio) }}</textarea>
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-white/80 mb-2">Location</label>
-                            <div class="space-y-4">
-                                <input type="text" name="musician[location_name]" value="{{ old('musician.location_name', $musician->location_name) }}" placeholder="Enter your location (e.g., New York, NY)" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30">
-                        <!-- musicianMap removed (maps disabled). Hidden inputs remain. -->
-                                <input type="hidden" name="musician[latitude]" id="musicianLatitude" value="{{ old('musician.latitude', $musician->latitude) }}">
-                                <input type="hidden" name="musician[longitude]" id="musicianLongitude" value="{{ old('musician.longitude', $musician->longitude) }}">
-                            </div>
-                        </div>
+                        <!-- Musician location input removed per request; address fields remain elsewhere. -->
                     </div>
                 </div>
                 @endif
@@ -172,15 +164,7 @@
                                 <input type="hidden" name="business[address_longitude]" id="businessAddressLongitude" value="{{ old('business.address_longitude', $business->longitude) }}">
                             </div>
                         </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-white/80 mb-2">Location</label>
-                            <div class="space-y-4">
-                                <input type="text" name="business[location_name]" value="{{ old('business.location_name', $business->location_name) }}" placeholder="Enter your location (e.g., New York, NY)" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30">
-                                <!-- businessMap removed (maps disabled). Hidden inputs remain. -->
-                                <input type="hidden" name="business[latitude]" id="businessLatitude" value="{{ old('business.latitude', $business->latitude) }}">
-                                <input type="hidden" name="business[longitude]" id="businessLongitude" value="{{ old('business.longitude', $business->longitude) }}">
-                            </div>
-                        </div>
+                        <!-- Business location input removed per request; address inputs remain. -->
                         <div>
                             <label class="block text-white/80 mb-1">Venue Offered</label>
                             <select name="business[venue]" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
@@ -224,55 +208,7 @@
         });
 
         // Maps removed: provide simple geocoding-only helpers that set hidden coords and fill the location input.
-        function initMusicianMap() {
-            // Attach search handler to musician location input so entering an address sets hidden coords.
-            const locationInput = document.querySelector('input[name="musician[location_name]"]');
-            if (locationInput) {
-                locationInput.addEventListener('blur', function() {
-                    if (this.value) searchLocation(this.value, 'musician');
-                });
-            }
-        }
-
-        function initBusinessMap() {
-            // Attach search handler to business location input so entering an address sets hidden coords.
-            const locationInput = document.querySelector('input[name="business[location_name]"]');
-            if (locationInput) {
-                locationInput.addEventListener('blur', function() {
-                    if (this.value) searchLocation(this.value, 'business');
-                });
-            }
-        }
-
-        function searchLocation(query, type) {
-            // Use Nominatim to geocode `query` and populate hidden lat/lng inputs plus keep the location_name value.
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        const result = data[0];
-                        const lat = parseFloat(result.lat);
-                        const lng = parseFloat(result.lon);
-
-                        if (type === 'musician') {
-                            const latInput = document.getElementById('musicianLatitude');
-                            const lngInput = document.getElementById('musicianLongitude');
-                            if (latInput) latInput.value = lat;
-                            if (lngInput) lngInput.value = lng;
-                            const loc = document.querySelector('input[name="musician[location_name]"]');
-                            if (loc && result.display_name) loc.value = result.display_name;
-                        } else {
-                            const latInput = document.getElementById('businessLatitude');
-                            const lngInput = document.getElementById('businessLongitude');
-                            if (latInput) latInput.value = lat;
-                            if (lngInput) lngInput.value = lng;
-                            const loc = document.querySelector('input[name="business[location_name]"]');
-                            if (loc && result.display_name) loc.value = result.display_name;
-                        }
-                    }
-                })
-                .catch(error => console.log('Search error:', error));
-        }
+        // Location inputs removed; geocoding/search helpers are not necessary anymore.
 
         // businessAddressMap functionality removed. Address field remains and hidden inputs
         // `businessAddressLatitude` / `businessAddressLongitude` are preserved so server-side
