@@ -168,7 +168,7 @@
                             <label class="block text-white/80 mb-2">Address</label>
                             <div class="space-y-4">
                                 <input type="text" name="business[address]" value="{{ old('business.address', $business->address) }}" placeholder="Enter your address (e.g., 123 Main St, New York, NY)" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30">
-                                <div id="businessAddressMap" class="h-64 rounded-2xl overflow-hidden border border-white/20"></div>
+                                <!-- businessAddressMap removed to reduce duplicate maps; address still stored in hidden inputs -->
                                 <input type="hidden" name="business[address_latitude]" id="businessAddressLatitude" value="{{ old('business.address_latitude', $business->latitude) }}">
                                 <input type="hidden" name="business[address_longitude]" id="businessAddressLongitude" value="{{ old('business.address_longitude', $business->longitude) }}">
                             </div>
@@ -210,8 +210,8 @@
     </div>
 
     <script>
-        let musicianMap, businessMap, businessAddressMap;
-        let musicianMarker, businessMarker, businessAddressMarker;
+        let musicianMap, businessMap;
+        let musicianMarker, businessMarker;
 
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize maps
@@ -221,9 +221,7 @@
             if (document.getElementById('businessMap')) {
                 initBusinessMap();
             }
-            if (document.getElementById('businessAddressMap')) {
-                initBusinessAddressMap();
-            }
+            // businessAddressMap removed — address is still saved via hidden inputs
         });
 
         function initMusicianMap() {
@@ -341,68 +339,9 @@
                 .catch(error => console.log('Search error:', error));
         }
 
-        function initBusinessAddressMap() {
-            const lat = parseFloat(document.getElementById('businessAddressLatitude').value) || 40.7128;
-            const lng = parseFloat(document.getElementById('businessAddressLongitude').value) || -74.0060;
-            
-            businessAddressMap = L.map('businessAddressMap').setView([lat, lng], 10);
-            
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(businessAddressMap);
-            
-            if (document.getElementById('businessAddressLatitude').value && document.getElementById('businessAddressLongitude').value) {
-                businessAddressMarker = L.marker([lat, lng]).addTo(businessAddressMap);
-            }
-            
-            businessAddressMap.on('click', function(e) {
-                if (businessAddressMarker) {
-                    businessAddressMap.removeLayer(businessAddressMarker);
-                }
-                businessAddressMarker = L.marker(e.latlng).addTo(businessAddressMap);
-                document.getElementById('businessAddressLatitude').value = e.latlng.lat;
-                document.getElementById('businessAddressLongitude').value = e.latlng.lng;
-                
-                // Reverse geocoding to get address
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.display_name) {
-                            document.querySelector('input[name="business[address]"]').value = data.display_name;
-                        }
-                    })
-                    .catch(error => console.log('Geocoding error:', error));
-            });
-            
-            // Search functionality for address
-            const addressInput = document.querySelector('input[name="business[address]"]');
-            addressInput.addEventListener('blur', function() {
-                if (this.value) {
-                    searchAddressLocation(this.value);
-                }
-            });
-        }
-
-        function searchAddressLocation(query) {
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.length > 0) {
-                        const result = data[0];
-                        const lat = parseFloat(result.lat);
-                        const lng = parseFloat(result.lon);
-                        
-                        businessAddressMap.setView([lat, lng], 15);
-                        if (businessAddressMarker) {
-                            businessAddressMap.removeLayer(businessAddressMarker);
-                        }
-                        businessAddressMarker = L.marker([lat, lng]).addTo(businessAddressMap);
-                        document.getElementById('businessAddressLatitude').value = lat;
-                        document.getElementById('businessAddressLongitude').value = lng;
-                    }
-                })
-                .catch(error => console.log('Address search error:', error));
-        }
+        // businessAddressMap functionality removed. Address field remains and hidden inputs
+        // `businessAddressLatitude` / `businessAddressLongitude` are preserved so server-side
+        // processing still receives saved coordinates if present.
 
         document.addEventListener('DOMContentLoaded', () => {
     const passwordInput = document.querySelector('input[name="password"]');
