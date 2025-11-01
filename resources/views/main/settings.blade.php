@@ -6,8 +6,7 @@
     <title>Settings - BandMate</title>
     @vite(['resources/css/app.css', 'resources/css/feed.css', 'resources/css/socket.css', 'resources/js/app.js', 'resources/js/socket.js'])
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- Leaflet removed from settings: maps are not used; address inputs preserved. -->
 </head>
 <body class="min-h-screen relative overflow-x-hidden gradient-bg">
     <div class="floating-elements fixed inset-0 pointer-events-none"></div>
@@ -122,7 +121,7 @@
                             <label class="block text-white/80 mb-2">Location</label>
                             <div class="space-y-4">
                                 <input type="text" name="musician[location_name]" value="{{ old('musician.location_name', $musician->location_name) }}" placeholder="Enter your location (e.g., New York, NY)" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30">
-                                <div id="musicianMap" class="h-64 rounded-2xl overflow-hidden border border-white/20"></div>
+                        <!-- musicianMap removed (maps disabled). Hidden inputs remain. -->
                                 <input type="hidden" name="musician[latitude]" id="musicianLatitude" value="{{ old('musician.latitude', $musician->latitude) }}">
                                 <input type="hidden" name="musician[longitude]" id="musicianLongitude" value="{{ old('musician.longitude', $musician->longitude) }}">
                             </div>
@@ -177,7 +176,7 @@
                             <label class="block text-white/80 mb-2">Location</label>
                             <div class="space-y-4">
                                 <input type="text" name="business[location_name]" value="{{ old('business.location_name', $business->location_name) }}" placeholder="Enter your location (e.g., New York, NY)" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30">
-                                <div id="businessMap" class="h-64 rounded-2xl overflow-hidden border border-white/20"></div>
+                                <!-- businessMap removed (maps disabled). Hidden inputs remain. -->
                                 <input type="hidden" name="business[latitude]" id="businessLatitude" value="{{ old('business.latitude', $business->latitude) }}">
                                 <input type="hidden" name="business[longitude]" id="businessLongitude" value="{{ old('business.longitude', $business->longitude) }}">
                             </div>
@@ -224,91 +223,29 @@
             // businessAddressMap removed — address is still saved via hidden inputs
         });
 
+        // Maps removed: provide simple geocoding-only helpers that set hidden coords and fill the location input.
         function initMusicianMap() {
-            const lat = parseFloat(document.getElementById('musicianLatitude').value) || 40.7128;
-            const lng = parseFloat(document.getElementById('musicianLongitude').value) || -74.0060;
-            
-            musicianMap = L.map('musicianMap').setView([lat, lng], 10);
-            
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(musicianMap);
-            
-            if (document.getElementById('musicianLatitude').value && document.getElementById('musicianLongitude').value) {
-                musicianMarker = L.marker([lat, lng]).addTo(musicianMap);
-            }
-            
-            musicianMap.on('click', function(e) {
-                if (musicianMarker) {
-                    musicianMap.removeLayer(musicianMarker);
-                }
-                musicianMarker = L.marker(e.latlng).addTo(musicianMap);
-                document.getElementById('musicianLatitude').value = e.latlng.lat;
-                document.getElementById('musicianLongitude').value = e.latlng.lng;
-                
-                // Reverse geocoding to get location name
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.display_name) {
-                            document.querySelector('input[name="musician[location_name]"]').value = data.display_name;
-                        }
-                    })
-                    .catch(error => console.log('Geocoding error:', error));
-            });
-            
-            // Search functionality
+            // Attach search handler to musician location input so entering an address sets hidden coords.
             const locationInput = document.querySelector('input[name="musician[location_name]"]');
-            locationInput.addEventListener('blur', function() {
-                if (this.value) {
-                    searchLocation(this.value, 'musician');
-                }
-            });
+            if (locationInput) {
+                locationInput.addEventListener('blur', function() {
+                    if (this.value) searchLocation(this.value, 'musician');
+                });
+            }
         }
 
         function initBusinessMap() {
-            const lat = parseFloat(document.getElementById('businessLatitude').value) || 40.7128;
-            const lng = parseFloat(document.getElementById('businessLongitude').value) || -74.0060;
-            
-            businessMap = L.map('businessMap').setView([lat, lng], 10);
-            
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(businessMap);
-            
-            if (document.getElementById('businessLatitude').value && document.getElementById('businessLongitude').value) {
-                businessMarker = L.marker([lat, lng]).addTo(businessMap);
-            }
-            
-            businessMap.on('click', function(e) {
-                if (businessMarker) {
-                    businessMap.removeLayer(businessMarker);
-                }
-                businessMarker = L.marker(e.latlng).addTo(businessMap);
-                document.getElementById('businessLatitude').value = e.latlng.lat;
-                document.getElementById('businessLongitude').value = e.latlng.lng;
-                
-                // Reverse geocoding to get location name
-                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.display_name) {
-                            document.querySelector('input[name="business[location_name]"]').value = data.display_name;
-                        }
-                    })
-                    .catch(error => console.log('Geocoding error:', error));
-            });
-            
-            // Search functionality
+            // Attach search handler to business location input so entering an address sets hidden coords.
             const locationInput = document.querySelector('input[name="business[location_name]"]');
-            locationInput.addEventListener('blur', function() {
-                if (this.value) {
-                    searchLocation(this.value, 'business');
-                }
-            });
+            if (locationInput) {
+                locationInput.addEventListener('blur', function() {
+                    if (this.value) searchLocation(this.value, 'business');
+                });
+            }
         }
 
         function searchLocation(query, type) {
+            // Use Nominatim to geocode `query` and populate hidden lat/lng inputs plus keep the location_name value.
             fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
@@ -316,23 +253,21 @@
                         const result = data[0];
                         const lat = parseFloat(result.lat);
                         const lng = parseFloat(result.lon);
-                        
+
                         if (type === 'musician') {
-                            musicianMap.setView([lat, lng], 13);
-                            if (musicianMarker) {
-                                musicianMap.removeLayer(musicianMarker);
-                            }
-                            musicianMarker = L.marker([lat, lng]).addTo(musicianMap);
-                            document.getElementById('musicianLatitude').value = lat;
-                            document.getElementById('musicianLongitude').value = lng;
+                            const latInput = document.getElementById('musicianLatitude');
+                            const lngInput = document.getElementById('musicianLongitude');
+                            if (latInput) latInput.value = lat;
+                            if (lngInput) lngInput.value = lng;
+                            const loc = document.querySelector('input[name="musician[location_name]"]');
+                            if (loc && result.display_name) loc.value = result.display_name;
                         } else {
-                            businessMap.setView([lat, lng], 13);
-                            if (businessMarker) {
-                                businessMap.removeLayer(businessMarker);
-                            }
-                            businessMarker = L.marker([lat, lng]).addTo(businessMap);
-                            document.getElementById('businessLatitude').value = lat;
-                            document.getElementById('businessLongitude').value = lng;
+                            const latInput = document.getElementById('businessLatitude');
+                            const lngInput = document.getElementById('businessLongitude');
+                            if (latInput) latInput.value = lat;
+                            if (lngInput) lngInput.value = lng;
+                            const loc = document.querySelector('input[name="business[location_name]"]');
+                            if (loc && result.display_name) loc.value = result.display_name;
                         }
                     }
                 })
