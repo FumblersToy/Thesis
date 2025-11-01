@@ -39,20 +39,7 @@
             </div>
 
             <!-- Industry (optional) -->
-            <div class="form-group">
-                <label for="industry">Business Type</label>
-                <select id="industry" name="industry">
-                    <option value="" disabled selected>Select your business type</option>
-                    <option value="Cafe">Café</option>
-                    <option value="Restaurant">Restaurant</option>
-                    <option value="Bar">Bar & Lounge</option>
-                    <option value="Hotel">Hotel & Resort</option>
-                    <option value="Club">Night Club</option>
-                    <option value="Event Venue">Event Venue</option>
-                    <option value="Music Hall">Music Hall</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
+            <!-- Industry (optional) removed — venue offered is used for filtering on the feed. -->
 
             <!-- Venue Offered -->
             <div class="form-group">
