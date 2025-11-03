@@ -32,16 +32,18 @@
             <!-- Main Content -->
             <section class="flex-1 p-6 lg:p-8 flex flex-col">
                 <!-- Header with Logo, Search Bar and User Profile -->
-                <div class="flex justify-between items-center mb-8 animate-fade-in">
+                <div class="flex flex-col lg:flex-row justify-between items-center mb-8 animate-fade-in">
                     <!-- Logo -->
                     <div class="flex-shrink-0">
                         <a href="{{ route('feed') }}" class="flex items-center bg-white/10 backdrop-blur-xl rounded-2xl px-4 py-2 hover:bg-white/20 transition-all duration-300 shadow-lg">
-                            <img src="{{ asset('assets/logo_both.png') }}" class="h-10" alt="Bandmate logo">
+                            <!-- Mobile: use black logo; Large: use full color logo -->
+                            <img src="{{ asset('assets/logo_black.png') }}" class="h-10 lg:hidden" alt="Bandmate logo">
+                            <img src="{{ asset('assets/logo_both.png') }}" class="h-10 hidden lg:block" alt="Bandmate logo">
                         </a>
                     </div>
                     
                     <!-- Search Bar (centered) -->
-                    <div class="flex-1 flex justify-center">
+                    <div class="flex-1 flex justify-center mt-4 lg:mt-0">
                         <div class="w-full max-w-md relative">
                             <form action="{{ route('search') }}" method="GET" id="searchForm">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
