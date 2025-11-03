@@ -122,16 +122,10 @@
             </div>
 
             <!-- Messages Container -->
-            <div class="messages-container flex-1 glass-effect backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-                <div class="flex h-full relative">
-                    <!-- Back button for mobile (shown when chat is open) -->
-                    <button id="backToConversations" class="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white/80 backdrop-blur-xl rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 border border-gray-200 hidden">
-                        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                    </button>
+            <div class="flex-1 glass-effect backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="flex h-full">
                     <!-- Conversations Sidebar -->
-                    <div class="w-11/12 max-w-2xl mx-auto lg:mx-0 lg:w-1/3 bg-white/10 backdrop-blur-xl border-r border-white/20 flex flex-col">
+                    <div class="w-1/3 bg-white/10 backdrop-blur-xl border-r border-white/20 flex flex-col">
                         <!-- Sidebar Header -->
                         <div class="p-6 border-b border-white/20">
                             <div class="flex items-center justify-between mb-4">
@@ -160,10 +154,17 @@
                     </div>
 
                     <!-- Chat Area -->
-                    <div class="flex-1 flex flex-col bg-white/5 backdrop-blur-xl transform translate-x-full lg:translate-x-0 transition-transform duration-300">
+                    <div class="flex-1 flex flex-col bg-white/5 backdrop-blur-xl">
                         <!-- Chat Header -->
-                        <div id="chatHeader" class="p-6 border-b border-white/20 bg-white/10 backdrop-blur-xl hidden">
+                        <div id="chatHeader" class="p-6 border-b border-white/20 bg-white/10 backdrop-blur-xl hidden fixed lg:static top-0 left-0 right-0 z-10">
                             <div class="flex items-center gap-4">
+                                <!-- Mobile back button -->
+                                <button id="mobileBackBtn" class="lg:hidden mr-2 p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                    </svg>
+                                </button>
+                                
                                 <div id="chatUserAvatar" class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
                                     <!-- Avatar will be populated here -->
                                 </div>
@@ -174,15 +175,15 @@
                             </div>
                         </div>
 
-                        <!-- Messages Area -->
-                        <div id="messagesArea" class="flex-1 overflow-y-auto p-6 hidden">
+                        <!-- Messages Area (adjusted padding for fixed header on mobile) -->
+                        <div id="messagesArea" class="flex-1 overflow-y-auto p-6 hidden mt-[85px] lg:mt-0">
                             <div id="messagesContainer" class="space-y-4">
                                 <!-- Messages will be populated here -->
                             </div>
                         </div>
 
-                        <!-- Message Input -->
-                        <div id="messageInput" class="p-6 border-t border-white/20 bg-white/10 backdrop-blur-xl hidden">
+                        <!-- Message Input (fixed on mobile) -->
+                        <div id="messageInput" class="p-6 border-t border-white/20 bg-white/10 backdrop-blur-xl hidden fixed lg:static bottom-0 left-0 right-0">
                             <div class="flex gap-4">
                                 <input type="text" id="messageText" placeholder="Type a message..." 
                                        class="flex-1 px-4 py-3 border border-white/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 bg-white/10 backdrop-blur-xl placeholder-white/70 text-white">
@@ -217,17 +218,22 @@
     window.currentUserId = {{ Auth::id() ?? 'null' }};
     document.addEventListener('DOMContentLoaded', function() {
             // Handle mobile back button
-            const backToConversationsBtn = document.getElementById('backToConversations');
-            const conversationsSidebar = document.querySelector('.messages-container .flex > div:first-child');
-            const chatArea = document.querySelector('.messages-container .flex > div:last-child');
-            
-            if (backToConversationsBtn) {
-                backToConversationsBtn.addEventListener('click', function() {
-                    // Show conversations, hide chat on mobile
+            const mobileBackBtn = document.getElementById('mobileBackBtn');
+            if (mobileBackBtn) {
+                mobileBackBtn.addEventListener('click', function() {
+                    const chatHeader = document.getElementById('chatHeader');
+                    const messagesArea = document.getElementById('messagesArea');
+                    const messageInput = document.getElementById('messageInput');
+                    const conversationsSidebar = document.querySelector('.messages-container .flex > div:first-child');
+                    
+                    // Hide chat elements
+                    chatHeader.classList.add('hidden');
+                    messagesArea.classList.add('hidden');
+                    messageInput.classList.add('hidden');
+                    
+                    // Show conversations on mobile
                     if (window.innerWidth < 1024) {
-                        conversationsSidebar.classList.remove('-translate-x-full');
-                        chatArea.classList.add('translate-x-full');
-                        backToConversationsBtn.classList.add('hidden');
+                        conversationsSidebar.style.display = 'flex';
                     }
                 });
             }
@@ -259,55 +265,6 @@
                 }
             });
 
-            // Handle mobile back button and chat transitions
-            const backToConversationsBtn = document.getElementById('backToConversations');
-            const conversationsSidebar = document.querySelector('.messages-container .flex > div:first-child');
-            const chatArea = document.querySelector('.messages-container .flex > div:last-child');
-
-            // Function to show chat on mobile
-            window.openChat = function(userId) {
-                const chatHeader = document.getElementById('chatHeader');
-                const messagesArea = document.getElementById('messagesArea');
-                const messageInput = document.getElementById('messageInput');
-                const emptyState = document.getElementById('emptyState');
-
-                // Update UI
-                chatHeader.classList.remove('hidden');
-                messagesArea.classList.remove('hidden');
-                messageInput.classList.remove('hidden');
-                emptyState.classList.add('hidden');
-
-                // On mobile: slide conversations out, slide chat in
-                if (window.innerWidth < 1024) {
-                    conversationsSidebar.classList.add('-translate-x-full');
-                    chatArea.classList.remove('translate-x-full');
-                    backToConversationsBtn.classList.remove('hidden');
-                }
-
-                // Load messages
-                if (typeof loadMessages === 'function') {
-                    loadMessages(userId);
-                }
-
-                // Update selection state
-                document.querySelectorAll('[data-user-id]').forEach(el => {
-                    el.classList.remove('bg-white/20');
-                });
-                const selected = document.querySelector(`[data-user-id="${userId}"]`);
-                if (selected) selected.classList.add('bg-white/20');
-            };
-
-            // Handle back button on mobile
-            if (backToConversationsBtn) {
-                backToConversationsBtn.addEventListener('click', function() {
-                    if (window.innerWidth < 1024) {
-                        conversationsSidebar.classList.remove('-translate-x-full');
-                        chatArea.classList.add('translate-x-full');
-                        this.classList.add('hidden');
-                    }
-                });
-            }
-
             // Start new chat button
             const startNewChatBtn = document.getElementById('startNewChatBtn');
             const newMessageBtn = document.getElementById('newMessageBtn');
@@ -316,8 +273,31 @@
                 searchInput.focus();
                 searchInput.click();
             }
-            startNewChatBtn?.addEventListener('click', showUserSearch);
-            newMessageBtn?.addEventListener('click', showUserSearch);
+            startNewChatBtn.addEventListener('click', showUserSearch);
+            newMessageBtn.addEventListener('click', showUserSearch);
+
+            // Show chat function
+            window.showChat = function(userId) {
+                const chatHeader = document.getElementById('chatHeader');
+                const messagesArea = document.getElementById('messagesArea');
+                const messageInput = document.getElementById('messageInput');
+                const conversationsSidebar = document.querySelector('.messages-container .flex > div:first-child');
+                
+                // Show chat elements
+                chatHeader.classList.remove('hidden');
+                messagesArea.classList.remove('hidden');
+                messageInput.classList.remove('hidden');
+                
+                // On mobile: hide conversations, show chat
+                if (window.innerWidth < 1024) {
+                    conversationsSidebar.style.display = 'none';
+                }
+                
+                // Load messages (if the function exists)
+                if (typeof loadMessages === 'function') {
+                    loadMessages(userId);
+                }
+            };
 
             // Auto-open chat if ?user=ID is present in URL
             const urlParams = new URLSearchParams(window.location.search);
