@@ -156,15 +156,8 @@
                     <!-- Chat Area -->
                     <div class="flex-1 flex flex-col bg-white/5 backdrop-blur-xl">
                         <!-- Chat Header -->
-                        <div id="chatHeader" class="p-6 border-b border-white/20 bg-white/10 backdrop-blur-xl hidden fixed lg:static top-0 left-0 right-0 z-10">
+                        <div id="chatHeader" class="p-6 border-b border-white/20 bg-white/10 backdrop-blur-xl hidden">
                             <div class="flex items-center gap-4">
-                                <!-- Mobile back button -->
-                                <button id="mobileBackBtn" class="lg:hidden mr-2 p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                    </svg>
-                                </button>
-                                
                                 <div id="chatUserAvatar" class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
                                     <!-- Avatar will be populated here -->
                                 </div>
@@ -175,15 +168,15 @@
                             </div>
                         </div>
 
-                        <!-- Messages Area (adjusted padding for fixed header on mobile) -->
-                        <div id="messagesArea" class="flex-1 overflow-y-auto p-6 hidden mt-[85px] lg:mt-0">
+                        <!-- Messages Area -->
+                        <div id="messagesArea" class="flex-1 overflow-y-auto p-6 hidden">
                             <div id="messagesContainer" class="space-y-4">
                                 <!-- Messages will be populated here -->
                             </div>
                         </div>
 
-                        <!-- Message Input (fixed on mobile) -->
-                        <div id="messageInput" class="p-6 border-t border-white/20 bg-white/10 backdrop-blur-xl hidden fixed lg:static bottom-0 left-0 right-0">
+                        <!-- Message Input -->
+                        <div id="messageInput" class="p-6 border-t border-white/20 bg-white/10 backdrop-blur-xl hidden">
                             <div class="flex gap-4">
                                 <input type="text" id="messageText" placeholder="Type a message..." 
                                        class="flex-1 px-4 py-3 border border-white/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 bg-white/10 backdrop-blur-xl placeholder-white/70 text-white">
@@ -193,8 +186,8 @@
                             </div>
                         </div>
 
-                        <!-- Empty State (hidden on mobile) -->
-                        <div id="emptyState" class="hidden lg:flex flex-1 items-center justify-center p-6">
+                        <!-- Empty State -->
+                        <div id="emptyState" class="flex-1 flex items-center justify-center p-6">
                             <div class="text-center text-white/70">
                                 <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
                                     <span class="text-4xl">💬</span>
@@ -217,26 +210,6 @@
     // Set current user ID for JS
     window.currentUserId = {{ Auth::id() ?? 'null' }};
     document.addEventListener('DOMContentLoaded', function() {
-            // Handle mobile back button
-            const mobileBackBtn = document.getElementById('mobileBackBtn');
-            if (mobileBackBtn) {
-                mobileBackBtn.addEventListener('click', function() {
-                    const chatHeader = document.getElementById('chatHeader');
-                    const messagesArea = document.getElementById('messagesArea');
-                    const messageInput = document.getElementById('messageInput');
-                    const conversationsSidebar = document.querySelector('.messages-container .flex > div:first-child');
-                    
-                    // Hide chat elements
-                    chatHeader.classList.add('hidden');
-                    messagesArea.classList.add('hidden');
-                    messageInput.classList.add('hidden');
-                    
-                    // Show conversations on mobile
-                    if (window.innerWidth < 1024) {
-                        conversationsSidebar.style.display = 'flex';
-                    }
-                });
-            }
             // Initialize Socket.IO with user data
             @auth
                 const userData = {
@@ -275,29 +248,6 @@
             }
             startNewChatBtn.addEventListener('click', showUserSearch);
             newMessageBtn.addEventListener('click', showUserSearch);
-
-            // Show chat function
-            window.showChat = function(userId) {
-                const chatHeader = document.getElementById('chatHeader');
-                const messagesArea = document.getElementById('messagesArea');
-                const messageInput = document.getElementById('messageInput');
-                const conversationsSidebar = document.querySelector('.messages-container .flex > div:first-child');
-                
-                // Show chat elements
-                chatHeader.classList.remove('hidden');
-                messagesArea.classList.remove('hidden');
-                messageInput.classList.remove('hidden');
-                
-                // On mobile: hide conversations, show chat
-                if (window.innerWidth < 1024) {
-                    conversationsSidebar.style.display = 'none';
-                }
-                
-                // Load messages (if the function exists)
-                if (typeof loadMessages === 'function') {
-                    loadMessages(userId);
-                }
-            };
 
             // Auto-open chat if ?user=ID is present in URL
             const urlParams = new URLSearchParams(window.location.search);
