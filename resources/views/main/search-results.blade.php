@@ -1,47 +1,7 @@
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Search Results - Bandmate</title>
-        @vite(['resources/css/app.css', 'resources/css/feed.css', 'resources/js/app.js'])
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-    </head>
-    <body class="min-h-screen relative overflow-x-hidden gradient-bg">
-        <div class="floating-elements fixed inset-0 pointer-events-none"></div>
-        
-        @php
-            // Get current user info for profile dropdown
-            $user = Auth::user();
-            $currentUserMusician = $user ? \App\Models\Musician::where('user_id', $user->id)->first() : null;
-            $currentUserBusiness = $user ? \App\Models\Business::where('user_id', $user->id)->first() : null;
-            $currentDisplayName = $currentUserMusician?->stage_name
-                ?: ($currentUserBusiness?->business_name ?: ($user->name ?? 'User'));
-            $currentRoleLabel = $currentUserMusician?->instrument ?: ($currentUserBusiness?->venue ?: 'Member');
-            $currentProfileImage = null;
-            if ($currentUserMusician && $currentUserMusician->profile_picture) {
-                $currentProfileImage = getImageUrl($currentUserMusician->profile_picture);
-            } elseif ($currentUserBusiness && $currentUserBusiness->profile_picture) {
-                $currentProfileImage = getImageUrl($currentUserBusiness->profile_picture);
-            } else {
-                $currentProfileImage = '/images/sample-profile.jpg';
-            }
-        @endphp
-
-        <div class="flex min-h-screen relative z-10">
-            <!-- Main Content -->
-            <section class="flex-1 p-6 lg:p-8 flex flex-col">
-                <!-- Header with Logo, Search Bar and User Profile -->
-                <div class="flex justify-between items-center mb-8 animate-fade-in">
-                    <!-- Logo -->
-                    <div class="flex-shrink-0">
-                        <a href="{{ route('feed') }}" class="flex items-center bg-white/10 backdrop-blur-xl rounded-2xl px-4 py-2 hover:bg-white/20 transition-all duration-300 shadow-lg">
-                            <img src="{{ asset('assets/logo_both.png') }}" class="h-10" alt="Bandmate logo">
-                        </a>
                     </div>
                     
-                    <!-- Search Bar (centered) -->
-                    <div class="flex-1 flex justify-center">
+                    <!-- Search Bar (centered) below the top row -->
+                    <div class="mt-4 flex justify-center">
                         <div class="w-full max-w-md relative">
                             <form action="{{ route('search') }}" method="GET" id="searchForm">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -77,6 +37,13 @@
                     
                     <!-- User Profile Section (dynamic) -->
                     <div class="relative ml-6">
+                                <!-- Use black logo as requested -->
+                                <img src="{{ asset('assets/logo_black.png') }}" class="h-10" alt="Bandmate logo">
+                            </a>
+                        </div>
+
+                        <!-- User Profile Section (dynamic) on the right -->
+                        <div class="relative ml-6">
                         <button id="profileButton" class="flex items-center gap-3 bg-white/80 backdrop-blur-xl p-4 rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 group border border-gray-200">
                             <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                                 src="{{ $currentProfileImage }}"
