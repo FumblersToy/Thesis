@@ -35,9 +35,10 @@
                 <div class="flex justify-between items-center mb-8 animate-fade-in">
                     <!-- Logo -->
                     <div class="flex-shrink-0">
-                        <a href="{{ route('feed') }}" class="flex items-center bg-white/10 backdrop-blur-xl rounded-2xl px-4 py-2 hover:bg-white/20 transition-all duration-300 shadow-lg">
-                            <img src="{{ asset('assets/logo_both.png') }}" class="h-10" alt="Bandmate logo">
-                        </a>
+                            <a href="{{ route('feed') }}" class="flex items-center bg-white/10 backdrop-blur-xl rounded-2xl px-4 py-2 hover:bg-white/20 transition-all duration-300 shadow-lg">
+                                <img src="{{ asset('assets/logo_black.png') }}" class="h-10 lg:hidden" alt="Bandmate logo">
+                                <img src="{{ asset('assets/logo_both.png') }}" class="h-10 hidden lg:block" alt="Bandmate logo">
+                            </a>
                     </div>
                     
                     <!-- Search Bar (centered) -->
