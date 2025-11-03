@@ -96,9 +96,9 @@
         </button>
 
         <!-- Mobile Sidebar -->
-        <aside id="mobileMenu" class="fixed inset-y-0 left-0 z-40 w-80 glass-effect backdrop-blur-xl p-6 transform -translate-x-full lg:hidden transition-transform duration-300 gradient-bg">
+    <aside id="mobileMenu" class="fixed inset-y-0 left-0 w-80 glass-effect backdrop-blur-xl p-6 transform -translate-x-full lg:hidden transition-transform duration-300 gradient-bg" style="z-index:9998;">
             <!-- Close button that appears with the mobile menu and overlaps the mobileMenuButton -->
-            <button id="mobileMenuClose" aria-label="Close menu" class="absolute top-6 left-6 z-60 p-3 rounded-2xl text-white bg-black/30 hover:bg-black/50 transition-colors">
+            <button id="mobileMenuClose" aria-label="Close menu" class="absolute top-6 left-6 p-3 rounded-2xl text-white bg-black/30 hover:bg-black/50 transition-colors" style="z-index:9999;">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -294,6 +294,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const mobileMenu = document.getElementById('mobileMenu');
             const mobileMenuClose = document.getElementById('mobileMenuClose');
+            const mobileMenuButton = document.getElementById('mobileMenuButton');
 
             if (mobileMenuClose && mobileMenu) {
                 mobileMenuClose.addEventListener('click', function(e) {
@@ -302,6 +303,8 @@
                     if (!mobileMenu.classList.contains('-translate-x-full')) {
                         mobileMenu.classList.add('-translate-x-full');
                     }
+                    // restore the mobile menu button visibility
+                    try { if (mobileMenuButton) mobileMenuButton.classList.remove('hidden'); } catch (err) {}
                 });
             }
         });

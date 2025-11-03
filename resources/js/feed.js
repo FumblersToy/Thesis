@@ -49,6 +49,12 @@ function initFeed() {
 
             // If opening (menu moved into view), initialize mobile filters
             const isOpen = !mobileMenu.classList.contains('-translate-x-full');
+            // Hide the mobile menu button itself when the menu is open so the close button can appear above it
+            if (isOpen) {
+                mobileMenuButton.classList.add('hidden');
+            } else {
+                mobileMenuButton.classList.remove('hidden');
+            }
             if (isOpen && !mobileFiltersInitialized) {
                 try {
                     const desktopFilters = document.getElementById('filters');
@@ -166,6 +172,8 @@ function initFeed() {
         
         if (mobileMenu && mobileMenuButton && !mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
             mobileMenu.classList.add('-translate-x-full');
+            // Ensure the mobile menu button is visible again after closing
+            try { mobileMenuButton.classList.remove('hidden'); } catch (err) {}
         }
     });
 
