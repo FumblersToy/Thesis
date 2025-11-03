@@ -34,7 +34,7 @@
                 <!-- Header with Logo, Search Bar and User Profile -->
                 <div class="flex flex-col lg:flex-row justify-between items-center mb-8 animate-fade-in">
                     <!-- Logo -->
-                    <div class="flex-shrink-0">
+                    <div class="flex-shrink-0 order-1 lg:order-0">
                         <a href="{{ route('feed') }}" class="flex items-center bg-white/10 backdrop-blur-xl rounded-2xl px-4 py-2 hover:bg-white/20 transition-all duration-300 shadow-lg">
                             <!-- Mobile: use black logo; Large: use full color logo -->
                             <img src="{{ asset('assets/logo_black.png') }}" class="h-10 lg:hidden" alt="Bandmate logo">
@@ -43,7 +43,7 @@
                     </div>
                     
                     <!-- Search Bar (centered) -->
-                    <div class="flex-1 flex justify-center mt-4 lg:mt-0">
+                    <div class="flex-1 flex justify-center order-2 mt-4 lg:mt-0 lg:order-0">
                         <div class="w-full max-w-md relative">
                             <form action="{{ route('search') }}" method="GET" id="searchForm">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -78,7 +78,7 @@
                     </div>
                     
                     <!-- User Profile Section (dynamic) -->
-                    <div class="relative ml-6">
+                    <div class="relative ml-6 order-3 lg:order-0">
                         <button id="profileButton" class="flex items-center gap-3 bg-white/80 backdrop-blur-xl p-4 rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 group border border-gray-200">
                             <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                                 src="{{ $currentProfileImage }}"
