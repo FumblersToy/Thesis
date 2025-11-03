@@ -9,6 +9,27 @@
     </head>
     <body class="min-h-screen relative overflow-x-hidden gradient-bg">
         <div class="floating-elements fixed inset-0 pointer-events-none"></div>
+
+        <!-- Mobile Menu Button (logo as selection) -->
+        <a id="mobileMenuButton" href="{{ route('feed') }}" class="lg:hidden fixed top-6 left-6 z-50 glass-effect backdrop-blur-xl p-2 rounded-2xl text-white hover-glow" aria-label="Open menu">
+            <div class="flex items-center bg-white/10 backdrop-blur-xl rounded-2xl px-3 py-2 hover:bg-white/20 transition-all duration-300 shadow-lg">
+                <img src="{{ asset('assets/logo_both.png') }}" class="h-8" alt="Bandmate logo">
+            </div>
+        </a>
+
+        <!-- Mobile Sidebar (copied from feed) -->
+        <aside id="mobileMenu" class="fixed inset-y-0 left-0 w-80 glass-effect backdrop-blur-xl p-6 transform -translate-x-full lg:hidden transition-transform duration-300 gradient-bg" style="z-index:9998;">
+            <!-- Close button that appears with the mobile menu and overlaps the mobileMenuButton -->
+            <button id="mobileMenuClose" aria-label="Close menu" class="absolute top-6 left-6 p-3 rounded-2xl text-white bg-black/30 hover:bg-black/50 transition-colors" style="z-index:9999;">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+
+            <!-- Static mobile sidebar content -->
+            <h3 class="text-white font-semibold mb-4">Filters</h3>
+            <div class="text-white">Instruments & venues (static)</div>
+        </aside>
         
         @php
             // Get current user info for profile dropdown
@@ -348,6 +369,36 @@
                         `;
                         searchResultsContent.classList.remove('hidden');
                     }, 500);
+                }
+            });
+        </script>
+        <script>
+            // Mobile menu open/close wiring (logo acts as opener)
+            document.addEventListener('DOMContentLoaded', function() {
+                const mobileMenu = document.getElementById('mobileMenu');
+                const mobileMenuClose = document.getElementById('mobileMenuClose');
+                const mobileMenuButton = document.getElementById('mobileMenuButton');
+
+                if (mobileMenuButton && mobileMenu) {
+                    mobileMenuButton.addEventListener('click', function(e) {
+                        // prevent navigation to feed when opening the menu
+                        try { e.preventDefault(); } catch (err) {}
+                        e.stopPropagation();
+                        // show the menu
+                        mobileMenu.classList.remove('-translate-x-full');
+                        try { mobileMenuButton.classList.add('hidden'); } catch (err) {}
+                    });
+                }
+
+                if (mobileMenuClose && mobileMenu) {
+                    mobileMenuClose.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        // hide the menu
+                        if (!mobileMenu.classList.contains('-translate-x-full')) {
+                            mobileMenu.classList.add('-translate-x-full');
+                        }
+                        try { if (mobileMenuButton) mobileMenuButton.classList.remove('hidden'); } catch (err) {}
+                    });
                 }
             });
         </script>
