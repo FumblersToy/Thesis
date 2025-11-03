@@ -29,11 +29,31 @@
         @endphp
 
         <div class="flex min-h-screen relative z-10">
+            <!-- Mobile Menu Button (copied from feed) -->
+            <button id="mobileMenuButton" class="lg:hidden fixed top-6 left-6 z-50 glass-effect backdrop-blur-xl p-3 rounded-2xl text-white hover-glow gradient-bg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+
+            <!-- Mobile Sidebar (copied from feed) -->
+            <aside id="mobileMenu" class="fixed inset-y-0 left-0 w-80 glass-effect backdrop-blur-xl p-6 transform -translate-x-full lg:hidden transition-transform duration-300 gradient-bg" style="z-index:9998;">
+                <!-- Close button that appears with the mobile menu and overlaps the mobileMenuButton -->
+                <button id="mobileMenuClose" aria-label="Close menu" class="absolute top-6 left-6 p-3 rounded-2xl text-white bg-black/30 hover:bg-black/50 transition-colors" style="z-index:9999;">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+
+                <!-- Static mobile sidebar content -->
+                <h3 class="text-white font-semibold mb-4">Filters</h3>
+                <div class="text-white">Instruments & venues (static)</div>
+            </aside>
             <!-- Main Content -->
             <section class="flex-1 p-6 lg:p-8 flex flex-col">
                 <!-- Header with Logo, Search Bar and User Profile -->
                 <!-- Grid: mobile = 2 cols (logo + profile on first row, search full-width below), lg = 3 cols (logo, search, profile on one row) -->
-                <div class="grid grid-cols-2 lg:grid-cols-3 items-start lg:items-center gap-4 mb-8 animate-fade-in">
+                <div class="grid grid-cols-2 lg:grid-cols-3 items-start lg:items-center gap-4 mb-8 mt-12 lg:mt-0 animate-fade-in">
                     <!-- Logo -->
                     <div class="flex-shrink-0 col-span-1">
                         <a href="{{ route('feed') }}" class="flex items-center bg-white/10 backdrop-blur-xl rounded-2xl px-4 py-2 hover:bg-white/20 transition-all duration-300 shadow-lg">
@@ -351,6 +371,46 @@
                         `;
                         searchResultsContent.classList.remove('hidden');
                     }, 500);
+                }
+                
+                // Mobile menu open/close wiring (copied/adapted from feed)
+                try {
+                    const mobileMenu = document.getElementById('mobileMenu');
+                    const mobileMenuButton = document.getElementById('mobileMenuButton');
+                    const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+                    if (mobileMenuButton && mobileMenu) {
+                        mobileMenuButton.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            mobileMenu.classList.remove('-translate-x-full');
+                            // hide the menu button while the menu is open
+                            try { mobileMenuButton.classList.add('hidden'); } catch (err) {}
+                        });
+                    }
+
+                    if (mobileMenuClose && mobileMenu) {
+                        mobileMenuClose.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            if (!mobileMenu.classList.contains('-translate-x-full')) {
+                                mobileMenu.classList.add('-translate-x-full');
+                            }
+                            try { if (mobileMenuButton) mobileMenuButton.classList.remove('hidden'); } catch (err) {}
+                        });
+                    }
+
+                    // Close mobile menu when clicking outside of it
+                    document.addEventListener('click', function(ev) {
+                        if (!mobileMenu) return;
+                        const target = ev.target;
+                        if (mobileMenu.classList.contains('-translate-x-full')) return; // already closed
+                        if (mobileMenu.contains(target) || (mobileMenuButton && mobileMenuButton.contains(target))) return;
+                        // otherwise close
+                        mobileMenu.classList.add('-translate-x-full');
+                        try { if (mobileMenuButton) mobileMenuButton.classList.remove('hidden'); } catch (err) {}
+                    });
+                } catch (err) {
+                    // non-fatal
+                    console.warn('Mobile menu wiring error:', err);
                 }
             });
         </script>
