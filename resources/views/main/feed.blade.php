@@ -96,7 +96,7 @@
         </button>
 
         <!-- Mobile Sidebar -->
-    <aside id="mobileMenu" class="fixed inset-y-0 left-0 w-80 glass-effect backdrop-blur-xl p-6 transform -translate-x-full lg:hidden transition-transform duration-300 gradient-bg" style="z-index:9998;">
+    <aside id="mobileMenu" class="fixed inset-y-0 left-0 w-80 glass-effect backdrop-blur-xl p-6 transform -translate-x-full lg:hidden transition-transform duration-300 gradient-bg overflow-y-auto h-full" style="z-index:9998;">
             <!-- Close button that appears with the mobile menu and overlaps the mobileMenuButton -->
             <button id="mobileMenuClose" aria-label="Close menu" class="absolute top-6 left-6 p-3 rounded-2xl text-white bg-black/30 hover:bg-black/50 transition-colors" style="z-index:9999;">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
