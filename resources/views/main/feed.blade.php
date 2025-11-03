@@ -97,6 +97,13 @@
 
         <!-- Mobile Sidebar -->
         <aside id="mobileMenu" class="fixed inset-y-0 left-0 z-40 w-80 glass-effect backdrop-blur-xl p-6 transform -translate-x-full lg:hidden transition-transform duration-300 gradient-bg">
+            <!-- Close button that appears with the mobile menu and overlaps the mobileMenuButton -->
+            <button id="mobileMenuClose" aria-label="Close menu" class="absolute top-6 left-6 z-60 p-3 rounded-2xl text-white bg-black/30 hover:bg-black/50 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+
             <!-- Static mobile sidebar content -->
             <h3 class="text-white font-semibold mb-4">Filters</h3>
             <div class="text-white">Instruments & venues (static)</div>
@@ -119,7 +126,7 @@
                                 type="text" 
                                 name="query" 
                                 id="searchInput"
-                                class="block w-full pl-10 pr-3 py-3 border border-white/20 rounded-2xl leading-5 bg-white/10 backdrop-blur-xl placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 text-white sm:text-sm" 
+                                class="block w-full px-3 py-3 border border-white/20 rounded-2xl leading-5 bg-white/10 backdrop-blur-xl placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 text-white sm:text-sm" 
                                 placeholder="Search musicians, bands, venues..."
                                 value="{{ request('query') }}"
                                 autocomplete="off">
@@ -280,6 +287,23 @@
                     window.socketManager.init(userData);
                 }
             @endauth
+        });
+    </script>
+    <script>
+        // Mobile menu close button wiring
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+            if (mobileMenuClose && mobileMenu) {
+                mobileMenuClose.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    // slide the menu out
+                    if (!mobileMenu.classList.contains('-translate-x-full')) {
+                        mobileMenu.classList.add('-translate-x-full');
+                    }
+                });
+            }
         });
     </script>
     <!-- Fallback inline fetch: ensure posts render even if feed.js throws earlier -->
