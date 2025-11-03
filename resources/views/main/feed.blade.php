@@ -105,7 +105,7 @@
         <!-- Main Content -->
         <section class="flex-1 p-6 lg:p-8 flex flex-col">
             <!-- Header with Search Bar and User Profile -->
-            <div class="flex justify-between items-center mb-8 animate-fade-in">
+            <div class="flex justify-between items-center mb-8 mt-12 lg:mt-0 animate-fade-in">
                 <!-- Search Bar (centered) -->
                 <div class="flex-1 flex justify-center">
                     <div class="w-full max-w-md relative">
