@@ -22,13 +22,6 @@
             <div class="flex justify-between items-center mb-8 animate-fade-in">
                 <!-- Logo and Back Button -->
                 <div class="flex items-center gap-4">
-                    <!-- Mobile menu button: opens conversations sidebar on small screens -->
-                    <button id="mobileMenuButton" class="lg:hidden p-3 bg-white/80 backdrop-blur-xl rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 border border-gray-200">
-                        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-
                     <a href="{{ route('feed') }}" class="flex items-center gap-3 bg-white/80 backdrop-blur-xl p-3 rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 border border-gray-200">
                         <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -130,9 +123,9 @@
 
             <!-- Messages Container -->
             <div class="flex-1 glass-effect backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-                <div class="flex h-full flex-col lg:flex-row">
-                    <!-- Conversations Sidebar (off-canvas on mobile) -->
-                    <div id="conversationsSidebar" class="bg-white/10 backdrop-blur-xl border-r border-white/20 flex flex-col w-full lg:w-1/3 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 fixed lg:static inset-y-0 left-0 z-40 lg:z-auto overflow-y-auto">
+                <div class="flex h-full">
+                    <!-- Conversations Sidebar -->
+                    <div class="w-1/3 bg-white/10 backdrop-blur-xl border-r border-white/20 flex flex-col">
                         <!-- Sidebar Header -->
                         <div class="p-6 border-b border-white/20">
                             <div class="flex items-center justify-between mb-4">
@@ -176,14 +169,14 @@
                         </div>
 
                         <!-- Messages Area -->
-                        <div id="messagesArea" class="flex-1 overflow-y-auto p-6 hidden lg:block lg:pb-0 pb-24">
+                        <div id="messagesArea" class="flex-1 overflow-y-auto p-6 hidden">
                             <div id="messagesContainer" class="space-y-4">
                                 <!-- Messages will be populated here -->
                             </div>
                         </div>
 
                         <!-- Message Input -->
-                        <div id="messageInput" class="p-6 border-t border-white/20 bg-white/10 backdrop-blur-xl hidden lg:static fixed bottom-0 left-0 right-0 z-30">
+                        <div id="messageInput" class="p-6 border-t border-white/20 bg-white/10 backdrop-blur-xl hidden">
                             <div class="flex gap-4">
                                 <input type="text" id="messageText" placeholder="Type a message..." 
                                        class="flex-1 px-4 py-3 border border-white/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 bg-white/10 backdrop-blur-xl placeholder-white/70 text-white">
@@ -270,54 +263,6 @@
                 };
                 tryOpenChat();
             }
-        });
-    </script>
-    <!-- Mobile conversations toggle script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenuButton = document.getElementById('mobileMenuButton');
-            const conversationsSidebar = document.getElementById('conversationsSidebar');
-
-            if (!mobileMenuButton || !conversationsSidebar) return;
-
-            const openSidebar = () => {
-                conversationsSidebar.classList.remove('-translate-x-full');
-                // add overlay
-                let overlay = document.getElementById('mobileOverlay');
-                if (!overlay) {
-                    overlay = document.createElement('div');
-                    overlay.id = 'mobileOverlay';
-                    overlay.className = 'fixed inset-0 bg-black/50 z-30 lg:hidden';
-                    document.body.appendChild(overlay);
-                    overlay.addEventListener('click', closeSidebar);
-                }
-            };
-
-            const closeSidebar = () => {
-                conversationsSidebar.classList.add('-translate-x-full');
-                const overlay = document.getElementById('mobileOverlay');
-                if (overlay) overlay.remove();
-            };
-
-            mobileMenuButton.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (conversationsSidebar.classList.contains('-translate-x-full')) {
-                    openSidebar();
-                } else {
-                    closeSidebar();
-                }
-            });
-
-            // Close sidebar when resizing to large screens
-            window.addEventListener('resize', function() {
-                if (window.innerWidth >= 1024) {
-                    conversationsSidebar.classList.remove('-translate-x-full');
-                    const overlay = document.getElementById('mobileOverlay');
-                    if (overlay) overlay.remove();
-                } else {
-                    conversationsSidebar.classList.add('-translate-x-full');
-                }
-            });
         });
     </script>
 </body>
