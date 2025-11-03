@@ -32,9 +32,10 @@
             <!-- Main Content -->
             <section class="flex-1 p-6 lg:p-8 flex flex-col">
                 <!-- Header with Logo, Search Bar and User Profile -->
-                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 animate-fade-in">
+                <!-- Grid: mobile = 2 cols (logo + profile on first row, search full-width below), lg = 3 cols (logo, search, profile on one row) -->
+                <div class="grid grid-cols-2 lg:grid-cols-3 items-start lg:items-center gap-4 mb-8 animate-fade-in">
                     <!-- Logo -->
-                    <div class="flex-shrink-0 order-1 lg:order-0">
+                    <div class="flex-shrink-0 col-span-1">
                         <a href="{{ route('feed') }}" class="flex items-center bg-white/10 backdrop-blur-xl rounded-2xl px-4 py-2 hover:bg-white/20 transition-all duration-300 shadow-lg">
                             <!-- Mobile: use black logo; Large: use full color logo -->
                             <img src="{{ asset('assets/logo_black.png') }}" class="h-10 lg:hidden" alt="Bandmate logo">
@@ -42,8 +43,8 @@
                         </a>
                     </div>
                     
-                    <!-- Search Bar (left on mobile, centered on large screens) -->
-                    <div class="flex-1 flex justify-start lg:justify-center order-2 mt-4 lg:mt-0 lg:order-0">
+                    <!-- Search Bar (full-width below on mobile, centered on large screens) -->
+                    <div class="col-span-2 lg:col-span-1 mt-4 lg:mt-0 flex justify-start lg:justify-center">
                         <div class="w-full max-w-md relative">
                             <form action="{{ route('search') }}" method="GET" id="searchForm">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -78,7 +79,7 @@
                     </div>
                     
                     <!-- User Profile Section (dynamic) -->
-                    <div class="relative ml-6 order-3 lg:order-0">
+                    <div class="relative ml-6 col-span-1 flex justify-end">
                         <button id="profileButton" class="flex items-center gap-3 bg-white/80 backdrop-blur-xl p-4 rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 group border border-gray-200">
                             <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                                 src="{{ $currentProfileImage }}"
