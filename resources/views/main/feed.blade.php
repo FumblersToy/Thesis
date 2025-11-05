@@ -338,6 +338,7 @@
                     const createdAt = post.created_at || '';
                     const likeCount = post.like_count || post.likes_count || 0;
                     const commentCount = post.comment_count || post.comments_count || 0;
+                    const isOwner = post.is_owner || false; // Add is_owner check
 
                     const userTypeEmoji = userType === 'musician' ? '🎵' : (userType === 'business' ? '🏢' : '👤');
 
@@ -388,12 +389,21 @@
 
                     inner += `
                         <div class="p-6">
-                            <div class="flex items-center gap-4 mb-4">
-                                ${avatarHtml}
-                                <div>
-                                    <h3 class="font-bold text-gray-800 text-lg">${userName}</h3>
-                                    <p class="text-gray-600">${userGenre}</p>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-4">
+                                    ${avatarHtml}
+                                    <div>
+                                        <h3 class="font-bold text-gray-800 text-lg">${userName}</h3>
+                                        <p class="text-gray-600">${userGenre}</p>
+                                    </div>
                                 </div>
+                                ${isOwner ? `
+                                    <button class="delete-post-btn text-red-500 hover:text-red-700 transition-colors" data-post-id="${post.id}">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                ` : ''}
                             </div>
                             <p class="text-gray-700 mb-4 leading-relaxed">${(post.description||'')}</p>
                             <div class="flex justify-between items-center text-gray-500 text-sm">
