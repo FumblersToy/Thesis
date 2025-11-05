@@ -356,14 +356,6 @@
                             @endif
                             <div class="flex justify-between items-center text-gray-500 text-sm">
                                 <span>{{ $post->created_at->format('M j, Y') }}</span>
-                                <div class="flex gap-4">
-                                    <button class="hover:text-red-500 transition-colors flex items-center gap-1">
-                                        ❤️ <span>0</span>
-                                    </button>
-                                    <button class="hover:text-blue-500 transition-colors flex items-center gap-1">
-                                        💬 <span>0</span>
-                                    </button>
-                                </div>
                             </div>
                         </div>
                     </article>

@@ -186,8 +186,8 @@
                             </div>
                         </div>
 
-                        <!-- Empty State -->
-                        <div id="emptyState" class="flex-1 flex items-center justify-center p-6">
+                        <!-- Empty State (hidden on mobile) -->
+                        <div id="emptyState" class="flex-1 items-center justify-center p-6 hidden lg:flex">
                             <div class="text-center text-white/70">
                                 <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
                                     <span class="text-4xl">💬</span>

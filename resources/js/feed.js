@@ -495,7 +495,6 @@ function initFeed() {
     function getActiveFilters() {
         const filters = {};
         
-        // Gather checked options both from desktop and mobile filters (if cloned)
         const checkedInstruments = Array.from(
             document.querySelectorAll('#instruments input[type="checkbox"]:checked, #mobileFilters #instruments input[type="checkbox"]:checked')
         ).map(cb => cb.value);
@@ -512,7 +511,6 @@ function initFeed() {
             filters.venues = checkedVenues.join(',');
         }
 
-        // Add distance and sorting filters: prefer desktop, fall back to mobile clone
         const sortVal = (sortBySelect && sortBySelect.value) || (document.querySelector('#mobileFilters #sortBy')?.value);
         if (sortVal) {
             filters.sort_by = sortVal;
