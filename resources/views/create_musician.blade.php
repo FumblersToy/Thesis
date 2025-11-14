@@ -82,6 +82,27 @@
                 </select>
             </div>
 
+            <div class="form-group">
+            label for="location">Location</label>
+                <select name="location" id="location">
+                    <option value="" disabled selected>Select your location</option>
+                    <option value="Balibago">Balibago</option>
+                    <option value="CM Recto">CM Recto</option></option>
+                    <option value="Pampang">Pampang</option>
+                    <option value="San Nicolas">San Nicolas</option>
+                    <option value="Santa Teresa">Santa Teresa</option>
+                    <option value="Anunas">Anunas</option>
+                    <option value="Agapito del Rosario">Agapito del Rosario</option>
+                    <option value="Cutcut">Cutcut</option>
+                    <option value="Capaya">Capaya</option>
+                    <option value="Telabastagan">Telabastagan</option>
+                    <option value="Lourdes">Lourdes</option>
+                    <option value="Malabanias">Malabanias</option>
+                    <option value="Tabun">Tabun</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
             <!-- Bio -->
             <div class="form-group">
                 <label for="bio">Tell Your Story</label>

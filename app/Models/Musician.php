@@ -17,6 +17,7 @@ class Musician extends Model
         'genre',
         'instrument',
         'bio',
+        'location',
         'profile_picture',
         'profile_picture_public_id',
         'latitude',

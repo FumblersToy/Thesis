@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('stage_name')->nullable();
             $table->string('genre')->nullable();
             $table->string('instrument')->nullable();
+            $table->string('location')->nullable();
             $table->text('bio')->nullable();
             $table->timestamps();
         });
