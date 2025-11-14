@@ -185,6 +185,20 @@
                                 </button>
                             </div>
                         </div>
+
+                        <!-- Empty State -->
+                        <div id="emptyState" class="flex-1 flex items-center justify-center p-6">
+                            <div class="text-center text-white/70">
+                                <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+                                    <span class="text-4xl">💬</span>
+                                </div>
+                                <h3 class="text-2xl font-bold mb-2 text-white">Start a Conversation</h3>
+                                <p class="text-lg mb-6">Select a conversation from the sidebar or search for a user to begin messaging.</p>
+                                <button id="startNewChatBtn" class="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover-glow font-semibold text-lg">
+                                    Start New Chat
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
