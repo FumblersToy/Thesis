@@ -575,9 +575,10 @@ function initFeed() {
     function createPostElement(post) {
         const hasImage = post.image_path && post.image_path.trim() !== '';
         const userName = post.user_name || 'User';
-        const userGenre = post.user_genre || '';
-        const userType = post.user_type || 'member';
-        const userAvatar = post.user_avatar || null;
+    const userGenre = post.user_genre || '';
+    const userLocation = post.user_location || post.user_city || '';
+    const userType = post.user_type || 'member';
+    const userAvatar = post.user_avatar || null;
         const createdAt = post.created_at || new Date().toISOString();
 
         const postDiv = document.createElement('div');
@@ -612,6 +613,7 @@ function initFeed() {
              data-image-url="${post.image_path}"
              data-user-name="${userName}"
              data-user-genre="${userGenre}"
+             data-user-location="${userLocation}"
              data-user-type="${userType}"
              data-user-avatar="${userAvatar || ''}"
              data-description="${post.description || ''}"
@@ -637,11 +639,11 @@ function initFeed() {
                 ` : ''}
             </div>
             <div class="p-6">
-                <div class="flex items-center gap-4 mb-4">
+                        <div class="flex items-center gap-4 mb-4">
                     ${avatarElement}
                     <div>
                         <h3 class="font-bold text-gray-800 text-lg">${userName}</h3>
-                        <p class="text-gray-600">${userGenre}</p>
+                        <p class="text-gray-600">${[userGenre, userLocation].filter(Boolean).join(' · ')}</p>
                     </div>
                 </div>
                 <p class="text-gray-700 mb-4 leading-relaxed">${post.description || 'No description'}</p>
