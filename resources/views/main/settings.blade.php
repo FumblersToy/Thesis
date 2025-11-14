@@ -113,11 +113,30 @@
                                 <option class="text-black" value="Other" {{ $instrVal === 'Other' ? 'selected' : '' }}>Other</option>
                             </select>
                         </div>
+                        <div>
+                            <label class="block text-white/80 mb-1">Location</label>
+                            <select>
+                                @php $locVal = old('musician.location', $musician->location); @endphp
+                                <option value="" disabled {{ $locVal ? '' : 'selected' }}>Select your location</option>
+                                <option class="text-black" value="Balibago" {{ $locVal === 'Balibago' ? 'selected' : '' }}>Balibago</option>
+                                <option class="text-black" value="CM Recto" {{ $locVal === 'CM Recto' ? 'selected' : '' }}>CM Recto</option></option>
+                                <option class="text-black" value="Pampang" {{ $locVal === 'Pampang' ? 'selected' : '' }}>Pampang</option>
+                                <option class="text-black" value="San Nicolas" {{ $locVal === 'San Nicolas' ? 'selected' : '' }}>San Nicolas</option>
+                                <option class="text-black" value="Santa Teresa" {{ $locVal === 'Santa Teresa' ? 'selected' : '' }}>Santa Teresa</option>
+                                <option class="text-black" value="Anunas" {{ $locVal === 'Anunas' ? 'selected' : '' }}>Anunas</option>
+                                <option class="text-black" value="Agapito del Rosario" {{ $locVal === 'Agapito del Rosario' ? 'selected' : '' }}>Agapito del Rosario</option>
+                                <option class="text-black" value="Cutcut" {{ $locVal === 'Cutcut' ? 'selected' : '' }}>Cutcut</option>
+                                <option class="text-black" value="Capaya" {{ $locVal === 'Capaya' ? 'selected' : '' }}>Capaya</option>
+                                <option class="text-black" value="Telabastagan" {{ $locVal === 'Telabastagan' ? 'selected' : '' }}>Telabastagan</option>
+                                <option class="text-black" value="Lourdes" {{ $locVal === 'Lourdes' ? 'selected' : '' }}>Lourdes</option>
+                                <option class="text-black" value="Malabanias" {{ $locVal === 'Malabanias' ? 'selected' : '' }}>Malabanias</option>
+                                <option class="text-black" value="Tabun" {{ $locVal === 'Tabun' ? 'selected' : '' }}>Tabun</option>
+                            </select>
+                        </div>
                         <div class="md:col-span-2">
                             <label class="block text-white/80 mb-1">Bio</label>
                             <textarea name="musician[bio]" rows="4" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30">{{ old('musician.bio', $musician->bio) }}</textarea>
                         </div>
-                        <!-- Musician location input removed per request; address fields remain elsewhere. -->
                     </div>
                 </div>
                 @endif
@@ -164,7 +183,19 @@
                                 <input type="hidden" name="business[address_longitude]" id="businessAddressLongitude" value="{{ old('business.address_longitude', $business->longitude) }}">
                             </div>
                         </div>
-                        <!-- Business location input removed per request; address inputs remain. -->
+                        <div>
+                            <label class="block text-white/80 mb-1">Location</label>
+                            <select name="business[location]" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+                                @php $locationVal = old('business.location', $business->location); @endphp
+                                <option value="" disabled {{ $locationVal ? '' : 'selected' }}>Select your location</option>
+                                <option value="Balibago" {{ $locationVal === 'Balibago' ? 'selected' : '' }}>Balibago</option>
+                                <option value="CM Recto" {{ $locationVal === 'CM Recto' ? 'selected' : '' }}>CM Recto</option>
+                                <option value="Clark" {{ $locationVal === 'Clark' ? 'selected' : '' }}>Clark</option>
+                                <option value="Malabanias" {{ $locationVal === 'Malabanias' ? 'selected' : '' }}>Malabanias</option>
+                                <option value="Friendship" {{ $locationVal === 'Friendship' ? 'selected' : '' }}>Friendship</option>
+                                <option value="Other" {{ $locationVal === 'Other' ? 'selected' : '' }}>Other</option>
+                            </select>
+                        </div>
                         <div>
                             <label class="block text-white/80 mb-1">Venue Offered</label>
                             <select name="business[venue]" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
