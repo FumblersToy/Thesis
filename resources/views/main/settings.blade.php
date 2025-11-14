@@ -115,7 +115,7 @@
                         </div>
                         <div>
                             <label class="block text-white/80 mb-1">Location</label>
-                            <select>
+                            <select name="musician[location]" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
                                 @php $locVal = old('musician.location', $musician->location); @endphp
                                 <option value="" disabled {{ $locVal ? '' : 'selected' }}>Select your location</option>
                                 <option class="text-black" value="Balibago" {{ $locVal === 'Balibago' ? 'selected' : '' }}>Balibago</option>
@@ -187,29 +187,29 @@
                             <label class="block text-white/80 mb-1">Location</label>
                             <select name="business[location]" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
                                 @php $locationVal = old('business.location', $business->location); @endphp
-                                <option value="" disabled {{ $locationVal ? '' : 'selected' }}>Select your location</option>
-                                <option value="Balibago" {{ $locationVal === 'Balibago' ? 'selected' : '' }}>Balibago</option>
-                                <option value="CM Recto" {{ $locationVal === 'CM Recto' ? 'selected' : '' }}>CM Recto</option>
-                                <option value="Clark" {{ $locationVal === 'Clark' ? 'selected' : '' }}>Clark</option>
-                                <option value="Malabanias" {{ $locationVal === 'Malabanias' ? 'selected' : '' }}>Malabanias</option>
-                                <option value="Friendship" {{ $locationVal === 'Friendship' ? 'selected' : '' }}>Friendship</option>
-                                <option value="Other" {{ $locationVal === 'Other' ? 'selected' : '' }}>Other</option>
+                                <option class="text-black" value="" disabled {{ $locationVal ? '' : 'selected' }}>Select your location</option>
+                                <option class="text-black" value="Balibago" {{ $locationVal === 'Balibago' ? 'selected' : '' }}>Balibago</option>
+                                <option class="text-black" value="CM Recto" {{ $locationVal === 'CM Recto' ? 'selected' : '' }}>CM Recto</option>
+                                <option class="text-black" value="Clark" {{ $locationVal === 'Clark' ? 'selected' : '' }}>Clark</option>
+                                <option class="text-black" value="Malabanias" {{ $locationVal === 'Malabanias' ? 'selected' : '' }}>Malabanias</option>
+                                <option class="text-black" value="Friendship" {{ $locationVal === 'Friendship' ? 'selected' : '' }}>Friendship</option>
+                                <option class="text-black" value="Other" {{ $locationVal === 'Other' ? 'selected' : '' }}>Other</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-white/80 mb-1">Venue Offered</label>
-                            <select name="business[venue]" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <select name="business[venue]" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30"">
                                 @php $venueVal = old('business.venue', $business->venue); @endphp
-                                <option value="" disabled {{ $venueVal ? '' : 'selected' }}>Select the venue you offer</option>
-                                <option value="Studio" {{ $venueVal === 'Studio' ? 'selected' : '' }}>Studio</option>
-                                <option value="Club" {{ $venueVal === 'Club' ? 'selected' : '' }}>Club</option>
-                                <option value="Theater" {{ $venueVal === 'Theater' ? 'selected' : '' }}>Theater</option>
-                                <option value="Cafe" {{ $venueVal === 'Cafe' ? 'selected' : '' }}>Café</option>
-                                <option value="Restaurant" {{ $venueVal === 'Restaurant' ? 'selected' : '' }}>Restaurant</option>
-                                <option value="Bar" {{ $venueVal === 'Bar' ? 'selected' : '' }}>Bar & Lounge</option>
-                                <option value="Event Venue" {{ $venueVal === 'Event Venue' ? 'selected' : '' }}>Event Venue</option>
-                                <option value="Music Hall" {{ $venueVal === 'Music Hall' ? 'selected' : '' }}>Music Hall</option>
-                                <option value="Other" {{ $venueVal === 'Other' ? 'selected' : '' }}>Other</option>
+                                <option class="text-black" value="" disabled {{ $venueVal ? '' : 'selected' }}>Select the venue you offer</option>
+                                <option class="text-black" value="Studio" {{ $venueVal === 'Studio' ? 'selected' : '' }}>Studio</option>
+                                <option class="text-black" value="Club" {{ $venueVal === 'Club' ? 'selected' : '' }}>Club</option>
+                                <option class="text-black" value="Theater" {{ $venueVal === 'Theater' ? 'selected' : '' }}>Theater</option>
+                                <option class="text-black" value="Cafe" {{ $venueVal === 'Cafe' ? 'selected' : '' }}>Café</option>
+                                <option class="text-black" value="Restaurant" {{ $venueVal === 'Restaurant' ? 'selected' : '' }}>Restaurant</option>
+                                <option class="text-black" value="Bar" {{ $venueVal === 'Bar' ? 'selected' : '' }}>Bar & Lounge</option>
+                                <option class="text-black" value="Event Venue" {{ $venueVal === 'Event Venue' ? 'selected' : '' }}>Event Venue</option>
+                                <option class="text-black" value="Music Hall" {{ $venueVal === 'Music Hall' ? 'selected' : '' }}>Music Hall</option>
+                                <option class="text-black" value="Other" {{ $venueVal === 'Other' ? 'selected' : '' }}>Other</option>
                             </select>
                         </div>
                     </div>
