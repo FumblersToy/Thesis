@@ -38,9 +38,6 @@
                 <input type="text" id="business_name" name="business_name" required placeholder="Enter your business name">
             </div>
 
-            <!-- Industry (optional) -->
-            <!-- Industry (optional) removed — venue offered is used for filtering on the feed. -->
-
             <!-- Venue Offered -->
             <div class="form-group">
                 <label for="venue">Venue Offered</label>
@@ -54,6 +51,19 @@
                     <option value="Bar">Bar & Lounge</option>
                     <option value="Event Venue">Event Venue</option>
                     <option value="Music Hall">Music Hall</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <select name="location" id="location" required>
+                    <option value="" disabled selected>Select your location</option>
+                    <option value="Balibago">Balibago</option>
+                    <option value="CM Recto">CM Recto</option>
+                    <option value="Clark">Clark</option>
+                    <option value="Malabanias">Malabanias</option>
+                    <option value="Friendship">Friendship</option>
                     <option value="Other">Other</option>
                 </select>
             </div>

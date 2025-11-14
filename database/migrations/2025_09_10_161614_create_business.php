@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('business_name')->nullable();
             $table->string('contact_email')->nullable()->unique();
             $table->string('phone_number', 20)->nullable();
+            $table->string('location')->nullable();
             $table->string('address')->nullable();
             $table->string('venue')->nullable();
         });

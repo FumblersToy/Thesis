@@ -21,6 +21,7 @@ class Business extends Model
         'phone_number',
         'address',
         'venue',
+        'location',
         'latitude',
         'longitude',
         'location_name',

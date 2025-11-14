@@ -83,7 +83,7 @@
             </div>
 
             <div class="form-group">
-            label for="location">Location</label>
+            <label for="location">Location</label>
                 <select name="location" id="location">
                     <option value="" disabled selected>Select your location</option>
                     <option value="Balibago">Balibago</option>
