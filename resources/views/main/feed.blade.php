@@ -335,6 +335,7 @@
                     // localize fields with fallbacks to match feed.js createPostElement
                     const userName = post.user_name || 'User';
                     const userGenre = post.user_genre || '';
+                    const userLocation = post.user_location || post.user_city || '';
                     const userType = post.user_type || 'member';
                     const userAvatar = post.user_avatar || '';
                     const createdAt = post.created_at || '';
@@ -343,6 +344,7 @@
                     const isOwner = post.is_owner || false; // Add is_owner check
 
                     const userTypeEmoji = userType === 'musician' ? '🎵' : (userType === 'business' ? '🏢' : '👤');
+                    const userMeta = [userGenre, userLocation].filter(Boolean).join(' · ');
 
                     // Build avatar HTML (fall back to initial if no avatar)
                     const avatarHtml = userAvatar ?
@@ -374,6 +376,7 @@
                                     data-image-url="${post.image_path}"
                                     data-user-name="${(post.user_name||'') }"
                                     data-user-genre="${(post.user_genre||'') }"
+                                    data-user-location="${(post.user_location||post.user_city||'') }"
                                     data-user-type="${(post.user_type||'member') }"
                                     data-user-avatar="${(post.user_avatar||'') }"
                                     data-description="${(post.description||'') }"
@@ -396,7 +399,7 @@
                                     ${avatarHtml}
                                     <div>
                                         <h3 class="font-bold text-gray-800 text-lg">${userName}</h3>
-                                        <p class="text-gray-600">${userGenre}</p>
+                                        <p class="text-gray-600">${userMeta}</p>
                                     </div>
                                 </div>
                                 ${isOwner ? `
@@ -466,6 +469,7 @@
                     userGenre: img.getAttribute('data-user-genre'),
                     userType: img.getAttribute('data-user-type'),
                     userAvatar: img.getAttribute('data-user-avatar'),
+                    userLocation: img.getAttribute('data-user-location'),
                     description: img.getAttribute('data-description'),
                     createdAt: img.getAttribute('data-created-at'),
                     like_count: parseInt(img.getAttribute('data-like-count')) || 0,
@@ -510,7 +514,7 @@
                                     ${avatarHtml}
                                     <div>
                                         <h3 class="font-bold text-gray-800 text-xl">${postData.userName}</h3>
-                                        <p class="text-gray-600">${postData.userGenre}</p>
+                                        <p class="text-gray-600">${[postData.userGenre, postData.userLocation].filter(Boolean).join(' · ')}</p>
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2 text-sm text-gray-500">
