@@ -884,11 +884,6 @@ function initFeed() {
         }
     }
 
-    // Modal functions (extract/show/toggleLike/addComment/loadComments/addCommentToModal)
-    // have been moved inline into the Blade template to match profile.blade.php.
-    // Keeping them out of this module prevents duplicate definitions and
-    // conflicting event listeners when the inline modal is active.
-
     // Initialize the page
     console.log('Initializing filters and loading posts...');
     initializeFilters();

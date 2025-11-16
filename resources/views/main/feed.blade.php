@@ -205,18 +205,11 @@
                                 <span class="text-lg">⚙️</span>
                                 Settings
                             </a>
-
-                            <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
-                                <span class="text-lg">🎵</span>
-                                My Music
-                            </a>
                             
                             <a href="{{ route('messages.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
                                 <span class="text-lg">💬</span>
                                 Messages
                             </a>
-                            
-                            <!-- Map removed -->
 
                             <div class="border-t border-gray-200 my-2"></div>
 
