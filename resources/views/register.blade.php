@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Bandmate | Register</title>
     @vite(['resources/css/app.css', 'resources/css/register.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -41,7 +42,7 @@
                 <!-- Header -->
                 <div class="text-center mb-8">
                     <div class="inline-flex items-center justify-center w-16 h-16 mb-6">
-                        <img src="/assets/logo_black.png">
+                        <img src="/assets/logo_black.png" alt="Bandmate Logo">
                     </div>
                     <h1 class="text-3xl font-bold text-gray-800 mb-2">Join Bandmate</h1>
                     <p class="text-gray-600">Create your account and start making music</p>
@@ -61,8 +62,9 @@
 
                 <!-- Registration Form -->
                 <form method="POST" action="{{ route('register') }}" class="space-y-6" onsubmit="return validateForm()">
-                <!-- Email Field -->
-                @csrf
+                    @csrf
+                    
+                    <!-- Email Field -->
                     <div class="relative">
                         <input type="email"
                                id="email"
@@ -74,7 +76,9 @@
                                class="floating-label absolute left-4 top-4 text-gray-500 transition-all duration-300 cursor-text peer-focus:text-blue-500">
                             Email Address
                         </label>
-                        <span id="email-exists-error" class="text-red-500 text-xs mt-1 hidden">This email is already registered.</span>
+                        <div id="email-exists-error" class="text-sm mt-1 hidden">
+                            <!-- Dynamic content will be inserted here -->
+                        </div>
                     </div>
 
                     <!-- Confirm Email Field -->
@@ -151,193 +155,258 @@
                         <span id="btn-text">Create Account</span>
                     </button>
                 </form>
+                
                 <!-- Login Link -->
                 <p class="text-center text-gray-600 mt-8">
                     Already have an account?
-                    <a href="{{route('login') }}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200 ml-1">
+                    <a href="{{ route('login') }}" class="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200 ml-1">
                         Sign in here
                     </a>
                 </p>
             </div>
         </section>
     </main>
+
     <script>
-    function togglePassword(fieldId, iconId) {
-        const passwordInput = document.getElementById(fieldId);
-        const eyeIcon = document.getElementById(iconId);
-        
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            eyeIcon.innerHTML = `
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
-            `;
-        } else {
-            passwordInput.type = 'password';
-            eyeIcon.innerHTML = `
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            `;
-        }
-    }
-
-    function validateForm() {
-        const email = document.getElementById('email').value;
-        const confirmEmail = document.getElementById('confirm-email').value;
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-        const emailMatchError = document.getElementById('email-match-error');
-        const passwordMatchError = document.getElementById('password-match-error');
-        const errorContainer = document.getElementById('error-container');
-        const errorList = document.getElementById('error-list');
-        
-        let isValid = true;
-        errorList.innerHTML = '';
-        emailMatchError.classList.add('hidden');
-        passwordMatchError.classList.add('hidden');
-        errorContainer.classList.add('hidden');
-
-        // Check if emails match
-        if (email !== confirmEmail) {
-            emailMatchError.classList.remove('hidden');
-            isValid = false;
+        function togglePassword(fieldId, iconId) {
+            const passwordInput = document.getElementById(fieldId);
+            const eyeIcon = document.getElementById(iconId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"/>
+                `;
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                `;
+            }
         }
 
-        // Check if passwords match
-        if (password !== confirmPassword) {
-            passwordMatchError.classList.remove('hidden');
-            isValid = false;
-        }
+        function validateForm() {
+            const email = document.getElementById('email').value;
+            const confirmEmail = document.getElementById('confirm-email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const emailMatchError = document.getElementById('email-match-error');
+            const passwordMatchError = document.getElementById('password-match-error');
+            const errorContainer = document.getElementById('error-container');
+            const errorList = document.getElementById('error-list');
+            
+            let isValid = true;
+            errorList.innerHTML = '';
+            emailMatchError.classList.add('hidden');
+            passwordMatchError.classList.add('hidden');
+            errorContainer.classList.add('hidden');
 
-        // Check password length
-        if (password.length < 8) {
-            const errorItem = document.createElement('li');
-            errorItem.textContent = 'Password must be at least 8 characters long.';
-            errorList.appendChild(errorItem);
-            errorContainer.classList.remove('hidden');
-            isValid = false;
-        }
+            // Check if emails match
+            if (email !== confirmEmail) {
+                emailMatchError.classList.remove('hidden');
+                isValid = false;
+            }
 
-        // Check email already exists (set by async check)
-        try {
-            if (window.__emailAlreadyExists) {
-                const emailExistsEl = document.getElementById('email-exists-error');
-                if (emailExistsEl) emailExistsEl.classList.remove('hidden');
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                passwordMatchError.classList.remove('hidden');
+                isValid = false;
+            }
+
+            // Check password length
+            if (password.length < 8) {
                 const errorItem = document.createElement('li');
-                errorItem.textContent = 'Email is already registered.';
+                errorItem.textContent = 'Password must be at least 8 characters long.';
                 errorList.appendChild(errorItem);
                 errorContainer.classList.remove('hidden');
                 isValid = false;
             }
-        } catch (e) {
-            // ignore
+
+            // Check if email already exists
+            if (window.__emailAlreadyExists) {
+                const errorItem = document.createElement('li');
+                errorItem.textContent = 'This email is already registered. Please use a different email or try logging in.';
+                errorList.appendChild(errorItem);
+                errorContainer.classList.remove('hidden');
+                isValid = false;
+            }
+
+            return isValid;
         }
 
-        return isValid;
-    }
+        // Real-time email validation
+        document.getElementById('confirm-email').addEventListener('input', function() {
+            const email = document.getElementById('email').value;
+            const confirmEmail = this.value;
+            const emailMatchError = document.getElementById('email-match-error');
+            
+            if (confirmEmail && email !== confirmEmail) {
+                emailMatchError.classList.remove('hidden');
+            } else {
+                emailMatchError.classList.add('hidden');
+            }
+        });
 
-    // Real-time email validation
-    document.getElementById('confirm-email').addEventListener('input', function() {
-        const email = document.getElementById('email').value;
-        const confirmEmail = this.value;
-        const emailMatchError = document.getElementById('email-match-error');
-        
-        if (confirmEmail && email !== confirmEmail) {
-            emailMatchError.classList.remove('hidden');
-        } else {
-            emailMatchError.classList.add('hidden');
-        }
-    });
+        // Real-time password validation
+        document.getElementById('confirm-password').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            const passwordMatchError = document.getElementById('password-match-error');
+            
+            if (confirmPassword && password !== confirmPassword) {
+                passwordMatchError.classList.remove('hidden');
+            } else {
+                passwordMatchError.classList.add('hidden');
+            }
+        });
 
-    // Real-time password validation
-    document.getElementById('confirm-password').addEventListener('input', function() {
-        const password = document.getElementById('password').value;
-        const confirmPassword = this.value;
-        const passwordMatchError = document.getElementById('password-match-error');
-        
-        if (confirmPassword && password !== confirmPassword) {
-            passwordMatchError.classList.remove('hidden');
-        } else {
-            passwordMatchError.classList.add('hidden');
-        }
-    });
+        // Enhanced Email Availability Check
+        (function(){
+            const emailInput = document.getElementById('email');
+            const emailExistsEl = document.getElementById('email-exists-error');
+            const registerBtn = document.getElementById('register-btn');
+            let debounceTimer = null;
 
-    // Email availability check (debounced)
-    (function(){
-        const emailInput = document.getElementById('email');
-        const emailExistsEl = document.getElementById('email-exists-error');
-        const registerBtn = document.getElementById('register-btn');
-        let emailExists = false;
-        let debounceTimer = null;
+            // Global flag for form validation
+            window.__emailAlreadyExists = false;
 
-        // expose to validateForm via closure variable
-        window.__emailAlreadyExists = false;
+            async function checkEmailAvailability(email) {
+                if (!email || !emailInput) return;
 
-        async function checkEmailAvailability(email) {
-            if (!email) return;
-            try {
-                // Replace this endpoint with your real email-check endpoint if different
-                const url = `/api/check-email?email=${encodeURIComponent(email)}`;
-                const resp = await fetch(url, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
-                if (!resp.ok) {
-                    // If endpoint not available, be permissive and don't block registration
+                try {
+                    // Show checking indicator
+                    if (emailExistsEl) {
+                        emailExistsEl.innerHTML = '<span class="text-blue-600">⏳ Checking email availability...</span>';
+                        emailExistsEl.classList.remove('hidden');
+                    }
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    
+                    const response = await fetch('/api/check-email', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken || ''
+                        },
+                        credentials: 'same-origin',
+                        body: JSON.stringify({ email: email })
+                    });
+
+                    if (!response.ok) {
+                        // If endpoint doesn't exist or error, allow registration
+                        console.warn('Email check endpoint not available');
+                        window.__emailAlreadyExists = false;
+                        if (emailExistsEl) emailExistsEl.classList.add('hidden');
+                        if (registerBtn) {
+                            registerBtn.disabled = false;
+                            registerBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
+                        return;
+                    }
+
+                    const data = await response.json();
+
+                    if (data.exists) {
+                        // Email already exists
+                        window.__emailAlreadyExists = true;
+                        if (emailExistsEl) {
+                            emailExistsEl.innerHTML = '<span class="text-red-600">❌ This email is already registered. <a href="/login" class="underline hover:text-red-800">Login instead?</a></span>';
+                            emailExistsEl.classList.remove('hidden');
+                        }
+                        if (registerBtn) {
+                            registerBtn.disabled = true;
+                            registerBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                            registerBtn.title = 'Email already registered';
+                        }
+                    } else {
+                        // Email is available
+                        window.__emailAlreadyExists = false;
+                        if (emailExistsEl) {
+                            emailExistsEl.innerHTML = '<span class="text-green-600">✅ Email is available</span>';
+                            emailExistsEl.classList.remove('hidden');
+                            // Hide after 2 seconds
+                            setTimeout(() => {
+                                if (emailExistsEl && !window.__emailAlreadyExists) {
+                                    emailExistsEl.classList.add('hidden');
+                                }
+                            }, 2000);
+                        }
+                        if (registerBtn) {
+                            registerBtn.disabled = false;
+                            registerBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                            registerBtn.title = '';
+                        }
+                    }
+                } catch (error) {
+                    console.error('Email check error:', error);
+                    // On network error, don't block registration
                     window.__emailAlreadyExists = false;
-                    emailExistsEl.classList.add('hidden');
-                    if (registerBtn) registerBtn.disabled = false;
+                    if (emailExistsEl) {
+                        emailExistsEl.innerHTML = '<span class="text-gray-500">⚠️ Unable to verify email. You can still continue.</span>';
+                        emailExistsEl.classList.remove('hidden');
+                        setTimeout(() => {
+                            if (emailExistsEl) emailExistsEl.classList.add('hidden');
+                        }, 3000);
+                    }
+                    if (registerBtn) {
+                        registerBtn.disabled = false;
+                        registerBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+            }
+
+            function debounceCheck() {
+                const email = emailInput.value.trim();
+                
+                clearTimeout(debounceTimer);
+                
+                // Reset state if email is empty
+                if (!email) {
+                    window.__emailAlreadyExists = false;
+                    if (emailExistsEl) emailExistsEl.classList.add('hidden');
+                    if (registerBtn) {
+                        registerBtn.disabled = false;
+                        registerBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
                     return;
                 }
-                const data = await resp.json();
-                if (data && data.exists) {
-                    window.__emailAlreadyExists = true;
-                    emailExistsEl.classList.remove('hidden');
-                    if (registerBtn) registerBtn.disabled = true;
-                } else {
+
+                // Validate email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
                     window.__emailAlreadyExists = false;
-                    emailExistsEl.classList.add('hidden');
-                    if (registerBtn) registerBtn.disabled = false;
+                    if (emailExistsEl) emailExistsEl.classList.add('hidden');
+                    return;
                 }
-            } catch (err) {
-                // Network error: don't block the user
-                window.__emailAlreadyExists = false;
-                emailExistsEl.classList.add('hidden');
-                if (registerBtn) registerBtn.disabled = false;
+
+                // Debounce the API call
+                debounceTimer = setTimeout(() => {
+                    checkEmailAvailability(email);
+                }, 500);
             }
-        }
 
-        function debounceCheck() {
-            const val = emailInput.value.trim();
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                if (val && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val)) {
-                    checkEmailAvailability(val);
-                } else {
-                    // invalid email format: hide the "exists" message and keep normal validation
-                    window.__emailAlreadyExists = false;
-                    emailExistsEl.classList.add('hidden');
-                    if (registerBtn) registerBtn.disabled = false;
-                }
-            }, 450);
-        }
+            if (emailInput) {
+                emailInput.addEventListener('input', debounceCheck);
+                emailInput.addEventListener('blur', debounceCheck);
+            }
+        })();
 
-        if (emailInput) {
-            emailInput.addEventListener('input', debounceCheck);
-            emailInput.addEventListener('blur', debounceCheck);
-        }
-    })();
-
-    // Add subtle parallax effect to background elements
-    document.addEventListener('mousemove', (e) => {
-        const mouseX = e.clientX / window.innerWidth;
-        const mouseY = e.clientY / window.innerHeight;
-        
-        const elements = document.querySelectorAll('.floating-animation');
-        elements.forEach((el, index) => {
-            const speed = (index + 1) * 0.05;
-            const x = (mouseX - 0.5) * speed * 50;
-            const y = (mouseY - 0.5) * speed * 50;
+        // Add subtle parallax effect to background elements
+        document.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
             
-            el.style.transform = `translate(${x}px, ${y}px)`;
+            const elements = document.querySelectorAll('.floating-animation');
+            elements.forEach((el, index) => {
+                const speed = (index + 1) * 0.05;
+                const x = (mouseX - 0.5) * speed * 50;
+                const y = (mouseY - 0.5) * speed * 50;
+                
+                el.style.transform = `translate(${x}px, ${y}px)`;
+            });
         });
-    });
-</script>
+    </script>
 </body>
 </html>
