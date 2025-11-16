@@ -21,7 +21,7 @@
                     Filters
                 </h2>
                 
-                <form id="filters" class="space-y-8 max-h-[60vh] overflow-y-auto pr-2">
+                <form id="filters" class="space-y-8">
                     <div class="animate-fade-in">
                         <h3 class="font-semibold text-white/90 mb-4 text-lg">🎵 Instruments</h3>
                         <div class="space-y-3" id="instruments">
