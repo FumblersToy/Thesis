@@ -14,7 +14,7 @@
     
     
     <div class="flex min-h-screen relative z-10">
-        <aside id="sidebar" class="w-80 p-6 glass-effect backdrop-blur-xl shadow-2xl hidden lg:block animate-slide-up gradient-bg">
+        <aside id="sidebar" class="w-80 p-6 glass-effect backdrop-blur-xl shadow-2xl hidden lg:block animate-slide-up gradient-bg overflow-y-auto">
             <div class="sticky top-6">
                 <h2 class="font-bold text-2xl mb-6 text-white flex items-center gap-3">
                     <div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse-slow"></div>
