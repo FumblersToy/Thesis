@@ -74,6 +74,7 @@
                                class="floating-label absolute left-4 top-4 text-gray-500 transition-all duration-300 cursor-text peer-focus:text-blue-500">
                             Email Address
                         </label>
+                        <span id="email-exists-error" class="text-red-500 text-xs mt-1 hidden">This email is already registered.</span>
                     </div>
 
                     <!-- Confirm Email Field -->
@@ -216,6 +217,21 @@
             isValid = false;
         }
 
+        // Check email already exists (set by async check)
+        try {
+            if (window.__emailAlreadyExists) {
+                const emailExistsEl = document.getElementById('email-exists-error');
+                if (emailExistsEl) emailExistsEl.classList.remove('hidden');
+                const errorItem = document.createElement('li');
+                errorItem.textContent = 'Email is already registered.';
+                errorList.appendChild(errorItem);
+                errorContainer.classList.remove('hidden');
+                isValid = false;
+            }
+        } catch (e) {
+            // ignore
+        }
+
         return isValid;
     }
 
@@ -244,6 +260,69 @@
             passwordMatchError.classList.add('hidden');
         }
     });
+
+    // Email availability check (debounced)
+    (function(){
+        const emailInput = document.getElementById('email');
+        const emailExistsEl = document.getElementById('email-exists-error');
+        const registerBtn = document.getElementById('register-btn');
+        let emailExists = false;
+        let debounceTimer = null;
+
+        // expose to validateForm via closure variable
+        window.__emailAlreadyExists = false;
+
+        async function checkEmailAvailability(email) {
+            if (!email) return;
+            try {
+                // Replace this endpoint with your real email-check endpoint if different
+                const url = `/api/check-email?email=${encodeURIComponent(email)}`;
+                const resp = await fetch(url, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' });
+                if (!resp.ok) {
+                    // If endpoint not available, be permissive and don't block registration
+                    window.__emailAlreadyExists = false;
+                    emailExistsEl.classList.add('hidden');
+                    if (registerBtn) registerBtn.disabled = false;
+                    return;
+                }
+                const data = await resp.json();
+                if (data && data.exists) {
+                    window.__emailAlreadyExists = true;
+                    emailExistsEl.classList.remove('hidden');
+                    if (registerBtn) registerBtn.disabled = true;
+                } else {
+                    window.__emailAlreadyExists = false;
+                    emailExistsEl.classList.add('hidden');
+                    if (registerBtn) registerBtn.disabled = false;
+                }
+            } catch (err) {
+                // Network error: don't block the user
+                window.__emailAlreadyExists = false;
+                emailExistsEl.classList.add('hidden');
+                if (registerBtn) registerBtn.disabled = false;
+            }
+        }
+
+        function debounceCheck() {
+            const val = emailInput.value.trim();
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                if (val && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val)) {
+                    checkEmailAvailability(val);
+                } else {
+                    // invalid email format: hide the "exists" message and keep normal validation
+                    window.__emailAlreadyExists = false;
+                    emailExistsEl.classList.add('hidden');
+                    if (registerBtn) registerBtn.disabled = false;
+                }
+            }, 450);
+        }
+
+        if (emailInput) {
+            emailInput.addEventListener('input', debounceCheck);
+            emailInput.addEventListener('blur', debounceCheck);
+        }
+    })();
 
     // Add subtle parallax effect to background elements
     document.addEventListener('mousemove', (e) => {
