@@ -892,7 +892,7 @@ function initFeed() {
     // Initialize the page
     console.log('Initializing filters and loading posts...');
     initializeFilters();
-    loadPosts(1, false);
+    loadPosts(1, false, true);
 
     console.log('Feed page initialization complete');
 }
