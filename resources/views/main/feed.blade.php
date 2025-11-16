@@ -816,6 +816,6 @@
         });
     </script>
 
-    @vite(['resources/js/app.js', 'resources/js/feed.js', 'resources/js/socket.js', 'resources/js/randomposts.js'])
+    @vite(['resources/js/app.js', 'resources/js/feed.js', 'resources/js/socket.js'])
 </body> 
 </html>

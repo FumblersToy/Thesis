@@ -316,115 +316,84 @@ function initFeed() {
     }
 
     // Load posts
-    async function loadPosts(page = 1, append = false) {
-        if (loading) return;
-        
-        loading = true;
-        
-        // Show loading state if not appending
-        if (!append && postsGrid) {
-            postsGrid.innerHTML = '<div class="col-span-full text-center py-12"><div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div><p class="mt-4 text-gray-600">Loading posts...</p></div>';
-        }
-        
-        try {
-            const filters = getActiveFilters();
-            const params = new URLSearchParams({ page: page, per_page: 12, ...filters });
-
-            // Build URL: if there are no filters, hit a simple canonical endpoint to request all posts
-            let url;
-            if (Object.keys(filters).length === 0) {
-                url = `/api/posts?page=${page}&per_page=12`;
-            } else {
-                url = `/api/posts?${params.toString()}`;
+   // Load posts (with random option)
+        async function loadPosts(page = 1, append = false, useRandom = false) {
+            if (loading) return;
+            
+            loading = true;
+            
+            // Show loading state if not appending
+            if (!append && postsGrid) {
+                postsGrid.innerHTML = '<div class="col-span-full text-center py-12"><div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div><p class="mt-4 text-gray-600">Loading posts...</p></div>';
             }
-
-            // First try: include credentials in case server requires session cookies
-            console.log('Fetching posts from URL:', url);
-            let response = await fetch(url, {
-                credentials: 'same-origin',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                }
-            });
-
-            // If the response is not OK, log the body and try a fallback without credentials
-            if (!response.ok) {
-                try {
-                    const text = await response.text();
-                    console.warn('Initial fetch returned non-OK status', response.status, 'body:', text);
-                } catch (readErr) {
-                    console.warn('Initial fetch returned non-OK status', response.status, 'and response text could not be read');
-                }
-
-                console.warn('Initial fetch failed with status', response.status, '- trying without credentials as a fallback');
-                try {
-                    const fallbackResponse = await fetch(url, {
-                        headers: {
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': csrfToken
-                        }
-                    });
-                    console.log('Fallback fetch status:', fallbackResponse.status);
-                    if (!fallbackResponse.ok) {
-                        try {
-                            const fbText = await fallbackResponse.text();
-                            console.warn('Fallback fetch body:', fbText);
-                        } catch (e) {
-                            console.warn('Fallback fetch failed and body could not be read');
-                        }
-                    }
-                    // prefer the fallback if initial failed
-                    response = fallbackResponse;
-                } catch (fallbackError) {
-                    console.error('Fallback fetch error:', fallbackError);
-                }
-            }
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log('Posts loaded:', data);
-
-            if (data.success) {
-                if (append) {
-                    appendPostsToGrid(data.posts);
-                } else {
-                    renderPostsGrid(data.posts);
-                }
+            
+            try {
+                const filters = getActiveFilters();
                 
-                // Show message if no posts
-                if (data.posts.length === 0) {
-                    postsGrid.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-gray-600 text-lg">No posts yet. Be the first to post!</p></div>';
-                }
-                
-                // Update load more button
-                if (data.pagination && data.pagination.has_more) {
-                    if (loadMoreBtn) {
-                        loadMoreBtn.style.display = 'block';
-                    }
-                    currentPage = data.pagination.current_page;
+                // Use random endpoint ONLY on first load with no filters
+                let url;
+                if (useRandom && page === 1 && Object.keys(filters).length === 0) {
+                    url = `/api/posts/random?count=12`;
                 } else {
-                    if (loadMoreBtn) {
-                        loadMoreBtn.style.display = 'none';
-                    }
+                    const params = new URLSearchParams({ page: page, per_page: 12, ...filters });
+                    url = Object.keys(filters).length === 0 
+                        ? `/api/posts?page=${page}&per_page=12`
+                        : `/api/posts?${params.toString()}`;
                 }
-            } else {
-                console.error('API returned unsuccessful:', data);
+
+                console.log('Fetching posts from URL:', url);
+                let response = await fetch(url, {
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+
+                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Posts loaded:', data);
+
+                if (data.success) {
+                    if (append) {
+                        appendPostsToGrid(data.posts);
+                    } else {
+                        renderPostsGrid(data.posts);
+                    }
+                    
+                    // Show message if no posts
+                    if (data.posts.length === 0) {
+                        postsGrid.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-gray-600 text-lg">No posts yet. Be the first to post!</p></div>';
+                    }
+                    
+                    // Update load more button
+                    if (data.pagination && data.pagination.has_more) {
+                        if (loadMoreBtn) {
+                            loadMoreBtn.style.display = 'block';
+                        }
+                        currentPage = data.pagination.current_page;
+                    } else {
+                        if (loadMoreBtn) {
+                            loadMoreBtn.style.display = 'none';
+                        }
+                    }
+                } else {
+                    console.error('API returned unsuccessful:', data);
+                    showNotification('Error loading posts', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading posts:', error);
+                if (postsGrid) {
+                    postsGrid.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-red-600 text-lg">Error loading posts. Please refresh the page.</p></div>';
+                }
                 showNotification('Error loading posts', 'error');
+            } finally {
+                loading = false;
             }
-        } catch (error) {
-            console.error('Error loading posts:', error);
-            if (postsGrid) {
-                postsGrid.innerHTML = '<div class="col-span-full text-center py-12"><p class="text-red-600 text-lg">Error loading posts. Please refresh the page.</p></div>';
-            }
-            showNotification('Error loading posts', 'error');
-        } finally {
-            loading = false;
         }
-    }
 
     // Get current location
     function getCurrentLocation() {
