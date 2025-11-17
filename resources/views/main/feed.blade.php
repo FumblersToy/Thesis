@@ -405,7 +405,20 @@
                     }
 
                     inner += `
-                        <div class="p-6">
+                        <div class="p-6 ${isVideo ? 'cursor-pointer hover:bg-gray-50 transition-colors post-details' : ''}" 
+                             ${isVideo ? `data-post-id="${post.id}"
+                             data-image-url="${post.image_path}"
+                             data-media-type="video"
+                             data-user-name="${(post.user_name||'')}"
+                             data-user-genre="${(post.user_genre||'')}"
+                             data-user-location="${(post.user_location||post.user_city||'')}"
+                             data-user-type="${(post.user_type||'member')}"
+                             data-user-avatar="${(post.user_avatar||'')}"
+                             data-description="${(post.description||'')}"
+                             data-created-at="${(post.created_at||'')}"
+                             data-like-count="${likeCount}"
+                             data-comment-count="${commentCount}"
+                             data-is-liked="${(post.is_liked? 'true' : 'false')}"` : ''}>
                             <div class="flex items-center justify-between mb-4">
                                 <div class="flex items-center gap-4">
                                     ${avatarHtml}
@@ -415,27 +428,15 @@
                                     </div>
                                 </div>
                                 ${isOwner ? `
-                                    <button class="delete-post-btn text-red-500 hover:text-red-700 transition-colors" data-post-id="${post.id}">
+                                    <button class="delete-post-btn text-red-500 hover:text-red-700 transition-colors" data-post-id="${post.id}" onclick="event.stopPropagation();">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                         </svg>
                                     </button>
                                 ` : ''}
                             </div>
-                            <p class="text-gray-700 mb-4 leading-relaxed ${isVideo ? 'cursor-pointer hover:text-gray-900 post-description' : ''}" 
-                               ${isVideo ? `data-post-id="${post.id}"
-                               data-image-url="${post.image_path}"
-                               data-media-type="video"
-                               data-user-name="${(post.user_name||'')}"
-                               data-user-genre="${(post.user_genre||'')}"
-                               data-user-location="${(post.user_location||post.user_city||'')}"
-                               data-user-type="${(post.user_type||'member')}"
-                               data-user-avatar="${(post.user_avatar||'')}"
-                               data-description="${(post.description||'')}"
-                               data-created-at="${(post.created_at||'')}"
-                               data-like-count="${likeCount}"
-                               data-comment-count="${commentCount}"
-                               data-is-liked="${(post.is_liked? 'true' : 'false')}"` : ''}>
+                            <p class="text-gray-700 mb-4 leading-relaxed" 
+>
                                 ${(post.description||'')}
                             </p>
                             <div class="flex justify-between items-center text-gray-500 text-sm">
@@ -478,6 +479,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Delegate clicks on images to open modal (mirrors profile modal behavior)
             document.addEventListener('click', function(e) {
+                // Don't open modal if clicking delete button
+                if (e.target.closest('.delete-post-btn')) {
+                    return;
+                }
+                
                 const imgEl = e.target.closest('.post-image');
                 if (imgEl) {
                     e.preventDefault();
@@ -486,11 +492,11 @@
                     return;
                 }
                 
-                // Handle clicks on video post descriptions
-                const descEl = e.target.closest('.post-description');
-                if (descEl && descEl.getAttribute('data-media-type') === 'video') {
+                // Handle clicks on video post details section
+                const detailsEl = e.target.closest('.post-details');
+                if (detailsEl && detailsEl.getAttribute('data-media-type') === 'video') {
                     e.preventDefault();
-                    const postData = extractPostDataFromImage(descEl);
+                    const postData = extractPostDataFromImage(detailsEl);
                     showImageModal(postData);
                 }
             });
