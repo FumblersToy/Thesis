@@ -617,20 +617,7 @@ function initFeed() {
             <div class="relative">
                 ${mediaSection}
             </div>
-            <div class="p-6 ${isVideo ? 'cursor-pointer hover:bg-gray-50 transition-colors post-details' : ''}"
-                 ${isVideo ? `data-post-id="${post.id}"
-                 data-image-url="${post.image_path}"
-                 data-media-type="video"
-                 data-user-name="${userName}"
-                 data-user-genre="${userGenre}"
-                 data-user-location="${userLocation}"
-                 data-user-type="${userType}"
-                 data-user-avatar="${userAvatar || ''}"
-                 data-description="${post.description || ''}"
-                 data-created-at="${createdAt}"
-                 data-like-count="${likeCountAttr}"
-                 data-comment-count="${commentCountAttr}"
-                 data-is-liked="${isLikedAttr}"` : ''}>
+            <div class="p-6">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-4">
                         ${avatarElement}
@@ -642,19 +629,33 @@ function initFeed() {
                     ${post.is_owner ? `
                         <button class="delete-post-btn text-red-500 hover:text-red-700 transition-colors" 
                                 data-post-id="${post.id}" 
-                                title="Delete post"
-                                onclick="event.stopPropagation();">
+                                title="Delete post">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                             </svg>
                         </button>
                     ` : ''}
                 </div>
-                <p class="text-gray-700 mb-4 leading-relaxed">${post.description || 'No description'}</p>
-                <div class="flex justify-between items-center text-gray-500 text-sm">
-                    <span>${formattedDate}</span>
-                    <div class="flex gap-4">
-                        <!-- Like/comment icons removed from preview; available in modal only -->
+                <div class="${isVideo ? 'cursor-pointer hover:bg-gray-50 transition-colors rounded-lg p-2 -m-2 post-details-clickable' : ''}" 
+                     ${isVideo ? `data-post-id="${post.id}"
+                     data-image-url="${post.image_path}"
+                     data-media-type="video"
+                     data-user-name="${userName}"
+                     data-user-genre="${userGenre}"
+                     data-user-location="${userLocation}"
+                     data-user-type="${userType}"
+                     data-user-avatar="${userAvatar || ''}"
+                     data-description="${post.description || ''}"
+                     data-created-at="${createdAt}"
+                     data-like-count="${likeCountAttr}"
+                     data-comment-count="${commentCountAttr}"
+                     data-is-liked="${isLikedAttr}"` : ''}>
+                    <p class="text-gray-700 mb-4 leading-relaxed">${post.description || 'No description'}</p>
+                    <div class="flex justify-between items-center text-gray-500 text-sm">
+                        <span>${formattedDate}</span>
+                        <div class="flex gap-4">
+                            <!-- Like/comment icons removed from preview; available in modal only -->
+                        </div>
                     </div>
                 </div>
             </div>

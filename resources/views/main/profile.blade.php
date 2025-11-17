@@ -708,15 +708,9 @@
                     return;
                 }
                 
-                // Handle clicks on video post details section
-                const detailsEl = e.target.closest('.post-details');
+                // Handle clicks on video post details clickable area (description/metadata only)
+                const detailsEl = e.target.closest('.post-details-clickable');
                 if (detailsEl && detailsEl.getAttribute('data-media-type') === 'video') {
-                    // Don't open modal if clicking in the header area (where delete button is)
-                    const clickedInHeader = e.target.closest('.flex.items-center.justify-between.mb-4');
-                    if (clickedInHeader) {
-                        return;
-                    }
-                    
                     e.preventDefault();
                     console.log('✅ Video post details clicked!');
                     const postData = extractPostDataFromImage(detailsEl);
