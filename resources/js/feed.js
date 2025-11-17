@@ -763,6 +763,7 @@ function initFeed() {
     document.addEventListener('click', function(e) {
         if (e.target.closest('.delete-post-btn')) {
             e.preventDefault();
+            e.stopPropagation();
             const button = e.target.closest('.delete-post-btn');
             const postId = button.getAttribute('data-post-id');
             
