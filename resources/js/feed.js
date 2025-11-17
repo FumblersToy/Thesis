@@ -542,7 +542,9 @@ function initFeed() {
 
     // Create post element
     function createPostElement(post) {
-        const hasImage = post.image_path && post.image_path.trim() !== '';
+        const hasMedia = post.image_path && post.image_path.trim() !== '';
+        const mediaType = post.media_type || 'image';
+        const isVideo = mediaType === 'video';
         const userName = post.user_name || 'User';
     const userGenre = post.user_genre || '';
     const userLocation = post.user_location || post.user_city || '';
@@ -572,7 +574,26 @@ function initFeed() {
     const commentCountAttr = post.comment_count || post.comments_count || 0;
     const isLikedAttr = post.is_liked ? 'true' : 'false';
 
-    const imageSection = hasImage ? `
+    const mediaSection = hasMedia ? (isVideo ? `
+        <video class="post-image w-full h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity" 
+               controls
+               loading="lazy"
+               data-post-id="${post.id}"
+               data-image-url="${post.image_path}"
+               data-media-type="video"
+               data-user-name="${userName}"
+               data-user-genre="${userGenre}"
+               data-user-location="${userLocation}"
+               data-user-type="${userType}"
+               data-user-avatar="${userAvatar || ''}"
+               data-description="${post.description || ''}"
+               data-created-at="${createdAt}"
+               data-like-count="${likeCountAttr}"
+               data-comment-count="${commentCountAttr}"
+               data-is-liked="${isLikedAttr}">
+            <source src="${post.image_path}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>` : `
         <img class="post-image w-full h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity" 
              src="${post.image_path}" 
              alt="Post image" 
@@ -580,6 +601,7 @@ function initFeed() {
              onerror="this.src='/images/sample-post-1.jpg'"
              data-post-id="${post.id}"
              data-image-url="${post.image_path}"
+             data-media-type="image"
              data-user-name="${userName}"
              data-user-genre="${userGenre}"
              data-user-location="${userLocation}"
@@ -589,11 +611,11 @@ function initFeed() {
              data-created-at="${createdAt}"
              data-like-count="${likeCountAttr}"
              data-comment-count="${commentCountAttr}"
-             data-is-liked="${isLikedAttr}">` : '';
+             data-is-liked="${isLikedAttr}">`) : '';
 
         postDiv.innerHTML = `
             <div class="relative">
-                ${imageSection}
+                ${mediaSection}
                 <div class="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
                     ${userTypeEmoji} ${userType}
                 </div>

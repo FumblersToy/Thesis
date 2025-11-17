@@ -23,7 +23,7 @@ class PostController extends Controller
         try {
             $request->validate([
                 'description' => 'nullable|string|max:1000',
-                'image' => 'nullable|image|max:4096',
+                'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov,avi,wmv|max:51200', // 50MB for videos
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->wantsJson() || $request->ajax()) {
@@ -55,21 +55,34 @@ class PostController extends Controller
 
         $imageUrl = null;
         $imagePublicId = null;
+        $mediaType = null;
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             if ($file->isValid()) {
                 try {
-                    // Upload to Cloudinary using Facade
-                    $uploadedFile = Cloudinary::upload($file->getRealPath(), [
+                    // Detect if file is a video or image
+                    $mimeType = $file->getMimeType();
+                    $isVideo = str_starts_with($mimeType, 'video/');
+                    $mediaType = $isVideo ? 'video' : 'image';
+                    
+                    // Upload to Cloudinary using Facade with appropriate resource type
+                    $uploadOptions = [
                         'folder' => 'musician_posts',
-                        'transformation' => [
+                    ];
+                    
+                    if ($isVideo) {
+                        $uploadOptions['resource_type'] = 'video';
+                    } else {
+                        $uploadOptions['transformation'] = [
                             'width' => 1200,
                             'height' => 1200,
                             'crop' => 'limit',
                             'quality' => 'auto'
-                        ],
-                    ]);
+                        ];
+                    }
+                    
+                    $uploadedFile = Cloudinary::upload($file->getRealPath(), $uploadOptions);
 
                     $imageUrl = $uploadedFile->getSecurePath();
                     $imagePublicId = $uploadedFile->getPublicId();
@@ -100,6 +113,7 @@ class PostController extends Controller
                 'description' => $request->description,
                 'image_path' => $imageUrl,
                 'image_public_id' => $imagePublicId,
+                'media_type' => $mediaType,
             ]);
 
             Log::info('Post created successfully', [
@@ -128,6 +142,7 @@ class PostController extends Controller
                         'id' => $post->id,
                         'description' => $post->description,
                         'image_path' => $post->image_path ? getImageUrl($post->image_path) : null,
+                        'media_type' => $post->media_type,
                         'created_at' => $post->created_at->toDateTimeString(),
                         'user_type' => $userType,
                         'user_name' => $userName,
@@ -229,6 +244,7 @@ class PostController extends Controller
                     'id' => $post->id,
                     'description' => $post->description,
                     'image_path' => $post->image_path ? getImageUrl($post->image_path) : null,
+                    'media_type' => $post->media_type,
                     'created_at' => optional($post->created_at)->toDateTimeString(),
                     'user_type' => $userType,
                     'user_name' => $userName,
@@ -274,11 +290,12 @@ class PostController extends Controller
             return redirect()->back()->with('error', 'Unauthorized to delete this post');
         }
 
-        // Delete image from Cloudinary if public_id exists
+        // Delete image/video from Cloudinary if public_id exists
         if ($post->image_public_id) {
             try {
-                Cloudinary::destroy($post->image_public_id);
-                Log::info('Cloudinary image deleted', ['public_id' => $post->image_public_id]);
+                $resourceType = $post->media_type === 'video' ? 'video' : 'image';
+                Cloudinary::destroy($post->image_public_id, ['resource_type' => $resourceType]);
+                Log::info('Cloudinary media deleted', ['public_id' => $post->image_public_id, 'type' => $resourceType]);
             } catch (Exception $e) {
                 Log::error('Cloudinary delete error: ' . $e->getMessage());
             }

@@ -232,14 +232,14 @@
                 </h2>
                 <form id="createPostForm" class="space-y-6" enctype="multipart/form-data" action="{{ route('posts.store') }}" method="POST">
                     @csrf
-                    <label for="image" class="block text-gray-700 font-medium mb-3 text-lg">📷 Upload Image (Optional)</label>
+                    <label for="image" class="block text-gray-700 font-medium mb-3 text-lg">📷 Upload Image or Video (Optional)</label>
                     <div class="custom-file-input">
-                        <input type="file" name="image" id="image" accept="image/*">
+                        <input type="file" name="image" id="image" accept="image/*,video/*">
                         <label for="image" class="custom-file-label cursor-pointer">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                             </svg>
-                            <span id="fileText">Choose an image or drag it here</span>
+                            <span id="fileText">Choose an image/video or drag it here</span>
                         </label>
                         
                         <span id="fileName" class="text-sm text-gray-600 hidden"></span>
@@ -333,6 +333,8 @@
                     const likeCount = post.like_count || post.likes_count || 0;
                     const commentCount = post.comment_count || post.comments_count || 0;
                     const isOwner = post.is_owner || false; // Add is_owner check
+                    const mediaType = post.media_type || 'image';
+                    const isVideo = mediaType === 'video';
 
                     const userTypeEmoji = userType === 'musician' ? '🎵' : (userType === 'business' ? '🏢' : '👤');
                     const userMeta = [userGenre, userLocation].filter(Boolean).join(' · ');
@@ -357,25 +359,47 @@
                     if (post.image_path) {
                         inner += `
                             <div class="relative">
-                                <img 
-                                    src="${post.image_path}" 
-                                    alt="Post image" 
-                                    loading="lazy" 
-                                    class="post-image w-full h-80 object-cover cursor-pointer" 
-                                    onerror="this.src='/images/sample-post-1.jpg'"
-                                    data-post-id="${post.id}"
-                                    data-image-url="${post.image_path}"
-                                    data-user-name="${(post.user_name||'') }"
-                                    data-user-genre="${(post.user_genre||'') }"
-                                    data-user-location="${(post.user_location||post.user_city||'') }"
-                                    data-user-type="${(post.user_type||'member') }"
-                                    data-user-avatar="${(post.user_avatar||'') }"
-                                    data-description="${(post.description||'') }"
-                                    data-created-at="${(post.created_at||'') }"
-                                    data-like-count="${likeCount}"
-                                    data-comment-count="${commentCount}"
-                                    data-is-liked="${(post.is_liked? 'true' : 'false')}"
-                                />
+                                ${isVideo ? `
+                                    <video 
+                                        controls
+                                        class="post-image w-full h-80 object-cover cursor-pointer" 
+                                        data-post-id="${post.id}"
+                                        data-image-url="${post.image_path}"
+                                        data-media-type="video"
+                                        data-user-name="${(post.user_name||'') }"
+                                        data-user-genre="${(post.user_genre||'') }"
+                                        data-user-location="${(post.user_location||post.user_city||'') }"
+                                        data-user-type="${(post.user_type||'member') }"
+                                        data-user-avatar="${(post.user_avatar||'') }"
+                                        data-description="${(post.description||'') }"
+                                        data-created-at="${(post.created_at||'') }"
+                                        data-like-count="${likeCount}"
+                                        data-comment-count="${commentCount}"
+                                        data-is-liked="${(post.is_liked? 'true' : 'false')}">
+                                        <source src="${post.image_path}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                ` : `
+                                    <img 
+                                        src="${post.image_path}" 
+                                        alt="Post image" 
+                                        loading="lazy" 
+                                        class="post-image w-full h-80 object-cover cursor-pointer" 
+                                        onerror="this.src='/images/sample-post-1.jpg'"
+                                        data-post-id="${post.id}"
+                                        data-image-url="${post.image_path}"
+                                        data-media-type="image"
+                                        data-user-name="${(post.user_name||'') }"
+                                        data-user-genre="${(post.user_genre||'') }"
+                                        data-user-location="${(post.user_location||post.user_city||'') }"
+                                        data-user-type="${(post.user_type||'member') }"
+                                        data-user-avatar="${(post.user_avatar||'') }"
+                                        data-description="${(post.description||'') }"
+                                        data-created-at="${(post.created_at||'') }"
+                                        data-like-count="${likeCount}"
+                                        data-comment-count="${commentCount}"
+                                        data-is-liked="${(post.is_liked? 'true' : 'false')}"/>
+                                `}
                                 <div class="absolute top-4 right-4 bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm">
                                     ${userTypeEmoji} ${userType}
                                 </div>
@@ -456,6 +480,7 @@
                 return {
                     id: img.getAttribute('data-post-id'),
                     imageUrl: img.getAttribute('data-image-url'),
+                    mediaType: img.getAttribute('data-media-type') || 'image',
                     userName: img.getAttribute('data-user-name'),
                     userGenre: img.getAttribute('data-user-genre'),
                     userType: img.getAttribute('data-user-type'),
@@ -488,13 +513,23 @@
                     `<img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200" src="${postData.userAvatar}" alt="avatar">` :
                     `<div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">${(postData.userName||'U').charAt(0).toUpperCase()}</div>`;
 
+                const isVideo = postData.mediaType === 'video';
+                const mediaHtml = isVideo ? `
+                    <video controls class="max-w-full max-h-full" style="width: 100%; height: 100%; object-fit: contain;">
+                        <source src="${postData.imageUrl}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                ` : `
+                    <img src="${postData.imageUrl}" 
+                         alt="Post image" 
+                         class="max-w-full max-h-full object-contain">
+                `;
+
                 modal.innerHTML = `
                     <div class="flex h-full max-h-[90vh]">
-                        <!-- Image Section -->
+                        <!-- Media Section -->
                         <div class="flex-1 bg-black flex items-center justify-center">
-                            <img src="${postData.imageUrl}" 
-                                 alt="Post image" 
-                                 class="max-w-full max-h-full object-contain">
+                            ${mediaHtml}
                         </div>
                         
                         <!-- Details Section -->
