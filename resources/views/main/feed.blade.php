@@ -425,7 +425,22 @@
                                     </button>
                                 ` : ''}
                             </div>
-                            <p class="text-gray-700 mb-4 leading-relaxed">${(post.description||'')}</p>
+                            <p class="text-gray-700 mb-4 leading-relaxed ${isVideo ? 'cursor-pointer hover:text-gray-900 post-description' : ''}" 
+                               ${isVideo ? `data-post-id="${post.id}"
+                               data-image-url="${post.image_path}"
+                               data-media-type="video"
+                               data-user-name="${(post.user_name||'')}"
+                               data-user-genre="${(post.user_genre||'')}"
+                               data-user-location="${(post.user_location||post.user_city||'')}"
+                               data-user-type="${(post.user_type||'member')}"
+                               data-user-avatar="${(post.user_avatar||'')}"
+                               data-description="${(post.description||'')}"
+                               data-created-at="${(post.created_at||'')}"
+                               data-like-count="${likeCount}"
+                               data-comment-count="${commentCount}"
+                               data-is-liked="${(post.is_liked? 'true' : 'false')}"` : ''}>
+                                ${(post.description||'')}
+                            </p>
                             <div class="flex justify-between items-center text-gray-500 text-sm">
                                 <span>${formattedDate}</span>
                                 <div class="flex gap-4">
@@ -470,6 +485,15 @@
                 if (imgEl) {
                     e.preventDefault();
                     const postData = extractPostDataFromImage(imgEl);
+                    showImageModal(postData);
+                    return;
+                }
+                
+                // Handle clicks on video post descriptions
+                const descEl = e.target.closest('.post-description');
+                if (descEl && descEl.getAttribute('data-media-type') === 'video') {
+                    e.preventDefault();
+                    const postData = extractPostDataFromImage(descEl);
                     showImageModal(postData);
                 }
             });

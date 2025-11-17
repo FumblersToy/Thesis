@@ -637,7 +637,20 @@ function initFeed() {
                         <p class="text-gray-600">${[userGenre, userLocation].filter(Boolean).join(' · ')}</p>
                     </div>
                 </div>
-                <p class="text-gray-700 mb-4 leading-relaxed">${post.description || 'No description'}</p>
+                <p class="text-gray-700 mb-4 leading-relaxed ${isVideo ? 'cursor-pointer hover:text-gray-900 post-description' : ''}"
+                   ${isVideo ? `data-post-id="${post.id}"
+                   data-image-url="${post.image_path}"
+                   data-media-type="video"
+                   data-user-name="${userName}"
+                   data-user-genre="${userGenre}"
+                   data-user-location="${userLocation}"
+                   data-user-type="${userType}"
+                   data-user-avatar="${userAvatar || ''}"
+                   data-description="${post.description || ''}"
+                   data-created-at="${createdAt}"
+                   data-like-count="${likeCountAttr}"
+                   data-comment-count="${commentCountAttr}"
+                   data-is-liked="${isLikedAttr}"` : ''}>${post.description || 'No description'}</p>
                 <div class="flex justify-between items-center text-gray-500 text-sm">
                     <span>${formattedDate}</span>
                     <div class="flex gap-4">
