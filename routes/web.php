@@ -74,6 +74,10 @@ Route::middleware('auth')->group(function () {
     // Follow functionality
     Route::post('/users/{id}/follow', [App\Http\Controllers\FollowController::class, 'toggle'])->name('users.follow');
     
+    // Rating functionality
+    Route::post('/users/{musicianId}/rate', [App\Http\Controllers\RatingController::class, 'store'])->name('users.rate');
+    Route::get('/users/{musicianId}/rating', [App\Http\Controllers\RatingController::class, 'getUserRating'])->name('users.getRating');
+    
     // Messages
     Route::get('/messages', function () {
         return response()->view('messages.index')
