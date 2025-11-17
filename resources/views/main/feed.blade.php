@@ -479,7 +479,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Delegate clicks on images to open modal (mirrors profile modal behavior)
             document.addEventListener('click', function(e) {
-                // Don't open modal if clicking delete button
+                // Don't open modal if clicking delete button or anywhere in the header area with delete button
                 if (e.target.closest('.delete-post-btn')) {
                     return;
                 }
@@ -495,6 +495,12 @@
                 // Handle clicks on video post details section
                 const detailsEl = e.target.closest('.post-details');
                 if (detailsEl && detailsEl.getAttribute('data-media-type') === 'video') {
+                    // Don't open modal if clicking in the header area (where delete button is)
+                    const clickedInHeader = e.target.closest('.flex.items-center.justify-between.mb-4');
+                    if (clickedInHeader) {
+                        return;
+                    }
+                    
                     e.preventDefault();
                     const postData = extractPostDataFromImage(detailsEl);
                     showImageModal(postData);
