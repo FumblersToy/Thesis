@@ -305,26 +305,50 @@
                         $exists = $post->image_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($post->image_path);
                         $imageUrl = $post->image_path ? getImageUrl($post->image_path) : '/images/sample-post-1.jpg';
                         $isOwner = $post->user_id === auth()->id();
+                        $mediaType = $post->media_type ?? 'image';
+                        $isVideo = $mediaType === 'video';
                     @endphp
                     <article class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 animate-scale-in border border-gray-200">
                         <div class="relative">
-                            <img 
-                                src="{{ $imageUrl }}"
-                                alt="post"
-                                class="post-image w-full h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-                                onerror="this.onerror=null;this.src='/images/sample-post-1.jpg';"
-                                data-post-id="{{ $post->id }}"
-                                data-image-url="{{ $imageUrl }}"
-                                data-user-name="{{ $displayName }}"
-                                data-user-genre="{{ $roleLabel }}"
-                                data-user-type="{{ $musician ? 'musician' : ($business ? 'business' : 'member') }}"
-                                data-user-avatar="{{ $profileImage }}"
-                                data-description="{{ $post->description }}"
-                                data-created-at="{{ $post->created_at->toDateTimeString() }}"
-                                data-like-count="{{ $post->likes()->count() }}"
-                                data-comment-count="{{ $post->comments()->count() }}"
-                                data-is-liked="{{ $post->likes()->where('user_id', auth()->id())->exists() ? 'true' : 'false' }}"
-                            >
+                            @if($isVideo)
+                                <video
+                                    controls
+                                    class="post-image w-full h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                    data-post-id="{{ $post->id }}"
+                                    data-image-url="{{ $imageUrl }}"
+                                    data-media-type="video"
+                                    data-user-name="{{ $displayName }}"
+                                    data-user-genre="{{ $roleLabel }}"
+                                    data-user-type="{{ $musician ? 'musician' : ($business ? 'business' : 'member') }}"
+                                    data-user-avatar="{{ $profileImage }}"
+                                    data-description="{{ $post->description }}"
+                                    data-created-at="{{ $post->created_at->toDateTimeString() }}"
+                                    data-like-count="{{ $post->likes()->count() }}"
+                                    data-comment-count="{{ $post->comments()->count() }}"
+                                    data-is-liked="{{ $post->likes()->where('user_id', auth()->id())->exists() ? 'true' : 'false' }}">
+                                    <source src="{{ $imageUrl }}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+                            @else
+                                <img 
+                                    src="{{ $imageUrl }}"
+                                    alt="post"
+                                    class="post-image w-full h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                    onerror="this.onerror=null;this.src='/images/sample-post-1.jpg';"
+                                    data-post-id="{{ $post->id }}"
+                                    data-image-url="{{ $imageUrl }}"
+                                    data-media-type="image"
+                                    data-user-name="{{ $displayName }}"
+                                    data-user-genre="{{ $roleLabel }}"
+                                    data-user-type="{{ $musician ? 'musician' : ($business ? 'business' : 'member') }}"
+                                    data-user-avatar="{{ $profileImage }}"
+                                    data-description="{{ $post->description }}"
+                                    data-created-at="{{ $post->created_at->toDateTimeString() }}"
+                                    data-like-count="{{ $post->likes()->count() }}"
+                                    data-comment-count="{{ $post->comments()->count() }}"
+                                    data-is-liked="{{ $post->likes()->where('user_id', auth()->id())->exists() ? 'true' : 'false' }}"
+                                >
+                            @endif
                             @if($isOwner)
                                 <button class="delete-post-btn absolute top-4 left-4 bg-red-500/80 hover:bg-red-600 text-white p-2 rounded-full transition-colors duration-200" 
                                         data-post-id="{{ $post->id }}" 
@@ -432,6 +456,18 @@
                 console.log('🔍 Click detected on:', e.target);
                 console.log('🔍 Target classes:', e.target.className);
                 console.log('🔍 Closest .post-image:', e.target.closest('.post-image'));
+                
+                // Handle delete button clicks
+                if (e.target.closest('.delete-post-btn')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const deleteBtn = e.target.closest('.delete-post-btn');
+                    const postId = deleteBtn.getAttribute('data-post-id');
+                    if (postId) {
+                        showDeleteConfirmation(postId, deleteBtn);
+                    }
+                    return;
+                }
                 
                 if (e.target.closest('.post-image')) {
                     e.preventDefault();
@@ -605,6 +641,7 @@
                 return {
                     id: img.getAttribute('data-post-id'),
                     imageUrl: img.getAttribute('data-image-url'),
+                    mediaType: img.getAttribute('data-media-type') || 'image',
                     userName: img.getAttribute('data-user-name'),
                     userGenre: img.getAttribute('data-user-genre'),
                     userType: img.getAttribute('data-user-type'),
@@ -638,13 +675,23 @@
                     `<img class="w-16 h-16 rounded-full object-cover border-2 border-gray-200" src="${postData.userAvatar}" alt="avatar">` :
                     `<div class="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-xl">${postData.userName.charAt(0).toUpperCase()}</div>`;
                 
+                const isVideo = postData.mediaType === 'video';
+                const mediaHtml = isVideo ? `
+                    <video controls class="max-w-full max-h-full" style="width: 100%; height: 100%; object-fit: contain;">
+                        <source src="${postData.imageUrl}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                ` : `
+                    <img src="${postData.imageUrl}" 
+                         alt="Post image" 
+                         class="max-w-full max-h-full object-contain">
+                `;
+                
                 modal.innerHTML = `
                     <div class="flex h-full max-h-[90vh]">
-                        <!-- Image Section -->
+                        <!-- Media Section -->
                         <div class="flex-1 bg-black flex items-center justify-center">
-                            <img src="${postData.imageUrl}" 
-                                 alt="Post image" 
-                                 class="max-w-full max-h-full object-contain">
+                            ${mediaHtml}
                         </div>
                         
                         <!-- Details Section -->
@@ -976,6 +1023,143 @@
                 `;
                 
                 commentsContainer.appendChild(commentElement);
+            }
+
+            // Custom confirmation modal for delete
+            function showDeleteConfirmation(postId, buttonElement) {
+                // Create modal overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+                overlay.style.opacity = '0';
+                overlay.style.transition = 'opacity 0.2s ease-out';
+
+                // Create modal
+                const modal = document.createElement('div');
+                modal.className = 'bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform scale-95 transition-all duration-200';
+
+                modal.innerHTML = `
+                    <div class="text-center">
+                        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                            <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Delete Post</h3>
+                        <p class="text-sm text-gray-500 mb-6">Are you sure you want to delete this post? This action cannot be undone.</p>
+                        <div class="flex gap-3">
+                            <button class="cancel-btn flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-medium">
+                                Cancel
+                            </button>
+                            <button class="confirm-btn flex-1 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                overlay.appendChild(modal);
+                document.body.appendChild(overlay);
+
+                setTimeout(() => {
+                    overlay.style.opacity = '1';
+                    modal.style.transform = 'scale(1)';
+                }, 10);
+
+                const closeModal = () => {
+                    overlay.style.opacity = '0';
+                    modal.style.transform = 'scale(0.95)';
+                    setTimeout(() => overlay.remove(), 200);
+                };
+
+                modal.querySelector('.cancel-btn').addEventListener('click', closeModal);
+                modal.querySelector('.confirm-btn').addEventListener('click', () => {
+                    deletePost(postId, buttonElement);
+                    closeModal();
+                });
+
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) closeModal();
+                });
+            }
+
+            // Delete post function
+            async function deletePost(postId, buttonElement) {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                
+                try {
+                    const response = await fetch(`/posts/${postId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Find and remove the post card from the DOM
+                        const postCard = buttonElement.closest('article');
+                        if (postCard) {
+                            postCard.style.opacity = '0';
+                            postCard.style.transform = 'scale(0.95)';
+                            setTimeout(() => {
+                                postCard.remove();
+                                
+                                // Check if there are no more posts
+                                const postsGrid = document.getElementById('postsGrid');
+                                if (postsGrid && postsGrid.children.length === 0) {
+                                    postsGrid.innerHTML = `
+                                        <div class="col-span-full text-center py-12">
+                                            <div class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg p-8 border border-gray-200">
+                                                <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                                <h3 class="text-lg font-semibold text-gray-700 mb-2">No posts yet</h3>
+                                                <p class="text-gray-500">This user hasn't shared any posts yet.</p>
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+                            }, 300);
+                        }
+
+                        // Show success notification
+                        showNotification('Post deleted successfully!', 'success');
+                    } else {
+                        showNotification(data.message || 'Failed to delete post', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting post:', error);
+                    showNotification('Network error. Please try again.', 'error');
+                }
+            }
+
+            // Show notification
+            function showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 z-50 p-4 rounded-2xl shadow-lg backdrop-blur-xl transform translate-x-full transition-transform duration-300 ${
+                    type === 'success' ? 'bg-green-500/90 text-white' : 
+                    type === 'error' ? 'bg-red-500/90 text-white' : 
+                    'bg-blue-500/90 text-white'
+                }`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(0)';
+                }, 100);
+                
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (document.body.contains(notification)) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
             }
         });
     </script>
