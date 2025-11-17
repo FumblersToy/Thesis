@@ -463,6 +463,193 @@
                 });
             }
 
+            // Rating modal and functionality
+            function showRatingModal(musicianId) {
+                // Check if modal already exists
+                let modal = document.getElementById('ratingModal');
+                if (modal) {
+                    modal.remove();
+                }
+
+                // Create modal
+                modal = document.createElement('div');
+                modal.id = 'ratingModal';
+                modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50';
+                modal.innerHTML = `
+                    <div class="bg-white/95 backdrop-blur-xl rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl border border-white/20">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Rate Musician</h3>
+                        <p class="text-gray-600 mb-6">Share your experience working with this musician</p>
+                        
+                        <div class="mb-6">
+                            <div class="flex gap-2 justify-center mb-2" id="starRating">
+                                ${[1, 2, 3, 4, 5].map(star => `
+                                    <button type="button" class="star-btn text-4xl transition-all duration-200 hover:scale-110" data-rating="${star}">
+                                        <span class="star-empty">☆</span>
+                                        <span class="star-filled hidden">⭐</span>
+                                    </button>
+                                `).join('')}
+                            </div>
+                            <p class="text-center text-gray-600 text-sm" id="ratingText">Click to rate</p>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 font-medium mb-2">Comment (Optional)</label>
+                            <textarea id="ratingComment" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none" rows="4" placeholder="Share your thoughts about this musician..."></textarea>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button type="button" id="submitRating" class="flex-1 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-medium py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                Submit Rating
+                            </button>
+                            <button type="button" id="cancelRating" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 rounded-xl transition-all duration-300">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+
+                let selectedRating = 0;
+                const starButtons = modal.querySelectorAll('.star-btn');
+                const submitBtn = modal.querySelector('#submitRating');
+                const cancelBtn = modal.querySelector('#cancelRating');
+                const ratingText = modal.querySelector('#ratingText');
+                const commentInput = modal.querySelector('#ratingComment');
+
+                // Load existing rating if any
+                fetch(`/users/${musicianId}/rating`, {
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.user_rating) {
+                        selectedRating = data.user_rating;
+                        updateStars(selectedRating);
+                        submitBtn.disabled = false;
+                        ratingText.textContent = getRatingText(selectedRating);
+                        if (data.user_comment) {
+                            commentInput.value = data.user_comment;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading existing rating:', error);
+                });
+
+                // Star click handlers
+                starButtons.forEach((btn, index) => {
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        selectedRating = index + 1;
+                        updateStars(selectedRating);
+                        submitBtn.disabled = false;
+                        ratingText.textContent = getRatingText(selectedRating);
+                    });
+                });
+
+                function updateStars(rating) {
+                    starButtons.forEach((btn, index) => {
+                        const empty = btn.querySelector('.star-empty');
+                        const filled = btn.querySelector('.star-filled');
+                        if (index < rating) {
+                            empty.classList.add('hidden');
+                            filled.classList.remove('hidden');
+                        } else {
+                            empty.classList.remove('hidden');
+                            filled.classList.add('hidden');
+                        }
+                    });
+                }
+
+                function getRatingText(rating) {
+                    const texts = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+                    return texts[rating] || 'Click to rate';
+                }
+
+                // Submit rating
+                submitBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (selectedRating === 0) return;
+
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Submitting...';
+
+                    fetch(`/users/${musicianId}/rate`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            rating: selectedRating,
+                            comment: commentInput.value.trim()
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification('Rating submitted successfully!', 'success');
+                            modal.remove();
+                            // Update rating display
+                            updateRatingDisplay(data.average_rating, data.rating_count);
+                        } else {
+                            showNotification(data.message || 'Failed to submit rating', 'error');
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Submit Rating';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Rating error:', error);
+                        showNotification('Failed to submit rating', 'error');
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit Rating';
+                    });
+                });
+
+                // Cancel button
+                cancelBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    modal.remove();
+                });
+
+                // Close on backdrop click
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            }
+
+            function loadAverageRating(musicianId) {
+                fetch(`/users/${musicianId}/rating`, {
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateRatingDisplay(data.average_rating, data.rating_count);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading rating:', error);
+                });
+            }
+
+            function updateRatingDisplay(avgRating, count) {
+                const avgRatingEl = document.getElementById('avgRating');
+                const ratingCountEl = document.getElementById('ratingCount');
+                if (avgRatingEl && ratingCountEl) {
+                    avgRatingEl.textContent = avgRating.toFixed(1);
+                    ratingCountEl.textContent = count;
+                }
+            }
+
             // Rating functionality
             const ratingButton = document.getElementById('ratingButton');
             if (ratingButton) {
@@ -1186,186 +1373,6 @@
                         }
                     }, 300);
                 }, 3000);
-            }
-
-            // Rating modal and functionality
-            function showRatingModal(musicianId) {
-                // Check if modal already exists
-                let modal = document.getElementById('ratingModal');
-                if (modal) {
-                    modal.remove();
-                }
-
-                // Create modal
-                modal = document.createElement('div');
-                modal.id = 'ratingModal';
-                modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50';
-                modal.innerHTML = `
-                    <div class="bg-white/95 backdrop-blur-xl rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl border border-white/20">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-4">Rate Musician</h3>
-                        <p class="text-gray-600 mb-6">Share your experience working with this musician</p>
-                        
-                        <div class="mb-6">
-                            <div class="flex gap-2 justify-center mb-2" id="starRating">
-                                ${[1, 2, 3, 4, 5].map(star => `
-                                    <button class="star-btn text-4xl transition-all duration-200 hover:scale-110" data-rating="${star}">
-                                        <span class="star-empty">☆</span>
-                                        <span class="star-filled hidden">⭐</span>
-                                    </button>
-                                `).join('')}
-                            </div>
-                            <p class="text-center text-gray-600 text-sm" id="ratingText">Click to rate</p>
-                        </div>
-
-                        <div class="mb-6">
-                            <label class="block text-gray-700 font-medium mb-2">Comment (Optional)</label>
-                            <textarea id="ratingComment" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none" rows="4" placeholder="Share your thoughts about this musician..."></textarea>
-                        </div>
-
-                        <div class="flex gap-3">
-                            <button id="submitRating" class="flex-1 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-medium py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                                Submit Rating
-                            </button>
-                            <button id="cancelRating" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 rounded-xl transition-all duration-300">
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                `;
-
-                document.body.appendChild(modal);
-
-                let selectedRating = 0;
-                const starButtons = modal.querySelectorAll('.star-btn');
-                const submitBtn = modal.getElementById('submitRating');
-                const cancelBtn = modal.getElementById('cancelRating');
-                const ratingText = modal.getElementById('ratingText');
-                const commentInput = modal.getElementById('ratingComment');
-
-                // Load existing rating if any
-                fetch(`/users/${musicianId}/rating`, {
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.user_rating) {
-                        selectedRating = data.user_rating;
-                        updateStars(selectedRating);
-                        submitBtn.disabled = false;
-                        ratingText.textContent = getRatingText(selectedRating);
-                        if (data.user_comment) {
-                            commentInput.value = data.user_comment;
-                        }
-                    }
-                });
-
-                // Star click handlers
-                starButtons.forEach((btn, index) => {
-                    btn.addEventListener('click', () => {
-                        selectedRating = index + 1;
-                        updateStars(selectedRating);
-                        submitBtn.disabled = false;
-                        ratingText.textContent = getRatingText(selectedRating);
-                    });
-                });
-
-                function updateStars(rating) {
-                    starButtons.forEach((btn, index) => {
-                        const empty = btn.querySelector('.star-empty');
-                        const filled = btn.querySelector('.star-filled');
-                        if (index < rating) {
-                            empty.classList.add('hidden');
-                            filled.classList.remove('hidden');
-                        } else {
-                            empty.classList.remove('hidden');
-                            filled.classList.add('hidden');
-                        }
-                    });
-                }
-
-                function getRatingText(rating) {
-                    const texts = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
-                    return texts[rating] || 'Click to rate';
-                }
-
-                // Submit rating
-                submitBtn.addEventListener('click', () => {
-                    if (selectedRating === 0) return;
-
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'Submitting...';
-
-                    fetch(`/users/${musicianId}/rate`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({
-                            rating: selectedRating,
-                            comment: commentInput.value.trim()
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showNotification('Rating submitted successfully!', 'success');
-                            modal.remove();
-                            // Update rating display
-                            updateRatingDisplay(data.average_rating, data.rating_count);
-                        } else {
-                            showNotification(data.message || 'Failed to submit rating', 'error');
-                            submitBtn.disabled = false;
-                            submitBtn.textContent = 'Submit Rating';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Rating error:', error);
-                        showNotification('Failed to submit rating', 'error');
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Submit Rating';
-                    });
-                });
-
-                // Cancel button
-                cancelBtn.addEventListener('click', () => {
-                    modal.remove();
-                });
-
-                // Close on backdrop click
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        modal.remove();
-                    }
-                });
-            }
-
-            function loadAverageRating(musicianId) {
-                fetch(`/users/${musicianId}/rating`, {
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        updateRatingDisplay(data.average_rating, data.rating_count);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading rating:', error);
-                });
-            }
-
-            function updateRatingDisplay(avgRating, count) {
-                const avgRatingEl = document.getElementById('avgRating');
-                const ratingCountEl = document.getElementById('ratingCount');
-                if (avgRatingEl && ratingCountEl) {
-                    avgRatingEl.textContent = avgRating.toFixed(1);
-                    ratingCountEl.textContent = count;
-                }
             }
         });
     </script>
