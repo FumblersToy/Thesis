@@ -34,6 +34,61 @@ Route::post('/forgot-password', [App\Http\Controllers\Auth\ForgotPasswordControl
 Route::get('/reset-password/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->middleware('guest')->name('password.reset');
 Route::post('/reset-password', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->middleware('guest')->name('password.update');
 
+// Debug route - check mail configuration
+Route::get('/debug/mail-config', function () {
+    return response()->json([
+        'MAIL_MAILER' => config('mail.default'),
+        'MAIL_HOST' => config('mail.mailers.smtp.host'),
+        'MAIL_PORT' => config('mail.mailers.smtp.port'),
+        'MAIL_USERNAME' => config('mail.mailers.smtp.username'),
+        'MAIL_ENCRYPTION' => config('mail.mailers.smtp.encryption'),
+        'MAIL_FROM_ADDRESS' => config('mail.from.address'),
+        'MAIL_FROM_NAME' => config('mail.from.name'),
+        'WARNING' => 'If MAIL_MAILER is "log", emails are saved to storage/logs instead of being sent'
+    ]);
+})->name('debug.mail');
+
+// Debug route - test email sending
+Route::get('/debug/test-email/{email}', function ($email) {
+    try {
+        \Log::info('[DEBUG] Testing email to: ' . $email);
+        
+        \Illuminate\Support\Facades\Mail::raw('This is a test email from Bandmate. If you receive this, your email configuration is working!', function ($message) use ($email) {
+            $message->to($email)
+                    ->subject('Test Email from Bandmate');
+        });
+        
+        $failures = \Illuminate\Support\Facades\Mail::failures();
+        
+        \Log::info('[DEBUG] Email test completed', [
+            'failures' => $failures,
+            'failure_count' => count($failures)
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Email sent! Check your inbox and spam folder.',
+            'failures' => $failures,
+            'config' => [
+                'driver' => config('mail.default'),
+                'host' => config('mail.mailers.smtp.host'),
+                'from' => config('mail.from.address')
+            ]
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('[DEBUG] Email test failed', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'class' => get_class($e)
+        ], 500);
+    }
+})->name('debug.test-email');
+
 Route::get('/register', function () {
     return response()->view('register')
         ->header('Cache-Control', 'no-cache, no-store, must-revalidate')

@@ -64,15 +64,49 @@ class ForgotPasswordController extends Controller
                 'reset_url' => $resetUrl
             ]);
 
-            Mail::send('emails.password-reset', [
-                'resetUrl' => $resetUrl,
-                'user' => User::where('email', $email)->first()
-            ], function ($message) use ($email) {
-                $message->to($email)
-                        ->subject('Reset Your Password - Bandmate');
-            });
+            try {
+                Mail::send('emails.password-reset', [
+                    'resetUrl' => $resetUrl,
+                    'user' => User::where('email', $email)->first()
+                ], function ($message) use ($email) {
+                    $message->to($email)
+                            ->subject('Reset Your Password - Bandmate');
+                });
 
-            \Log::info('[FORGOT PASSWORD] Email sent successfully');
+                // Check for mail failures
+                if (count(Mail::failures()) > 0) {
+                    \Log::error('[FORGOT PASSWORD] Email failed to send', [
+                        'email' => $email,
+                        'failures' => Mail::failures()
+                    ]);
+                    
+                    if ($request->wantsJson() || $request->ajax()) {
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Failed to send email. Please check your email configuration.'
+                        ], 500);
+                    }
+                    
+                    return back()->withErrors(['email' => 'Failed to send email. Please try again later.']);
+                }
+
+                \Log::info('[FORGOT PASSWORD] Email sent successfully');
+            } catch (\Exception $e) {
+                \Log::error('[FORGOT PASSWORD] Exception while sending email', [
+                    'email' => $email,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Email error: ' . $e->getMessage()
+                    ], 500);
+                }
+                
+                return back()->withErrors(['email' => 'Error sending email: ' . $e->getMessage()]);
+            }
 
             // Return JSON response for AJAX requests
             if ($request->wantsJson() || $request->ajax()) {
