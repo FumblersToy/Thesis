@@ -138,17 +138,32 @@
                 }
             })
             .then(response => {
+                // Check if response is ok (status 200-299)
                 if (response.ok) {
-                    // Reload page to show success message
-                    window.location.reload();
+                    return response.json().catch(() => {
+                        // If no JSON, just reload
+                        window.location.reload();
+                        return null;
+                    });
                 } else {
-                    return response.json();
+                    // For error responses, parse the JSON
+                    return response.json().then(data => {
+                        throw data;
+                    });
                 }
             })
             .then(data => {
-                if (data) {
-                    // Display errors
-                    const errors = data.errors || {};
+                // Success - reload to show success message
+                if (data !== null) {
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Forgot password error:', error);
+                
+                // Display errors
+                if (error && error.errors) {
+                    const errors = error.errors;
                     errorList.innerHTML = '';
                     
                     Object.keys(errors).forEach(key => {
@@ -156,19 +171,12 @@
                         errorItem.textContent = errors[key][0];
                         errorList.appendChild(errorItem);
                     });
-                    
-                    errorContainer.classList.remove('hidden');
-                    
-                    // Reset button state
-                    btnText.textContent = 'Send Reset Link';
-                    spinner.classList.add('hidden');
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-75');
+                } else if (error && error.message) {
+                    errorList.innerHTML = `<li>${error.message}</li>`;
+                } else {
+                    errorList.innerHTML = '<li>An error occurred. Please try again.</li>';
                 }
-            })
-            .catch(error => {
-                console.error('Forgot password error:', error);
-                errorList.innerHTML = '<li>An error occurred. Please try again.</li>';
+                
                 errorContainer.classList.remove('hidden');
                 
                 // Reset button state

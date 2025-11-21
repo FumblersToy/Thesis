@@ -52,6 +52,14 @@ class ForgotPasswordController extends Controller
                     ->subject('Reset Your Password - Bandmate');
         });
 
+        // Return JSON response for AJAX requests
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'We have emailed your password reset link!'
+            ]);
+        }
+
         return back()->with('status', 'We have emailed your password reset link!');
     }
 }
