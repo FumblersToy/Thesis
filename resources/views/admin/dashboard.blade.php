@@ -6,6 +6,20 @@
     <title>Admin Dashboard - BandMate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>
+        // Prevent back navigation to login page
+        window.history.pushState(null, null, window.location.href);
+        window.onpopstate = function() {
+            window.history.pushState(null, null, window.location.href);
+        };
+        
+        // Reload page if coming from cache (e.g., after logout)
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+    </script>
 </head>
 <body class="bg-gray-100">
     <!-- Navigation -->
@@ -18,7 +32,7 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <span class="text-gray-600">{{ auth('admin')->user()->name }}</span>
-                    <form method="POST" action="{{ route('admin.logout') }}" class="inline">
+                    <form method="POST" action="{{ route('admin.logout') }}" class="inline" id="logoutForm">
                         @csrf
                         <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
                             Logout
@@ -195,6 +209,14 @@
 
     <script>
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        // Handle logout to prevent back button after logout
+        document.getElementById('logoutForm').addEventListener('submit', function(e) {
+            // Clear the history stack before logout
+            if (window.history) {
+                window.history.replaceState(null, null, '{{ route("admin.login") }}');
+            }
+        });
 
         async function deleteUser(userId) {
             if (!confirm('Are you sure you want to delete this user? This will also delete all their posts and cannot be undone.')) {

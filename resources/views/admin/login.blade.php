@@ -6,6 +6,15 @@
     <title>Admin Login - BandMate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script>
+        // Prevent back navigation after successful login
+        window.history.replaceState(null, null, window.location.href);
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+    </script>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900">
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

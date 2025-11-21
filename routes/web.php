@@ -191,13 +191,25 @@ Route::get('/test-admin-dashboard', function() {
 // Admin Routes
 Route::prefix('admin')->name('admin.')->group(function () {
     // Admin Authentication Routes
-    Route::get('/login', [App\Http\Controllers\Admin\AuthController::class, 'showLogin'])->name('login');
+    Route::get('/login', function() {
+        $response = app(App\Http\Controllers\Admin\AuthController::class)->showLogin();
+        return response($response)
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
+    })->name('login');
     Route::post('/login', [App\Http\Controllers\Admin\AuthController::class, 'login']);
     Route::post('/logout', [App\Http\Controllers\Admin\AuthController::class, 'logout'])->name('logout');
     
     // Protected Admin Routes
     Route::middleware('admin')->group(function () {
-        Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard', function() {
+            $response = app(App\Http\Controllers\Admin\DashboardController::class)->index();
+            return response($response)
+                ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                ->header('Pragma', 'no-cache')
+                ->header('Expires', '0');
+        })->name('dashboard');
         Route::get('/users/{user}/posts', [App\Http\Controllers\Admin\DashboardController::class, 'userPosts'])->name('user.posts');
         Route::delete('/posts/{post}', [App\Http\Controllers\Admin\DashboardController::class, 'deletePost'])->name('post.delete');
         Route::delete('/users/{user}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteUser'])->name('user.delete');
