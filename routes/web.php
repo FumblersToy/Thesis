@@ -38,6 +38,7 @@ Route::post('/reset-password', [App\Http\Controllers\Auth\ResetPasswordControlle
 Route::get('/debug/mail-config', function () {
     return response()->json([
         'MAIL_MAILER' => config('mail.default'),
+        'MAIL_MAILER_ENV' => env('MAIL_MAILER'),
         'MAIL_HOST' => config('mail.mailers.smtp.host'),
         'MAIL_PORT' => config('mail.mailers.smtp.port'),
         'MAIL_USERNAME' => config('mail.mailers.smtp.username'),
@@ -47,6 +48,18 @@ Route::get('/debug/mail-config', function () {
         'WARNING' => 'If MAIL_MAILER is "log", emails are saved to storage/logs instead of being sent'
     ]);
 })->name('debug.mail');
+
+// Debug route - clear config cache
+Route::get('/debug/clear-config', function () {
+    \Illuminate\Support\Facades\Artisan::call('config:clear');
+    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Configuration cache cleared. Check /debug/mail-config again.',
+        'config_clear_output' => \Illuminate\Support\Facades\Artisan::output()
+    ]);
+})->name('debug.clear-config');
 
 // Debug route - test email sending
 Route::get('/debug/test-email/{email}', function ($email) {
