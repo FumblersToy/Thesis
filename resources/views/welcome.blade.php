@@ -24,7 +24,7 @@
                 Login
             </a>
             <a href="{{ route('register') }}" class="nav-btn register">
-                Get Started
+                Kadmiel Lets Go
             </a>
         </div>
     </header>
