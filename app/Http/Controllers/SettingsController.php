@@ -124,7 +124,6 @@ class SettingsController extends Controller
         if ($business) {
             $validatedBusiness = $request->validate([
                 'business.profile_picture' => 'nullable|image|max:3072',
-                'business.business_permit' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
                 'business.business_name' => 'nullable|string|max:255',
                 'business.contact_email' => 'nullable|email|max:255',
                 'business.phone_number' => 'nullable|string|max:20',
@@ -173,41 +172,6 @@ class SettingsController extends Controller
                         }
                     } catch (Exception $e) {
                         Log::error('Cloudinary upload error for business profile: ' . $e->getMessage());
-                    }
-                }
-            }
-
-            if ($request->hasFile('business.business_permit')) {
-                $file = $request->file('business.business_permit');
-                if ($file->isValid()) {
-                    // Delete old permit from Cloudinary if it exists
-                    if ($business->business_permit_public_id) {
-                        try {
-                            $cloudinaryUrl = config('cloudinary.cloud_url');
-                            if ($cloudinaryUrl) {
-                                $cloudinary = new Cloudinary($cloudinaryUrl);
-                                $cloudinary->uploadApi()->destroy($business->business_permit_public_id);
-                            }
-                        } catch (Exception $e) {
-                            Log::error('Cloudinary delete error for old business permit: ' . $e->getMessage());
-                        }
-                    }
-
-                    // Upload new permit to Cloudinary
-                    try {
-                        $cloudinaryUrl = config('cloudinary.cloud_url');
-                        if ($cloudinaryUrl) {
-                            $cloudinary = new Cloudinary($cloudinaryUrl);
-                            $uploadedFile = $cloudinary->uploadApi()->upload($file->getRealPath(), [
-                                'folder' => 'business_permits',
-                                'resource_type' => 'auto',
-                            ]);
-
-                            $business->business_permit = $uploadedFile['secure_url'] ?? '';
-                            $business->business_permit_public_id = $uploadedFile['public_id'] ?? null;
-                        }
-                    } catch (Exception $e) {
-                        Log::error('Cloudinary upload error for business permit: ' . $e->getMessage());
                     }
                 }
             }

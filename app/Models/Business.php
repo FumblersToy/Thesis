@@ -16,8 +16,6 @@ class Business extends Model
         'user_id',
         'profile_picture',
         'profile_picture_public_id',
-        'business_permit',
-        'business_permit_public_id',
         'business_name',
         'contact_email',
         'phone_number',
