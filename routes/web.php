@@ -58,17 +58,11 @@ Route::get('/debug/test-email/{email}', function ($email) {
                     ->subject('Test Email from Bandmate');
         });
         
-        $failures = \Illuminate\Support\Facades\Mail::failures();
-        
-        \Log::info('[DEBUG] Email test completed', [
-            'failures' => $failures,
-            'failure_count' => count($failures)
-        ]);
+        \Log::info('[DEBUG] Email test completed successfully');
         
         return response()->json([
             'success' => true,
             'message' => 'Email sent! Check your inbox and spam folder.',
-            'failures' => $failures,
             'config' => [
                 'driver' => config('mail.default'),
                 'host' => config('mail.mailers.smtp.host'),
