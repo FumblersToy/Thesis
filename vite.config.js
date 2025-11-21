@@ -15,6 +15,7 @@ export default defineConfig({
                 'resources/css/feed.css',
                 'resources/css/socket.css',
                 'resources/css/welcome.css',
+                'resources/css/auth.css',
                 'resources/js/app.js',
                 'resources/js/layout.js',
                 'resources/js/socket.js',
