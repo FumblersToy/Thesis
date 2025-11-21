@@ -109,6 +109,7 @@
         // Handle form submission
         document.getElementById('forgot-form').addEventListener('submit', function(event) {
             event.preventDefault();
+            console.log('[FORGOT PASSWORD] Form submission started');
             
             const form = this;
             const btn = document.getElementById('submit-btn');
@@ -116,6 +117,8 @@
             const spinner = document.getElementById('loading-spinner');
             const errorContainer = document.getElementById('error-container');
             const errorList = document.getElementById('error-list');
+            
+            console.log('[FORGOT PASSWORD] Form action URL:', form.action);
             
             // Show loading state
             btnText.textContent = 'Sending...';
@@ -127,8 +130,11 @@
             
             // Get form data
             const formData = new FormData(form);
+            const email = formData.get('email');
+            console.log('[FORGOT PASSWORD] Submitting for email:', email);
             
             // Submit form
+            console.log('[FORGOT PASSWORD] Starting fetch request...');
             fetch(form.action, {
                 method: 'POST',
                 body: formData,
@@ -138,31 +144,48 @@
                 }
             })
             .then(response => {
+                console.log('[FORGOT PASSWORD] Response received:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    ok: response.ok,
+                    headers: Object.fromEntries(response.headers.entries())
+                });
+                
                 // Check if response is ok (status 200-299)
                 if (response.ok) {
-                    return response.json().catch(() => {
+                    console.log('[FORGOT PASSWORD] Response OK, attempting to parse JSON...');
+                    return response.json().catch(err => {
+                        console.log('[FORGOT PASSWORD] No JSON in response, will reload page', err);
                         // If no JSON, just reload
                         window.location.reload();
                         return null;
                     });
                 } else {
+                    console.log('[FORGOT PASSWORD] Response not OK, parsing error JSON...');
                     // For error responses, parse the JSON
                     return response.json().then(data => {
+                        console.error('[FORGOT PASSWORD] Error data:', data);
                         throw data;
+                    }).catch(err => {
+                        console.error('[FORGOT PASSWORD] Failed to parse error JSON:', err);
+                        throw { message: `Server error: ${response.status} ${response.statusText}` };
                     });
                 }
             })
             .then(data => {
+                console.log('[FORGOT PASSWORD] Final data:', data);
                 // Success - reload to show success message
                 if (data !== null) {
+                    console.log('[FORGOT PASSWORD] Success! Reloading page...');
                     window.location.reload();
                 }
             })
             .catch(error => {
-                console.error('Forgot password error:', error);
+                console.error('[FORGOT PASSWORD] Caught error:', error);
                 
                 // Display errors
                 if (error && error.errors) {
+                    console.log('[FORGOT PASSWORD] Displaying validation errors:', error.errors);
                     const errors = error.errors;
                     errorList.innerHTML = '';
                     
@@ -172,8 +195,10 @@
                         errorList.appendChild(errorItem);
                     });
                 } else if (error && error.message) {
+                    console.log('[FORGOT PASSWORD] Displaying error message:', error.message);
                     errorList.innerHTML = `<li>${error.message}</li>`;
                 } else {
+                    console.log('[FORGOT PASSWORD] Displaying generic error');
                     errorList.innerHTML = '<li>An error occurred. Please try again.</li>';
                 }
                 
