@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bandmate | Forgot Password</title>
-    @vite(['resources/css/auth.css', 'resources/js/app.js'])
+    @vite(['resources/css/login.css', 'resources/css/auth.css', 'resources/js/app.js'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="min-h-screen gradient-bg flex items-center justify-center p-4">
