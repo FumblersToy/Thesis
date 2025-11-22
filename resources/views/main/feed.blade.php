@@ -335,6 +335,7 @@
                     const isOwner = post.is_owner || false; // Add is_owner check
                     const mediaType = post.media_type || 'image';
                     const isVideo = mediaType === 'video';
+                    const isVerified = post.is_verified || false; // Add verified status
 
                     const userTypeEmoji = userType === 'musician' ? '🎵' : (userType === 'business' ? '🏢' : '👤');
                     const userMeta = [userGenre, userLocation].filter(Boolean).join(' · ');
@@ -375,7 +376,8 @@
                                         data-created-at="${(post.created_at||'') }"
                                         data-like-count="${likeCount}"
                                         data-comment-count="${commentCount}"
-                                        data-is-liked="${(post.is_liked? 'true' : 'false')}">
+                                        data-is-liked="${(post.is_liked? 'true' : 'false')}"
+                                        data-is-verified="${(isVerified ? 'true' : 'false')}">
                                         <source src="${post.image_path}" type="video/mp4">
                                         Your browser does not support the video tag.
                                     </video>
@@ -398,7 +400,8 @@
                                         data-created-at="${(post.created_at||'') }"
                                         data-like-count="${likeCount}"
                                         data-comment-count="${commentCount}"
-                                        data-is-liked="${(post.is_liked? 'true' : 'false')}"/>
+                                        data-is-liked="${(post.is_liked? 'true' : 'false')}"
+                                        data-is-verified="${(isVerified ? 'true' : 'false')}"/>
                                 `}
                             </div>
                         `;
@@ -410,7 +413,10 @@
                                 <div class="flex items-center gap-4">
                                     ${avatarHtml}
                                     <div>
-                                        <h3 class="font-bold text-gray-800 text-lg">${userName}</h3>
+                                        <div class="flex items-center gap-2">
+                                            <h3 class="font-bold text-gray-800 text-lg">${userName}</h3>
+                                            ${isVerified ? `<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>` : ''}
+                                        </div>
                                         <p class="text-gray-600">${userMeta}</p>
                                     </div>
                                 </div>
@@ -516,7 +522,8 @@
                     createdAt: img.getAttribute('data-created-at'),
                     like_count: parseInt(img.getAttribute('data-like-count')) || 0,
                     comment_count: parseInt(img.getAttribute('data-comment-count')) || 0,
-                    is_liked: img.getAttribute('data-is-liked') === 'true'
+                    is_liked: img.getAttribute('data-is-liked') === 'true',
+                    is_verified: img.getAttribute('data-is-verified') === 'true'
                 };
             }
 
@@ -565,7 +572,10 @@
                                 <div class="flex items-center gap-4 mb-4">
                                     ${avatarHtml}
                                     <div>
-                                        <h3 class="font-bold text-gray-800 text-xl">${postData.userName}</h3>
+                                        <div class="flex items-center gap-2">
+                                            <h3 class="font-bold text-gray-800 text-xl">${postData.userName}</h3>
+                                            ${postData.is_verified ? `<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>` : ''}
+                                        </div>
                                         <p class="text-gray-600">${[postData.userGenre, postData.userLocation].filter(Boolean).join(' · ')}</p>
                                     </div>
                                 </div>
