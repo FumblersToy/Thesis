@@ -59,19 +59,57 @@
                     <div class="ml-6">
                         <h1 class="text-2xl font-bold text-gray-900">{{ $displayName }}</h1>
                         <p class="text-gray-600">{{ $user->email }}</p>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                            @if($user->musician) bg-purple-100 text-purple-800
-                            @elseif($user->business) bg-blue-100 text-blue-800
-                            @else bg-gray-100 text-gray-800 @endif">
-                            {{ $userType }}
-                        </span>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                @if($user->musician) bg-purple-100 text-purple-800
+                                @elseif($user->business) bg-blue-100 text-blue-800
+                                @else bg-gray-100 text-gray-800 @endif">
+                                {{ $userType }}
+                            </span>
+                            @if($user->business && $user->business->verified)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    ✓ Verified
+                                </span>
+                            @endif
+                        </div>
                     </div>
                     
+                    @if($user->business)
+                    <div class="ml-auto flex flex-col gap-2">
+                        @if($user->business->business_permit)
+                            <a href="{{ $user->business->business_permit }}" target="_blank" 
+                               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm text-center">
+                                📄 View Business Permit
+                            </a>
+                        @else
+                            <span class="bg-gray-300 text-gray-600 px-4 py-2 rounded-md text-sm text-center">
+                                No Permit Uploaded
+                            </span>
+                        @endif
+                        
+                        @if($user->business->verified)
+                            <button onclick="toggleVerification({{ $user->business->id }}, false)" 
+                                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
+                                Unverify Business
+                            </button>
+                        @else
+                            <button onclick="toggleVerification({{ $user->business->id }}, true)" 
+                                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm">
+                                Verify Business
+                            </button>
+                        @endif
+                        
+                        <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm text-center">
+                            ← Back to Dashboard
+                        </a>
+                    </div>
+                    @else
                     <div class="ml-auto">
                         <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm">
                             ← Back to Dashboard
                         </a>
                     </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -142,6 +180,36 @@
 
     <script>
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        async function toggleVerification(businessId, verify) {
+            const action = verify ? 'verify' : 'unverify';
+            if (!confirm(`Are you sure you want to ${action} this business?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/businesses/${businessId}/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ verified: verify })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Network error occurred');
+            }
+        }
 
         async function deletePost(postId) {
             if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {

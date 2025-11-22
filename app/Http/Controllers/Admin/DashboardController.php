@@ -121,4 +121,18 @@ class DashboardController extends Controller
             'message' => 'User deleted successfully'
         ]);
     }
+
+    public function toggleVerification(Request $request, $businessId)
+    {
+        $business = Business::findOrFail($businessId);
+        $verified = $request->input('verified', false);
+        
+        $business->verified = $verified;
+        $business->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $verified ? 'Business verified successfully' : 'Business unverified successfully'
+        ]);
+    }
 }

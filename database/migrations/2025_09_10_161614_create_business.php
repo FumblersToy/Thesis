@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('profile_picture_public_id')->nullable();
             $table->string('business_permit')->nullable();
             $table->string('business_permit_public_id')->nullable();
+            $table->boolean('verified')->default(false);
             $table->string('business_name')->nullable();
             $table->string('contact_email')->nullable()->unique();
             $table->string('phone_number', 20)->nullable();
