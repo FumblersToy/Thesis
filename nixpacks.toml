@@ -12,13 +12,14 @@ cmds = [
     'rm -f public/hot',
     'npm run build',
     'ls -la public/build',
-    'php artisan config:cache',
-    'php artisan route:cache',
-    'php artisan view:cache'
+    'cat public/build/manifest.json',
+    'mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions storage/logs',
+    'chmod -R 775 storage bootstrap/cache',
+    'php artisan migrate --force'
 ]
 
 [start]
-cmd = 'php artisan optimize && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}'
+cmd = 'rm -rf storage/framework/views/* && php artisan view:clear && php artisan config:cache && php artisan route:cache && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}'
 
 [variables]
 APP_ENV = 'production'
