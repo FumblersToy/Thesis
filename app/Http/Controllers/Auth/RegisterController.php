@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Events\Registered;
 
 class RegisterController extends Controller
 {
@@ -24,10 +25,13 @@ class RegisterController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        // Fire the Registered event (this will send the verification email)
+        event(new Registered($user));
+
         // Log the user in
         Auth::login($user);
 
-        // Redirect to a desired location, e.g., home page
-        return redirect()->route('create');
+        // Redirect to email verification notice
+        return redirect()->route('verification.notice');
     }
 }
