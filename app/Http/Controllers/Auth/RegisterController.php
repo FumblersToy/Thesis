@@ -37,7 +37,7 @@ class RegisterController extends Controller
             ['token' => $token]
         );
 
-        Mail::send('emails.verify-link', ['verificationUrl' => $verificationUrl], function ($message) use ($request) {
+        Mail::raw("Welcome to Bandmate!\n\nPlease click the link below to verify your email and complete your registration:\n\n{$verificationUrl}\n\nThis link will expire in 24 hours.\n\nIf you didn't create this account, you can ignore this email.", function ($message) use ($request) {
             $message->to($request->email)
                     ->subject('Verify Your Bandmate Account');
         });
