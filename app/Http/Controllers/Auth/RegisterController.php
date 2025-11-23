@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
@@ -37,10 +38,23 @@ class RegisterController extends Controller
             ['token' => $token]
         );
 
-        Mail::raw("Welcome to Bandmate!\n\nPlease click the link below to verify your email and complete your registration:\n\n{$verificationUrl}\n\nThis link will expire in 24 hours.\n\nIf you didn't create this account, you can ignore this email.", function ($message) use ($request) {
-            $message->to($request->email)
-                    ->subject('Verify Your Bandmate Account');
-        });
+        try {
+            Log::info('[REGISTRATION] Attempting to send verification email to: ' . $request->email);
+            Log::info('[REGISTRATION] Verification URL: ' . $verificationUrl);
+            
+            Mail::raw("Welcome to Bandmate!\n\nPlease click the link below to verify your email and complete your registration:\n\n{$verificationUrl}\n\nThis link will expire in 24 hours.\n\nIf you didn't create this account, you can ignore this email.", function ($message) use ($request) {
+                $message->to($request->email)
+                        ->subject('Verify Your Bandmate Account');
+            });
+            
+            Log::info('[REGISTRATION] Verification email sent successfully to: ' . $request->email);
+        } catch (\Exception $e) {
+            Log::error('[REGISTRATION] Failed to send verification email', [
+                'email' => $request->email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
 
         return redirect()->route('verification.notice')->with('email', $request->email);
     }
