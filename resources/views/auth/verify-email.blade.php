@@ -12,8 +12,9 @@
             <!-- Logo -->
             <div class="text-center mb-8">
                 <img src="/assets/logo_black.png" alt="Bandmate Logo" class="w-16 h-16 mx-auto mb-4">
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">Verify Your Email</h1>
-                <p class="text-gray-600">We've sent a verification link to your email address</p>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Check Your Email</h1>
+                <p class="text-gray-600">We've sent a verification link to</p>
+                <p class="text-gray-800 font-semibold mt-2">{{ session('email') }}</p>
             </div>
 
             <!-- Email Icon -->
@@ -23,38 +24,22 @@
                 </svg>
             </div>
 
-            <!-- Status Message -->
-            @if (session('status') == 'verification-link-sent')
-                <div class="mb-6 bg-green-50 border-l-4 border-green-400 text-green-700 p-4 rounded-r-lg">
-                    <p class="text-sm">A new verification link has been sent to your email address!</p>
-                </div>
-            @endif
-
             <!-- Instructions -->
             <div class="mb-6 text-center">
                 <p class="text-gray-700 mb-4">
-                    Please check your email and click the verification link to continue setting up your profile.
+                    Please check your email and click the verification link to complete your registration.
                 </p>
                 <p class="text-sm text-gray-600">
-                    Didn't receive the email? Check your spam folder or request a new link below.
+                    The link will expire in 24 hours. If you don't see the email, check your spam folder.
                 </p>
             </div>
 
-            <!-- Resend Button -->
-            <form method="POST" action="{{ route('verification.send') }}">
-                @csrf
-                <button type="submit" class="w-full gradient-bg text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 mb-4">
-                    Resend Verification Email
-                </button>
-            </form>
-
-            <!-- Logout Button -->
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="w-full border-2 border-gray-300 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-300">
-                    Logout
-                </button>
-            </form>
+            <!-- Back to Register -->
+            <div class="text-center">
+                <a href="{{ route('register') }}" class="text-gray-600 hover:text-gray-800 text-sm transition-colors duration-200">
+                    ← Back to Registration
+                </a>
+            </div>
         </div>
     </div>
 </body>
