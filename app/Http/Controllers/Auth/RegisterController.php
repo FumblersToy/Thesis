@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Auth\Events\Registered;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 
 class RegisterController extends Controller
 {
@@ -19,19 +19,29 @@ class RegisterController extends Controller
             'password' => 'required|min:8|confirmed',
         ]);
 
-        // Create a new user
-        $user = User::create([
+        // Generate verification token
+        $token = bin2hex(random_bytes(32));
+
+        // Store data in session temporarily (NOT in database)
+        $request->session()->put('pending_user', [
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'token' => $token,
+            'expires_at' => now()->addHours(24),
         ]);
 
-        // Fire the Registered event (this will send the verification email)
-        event(new Registered($user));
+        // Send verification email
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addHours(24),
+            ['token' => $token]
+        );
 
-        // Log the user in
-        Auth::login($user);
+        Mail::send('emails.verify-link', ['verificationUrl' => $verificationUrl], function ($message) use ($request) {
+            $message->to($request->email)
+                    ->subject('Verify Your Bandmate Account');
+        });
 
-        // Redirect to email verification notice
-        return redirect()->route('verification.notice');
+        return redirect()->route('verification.notice')->with('email', $request->email);
     }
 }

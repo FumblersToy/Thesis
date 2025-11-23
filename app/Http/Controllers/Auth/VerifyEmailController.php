@@ -3,22 +3,41 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Auth\Events\Verified;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class VerifyEmailController extends Controller
 {
-    public function __invoke(EmailVerificationRequest $request)
+    public function __invoke(Request $request, $token)
     {
-        if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('account-type', absolute: false).'?verified=1');
+        $pendingUser = session('pending_user');
+
+        // Check if session data exists
+        if (!$pendingUser) {
+            return redirect()->route('register')->with('error', 'Registration session expired. Please register again.');
         }
 
-        if ($request->user()->markEmailAsVerified()) {
-            event(new Verified($request->user()));
+        // Check if token matches and not expired
+        if ($pendingUser['token'] !== $token || now()->greaterThan($pendingUser['expires_at'])) {
+            session()->forget('pending_user');
+            return redirect()->route('register')->with('error', 'Verification link is invalid or expired. Please register again.');
         }
 
-        return redirect()->intended(route('account-type', absolute: false).'?verified=1');
+        // NOW create the user in database (only after verification)
+        $user = User::create([
+            'email' => $pendingUser['email'],
+            'password' => $pendingUser['password'],
+            'email_verified_at' => now(),
+        ]);
+
+        // Clear session data
+        session()->forget('pending_user');
+
+        // Log user in
+        Auth::login($user);
+
+        // Redirect to account type selection
+        return redirect()->route('create')->with('verified', true);
     }
 }

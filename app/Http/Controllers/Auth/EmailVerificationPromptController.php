@@ -9,8 +9,11 @@ class EmailVerificationPromptController extends Controller
 {
     public function __invoke(Request $request)
     {
-        return $request->user()->hasVerifiedEmail()
-                    ? redirect()->intended(route('account-type', absolute: false))
-                    : view('auth.verify-email');
+        // Check if there's pending registration
+        if (!session()->has('pending_user')) {
+            return redirect()->route('register')->with('error', 'No pending registration. Please register first.');
+        }
+
+        return view('auth.verify-email');
     }
 }
