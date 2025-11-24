@@ -66,11 +66,73 @@
                 </select>
             </div>
 
+            <!-- Secondary Genre (Optional) -->
+            <div class="form-group">
+                <label for="genre2">Secondary Genre <span style="color: #888; font-size: 0.9em;">(Optional)</span></label>
+                <select id="genre2" name="genre2">
+                    <option value="">None</option>
+                    <option value="RnB">RnB</option>
+                    <option value="House">House</option>
+                    <option value="Pop Punk">Pop Punk</option>
+                    <option value="Electronic">Electronic</option>
+                    <option value="Reggae">Reggae</option>
+                    <option value="Jazz">Jazz</option>
+                    <option value="Rock">Rock</option>
+                </select>
+            </div>
+
+            <!-- Third Genre (Optional) -->
+            <div class="form-group">
+                <label for="genre3">Third Genre <span style="color: #888; font-size: 0.9em;">(Optional)</span></label>
+                <select id="genre3" name="genre3">
+                    <option value="">None</option>
+                    <option value="RnB">RnB</option>
+                    <option value="House">House</option>
+                    <option value="Pop Punk">Pop Punk</option>
+                    <option value="Electronic">Electronic</option>
+                    <option value="Reggae">Reggae</option>
+                    <option value="Jazz">Jazz</option>
+                    <option value="Rock">Rock</option>
+                </select>
+            </div>
+
             <!-- Instrument -->
             <div class="form-group">
                 <label for="instrument">Primary Instrument</label>
                 <select id="instrument" name="instrument">
                     <option value="" disabled selected>Choose your main instrument</option>
+                    <option value="Guitar">Guitar</option>
+                    <option value="Drums">Drums</option>
+                    <option value="Piano">Piano</option>
+                    <option value="Bass">Bass</option>
+                    <option value="Vocals">Vocals</option>
+                    <option value="Violin">Violin</option>
+                    <option value="Saxophone">Saxophone</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <!-- Secondary Instrument (Optional) -->
+            <div class="form-group">
+                <label for="instrument2">Secondary Instrument <span style="color: #888; font-size: 0.9em;">(Optional)</span></label>
+                <select id="instrument2" name="instrument2">
+                    <option value="">None</option>
+                    <option value="Guitar">Guitar</option>
+                    <option value="Drums">Drums</option>
+                    <option value="Piano">Piano</option>
+                    <option value="Bass">Bass</option>
+                    <option value="Vocals">Vocals</option>
+                    <option value="Violin">Violin</option>
+                    <option value="Saxophone">Saxophone</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <!-- Third Instrument (Optional) -->
+            <div class="form-group">
+                <label for="instrument3">Third Instrument <span style="color: #888; font-size: 0.9em;">(Optional)</span></label>
+                <select id="instrument3" name="instrument3">
+                    <option value="">None</option>
                     <option value="Guitar">Guitar</option>
                     <option value="Drums">Drums</option>
                     <option value="Piano">Piano</option>

@@ -20,7 +20,11 @@ return new class extends Migration
             $table->string('last_name')->nullable();
             $table->string('stage_name')->nullable();
             $table->string('genre')->nullable();
+            $table->string('genre2')->nullable();
+            $table->string('genre3')->nullable();
             $table->string('instrument')->nullable();
+            $table->string('instrument2')->nullable();
+            $table->string('instrument3')->nullable();
             $table->string('location')->nullable();
             $table->text('bio')->nullable();
             $table->string('credential_document')->nullable();

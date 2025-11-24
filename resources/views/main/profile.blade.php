@@ -32,6 +32,20 @@
             $profileImage = '/assets/default1.jpg';
         }
         $bioText = $musician?->bio ?: '';
+        
+        // Build genre and instrument arrays for musicians
+        $genres = [];
+        $instruments = [];
+        if ($musician) {
+            if ($musician->genre) $genres[] = $musician->genre;
+            if ($musician->genre2) $genres[] = $musician->genre2;
+            if ($musician->genre3) $genres[] = $musician->genre3;
+            
+            if ($musician->instrument) $instruments[] = $musician->instrument;
+            if ($musician->instrument2) $instruments[] = $musician->instrument2;
+            if ($musician->instrument3) $instruments[] = $musician->instrument3;
+        }
+        
         $roleLabel = $musician?->instrument ?: ($business?->venue ?: '');
 
         $posts = \App\Models\Post::where('user_id', $profileUserId)
@@ -292,13 +306,39 @@
                                     {{ $bioText ?: 'No bio available' }}
                                 </p>
 
-                                @if($roleLabel)
-                                <div class="flex items-center gap-2 text-sm text-gray-700 mt-2">
-                                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM21 16c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
-                                    </svg>
-                                    <span>{{ $roleLabel }}</span>
-                                </div>
+                                @if($musician && (count($genres) > 0 || count($instruments) > 0))
+                                    @if(count($genres) > 0)
+                                    <div class="flex items-center gap-2 text-sm text-gray-700 mt-2">
+                                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM21 16c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                                        </svg>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            @foreach($genres as $genre)
+                                                <span class="px-2.5 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-full text-xs font-medium">{{ $genre }}</span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    @endif
+                                    
+                                    @if(count($instruments) > 0)
+                                    <div class="flex items-center gap-2 text-sm text-gray-700 mt-2">
+                                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                                        </svg>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            @foreach($instruments as $instrument)
+                                                <span class="px-2.5 py-1 bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700 rounded-full text-xs font-medium">{{ $instrument }}</span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    @endif
+                                @elseif($business && $business->venue)
+                                    <div class="flex items-center gap-2 text-sm text-gray-700 mt-2">
+                                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                        </svg>
+                                        <span>{{ $business->venue }}</span>
+                                    </div>
                                 @endif
 
                             </div>
