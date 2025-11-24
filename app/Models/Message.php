@@ -98,7 +98,7 @@ class Message extends Model
             $user = $users->get($conversation->other_user_id);
             return [
                 'user' => $user,
-                'last_message_at' => $conversation->last_message_at,
+                'last_message_at' => \Carbon\Carbon::parse($conversation->last_message_at)->toIso8601String(),
                 'message_count' => $conversation->message_count,
                 'unread_count' => $conversation->unread_count,
             ];

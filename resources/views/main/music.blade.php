@@ -24,16 +24,25 @@
                         <img src="{{ asset('assets/logo_both.png') }}" alt="Bandmate Logo" class="h-12 hidden md:block cursor-pointer hover:opacity-90 transition-opacity">
                     </a>
 
-                    <div class="flex items-center gap-4">
-                        <button id="profileBtn" class="flex items-center gap-3 bg-white/20 hover:bg-white/30 backdrop-blur-xl px-4 py-2 rounded-full transition-all duration-300">
-                            <img class="w-10 h-10 rounded-full object-cover border-2 border-white" src="{{ Auth::user()->musician->profile_picture ?? 'https://via.placeholder.com/150' }}" alt="profile">
-                            <span class="text-white font-medium hidden sm:inline">{{ Auth::user()->musician->artist_name ?? 'User' }}</span>
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="relative">
+                        <button id="profileBtn" class="flex items-center gap-3 bg-white/80 backdrop-blur-xl p-4 rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 group border border-gray-200">
+                            <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                                 src="{{ Auth::user()->musician->profile_picture ?? 'https://via.placeholder.com/150' }}"
+                                 alt="profile">
+                            
+                            <div class="hidden sm:block text-left">
+                                <p class="text-gray-800 font-semibold">
+                                    {{ Auth::user()->musician->artist_name ?? 'User' }}
+                                </p>
+                                <p class="text-gray-600 text-sm">Musician</p>
+                            </div>
+
+                            <svg class="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
 
-                        <div id="profileDropdown" class="absolute right-4 top-24 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden hidden animate-scale-in z-50 border border-gray-200">
+                        <div id="profileDropdown" class="absolute right-0 top-full mt-2 w-64 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden hidden animate-scale-in z-50 border border-gray-200">
                             <div class="p-4 border-b border-gray-200">
                                 <div class="flex items-center gap-3">
                                     <img class="w-16 h-16 rounded-full object-cover border-2 border-gray-200" src="{{ Auth::user()->musician->profile_picture ?? 'https://via.placeholder.com/150' }}" alt="profile">
