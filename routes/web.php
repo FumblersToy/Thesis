@@ -343,6 +343,11 @@ Route::prefix('api/messages')->middleware('auth')->group(function () {
 // API: posts list with filters - NOW USING PostController
 Route::get('/api/posts', [PostController::class, 'index'])->middleware('auth');
 
+// API: Notifications
+Route::get('/api/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->middleware('auth');
+Route::post('/api/notifications/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->middleware('auth');
+Route::post('/api/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->middleware('auth');
+
 // Venue detail: redirect to user profile for business owner
 Route::get('/venue/{id}', function ($id) {
     $business = \App\Models\Business::findOrFail($id);

@@ -37,6 +37,20 @@ class LikeController extends Controller
                     'post_id' => $postId,
                 ]);
                 $liked = true;
+
+                // Create notification for post owner (if not liking own post)
+                if ($post->user_id !== $userId) {
+                    $liker = Auth::user();
+                    $likerName = $liker->musician->artist_name ?? $liker->business->business_name ?? 'Someone';
+                    
+                    \App\Models\Notification::create([
+                        'user_id' => $post->user_id,
+                        'notifier_id' => $userId,
+                        'type' => 'like',
+                        'post_id' => $postId,
+                        'message' => "{$likerName} liked your post",
+                    ]);
+                }
             }
 
             // Get updated like count

@@ -33,6 +33,21 @@ class CommentController extends Controller
             // Load the user relationship with musician and business profiles
             $comment->load(['user.musician', 'user.business']);
 
+            // Create notification for post owner (if not commenting on own post)
+            if ($post->user_id !== Auth::id()) {
+                $commenter = Auth::user();
+                $commenterName = $commenter->musician->artist_name ?? $commenter->business->business_name ?? 'Someone';
+                
+                \App\Models\Notification::create([
+                    'user_id' => $post->user_id,
+                    'notifier_id' => Auth::id(),
+                    'type' => 'comment',
+                    'post_id' => $postId,
+                    'comment_id' => $comment->id,
+                    'message' => "{$commenterName} commented on your post",
+                ]);
+            }
+
             if ($request->wantsJson() || $request->header('Accept') === 'application/json') {
                 // Get the appropriate display name and avatar
                 $displayName = $comment->user->name ?? $comment->user->email;
