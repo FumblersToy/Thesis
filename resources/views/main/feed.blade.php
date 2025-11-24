@@ -538,12 +538,20 @@
             function showImageModal(postData) {
                 if (!postData) return;
                 
+                console.log('=== MODAL DEBUG START ===');
+                console.log('Full Post Data:', postData);
+                console.log('imageUrl:', postData.imageUrl);
+                console.log('imageUrl2:', postData.imageUrl2);
+                console.log('imageUrl3:', postData.imageUrl3);
+                
                 // Collect all images/videos - filter out empty strings and null values
                 const images = [postData.imageUrl, postData.imageUrl2, postData.imageUrl3]
                     .filter(url => url && url !== '' && url !== 'null' && url !== 'undefined');
                 
-                console.log('Modal opened with images:', images); // Debug log
-                console.log('Post data:', postData); // Debug log
+                console.log('Filtered images array:', images);
+                console.log('Images array length:', images.length);
+                console.log('Will show navigation buttons:', images.length > 1);
+                console.log('=== MODAL DEBUG END ===');
                 
                 let currentImageIndex = 0;
                 
