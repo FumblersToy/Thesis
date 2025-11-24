@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // State
     let currentChatUserId = null;
+    let currentChatUserOnline = false;
     let conversations = [];
     let messages = [];
     let typingTimeout = null;
@@ -184,6 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const displayName = user.musician?.stage_name || user.business?.business_name || user.name;
         const userType = user.musician ? 'musician' : user.business ? 'business' : 'member';
         const avatar = user.musician?.profile_picture || user.business?.profile_picture || null;
+        const isOnline = conversation.is_online || false;
         
         const div = document.createElement('div');
         div.className = `p-4 border-b border-white/20 cursor-pointer hover:bg-white/10 transition-colors rounded-xl m-2 ${currentChatUserId === user.id ? 'bg-white/20' : ''}`;
@@ -196,7 +198,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         `<img src="${getImageUrl(avatar)}" alt="${displayName}" class="w-12 h-12 rounded-full object-cover">` :
                         `<div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">${displayName.charAt(0).toUpperCase()}</div>`
                     }
-                    <div class="online-status absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
+                    ${isOnline ? '<div class="online-status absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>' : ''}
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center justify-between">
@@ -266,6 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (data.success) {
                 messages = data.messages;
+                currentChatUserOnline = data.is_online || false;
                 renderMessages();
                 updateChatHeader(data.user);
                 scrollToBottom();
@@ -387,7 +390,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const avatar = user.musician?.profile_picture || user.business?.profile_picture || null;
         
         document.getElementById('chatUserName').textContent = displayName;
-        document.getElementById('chatUserStatus').textContent = 'Online';
+        document.getElementById('chatUserStatus').textContent = currentChatUserOnline ? 'Online' : userType;
         
         const avatarElement = document.getElementById('chatUserAvatar');
         if (avatar) {

@@ -14,12 +14,14 @@
     
     
     <div class="flex min-h-screen relative z-10">
-        <aside id="sidebar" class="w-80 p-6 glass-effect backdrop-blur-xl shadow-2xl hidden lg:block animate-slide-up gradient-bg overflow-y-auto">
-            <div class="sticky top-6">
+        <aside id="sidebar" class="w-80 glass-effect backdrop-blur-xl shadow-2xl hidden lg:flex lg:flex-col animate-slide-up gradient-bg fixed left-0 top-0 bottom-0">
+            <div class="p-6 flex-shrink-0">
                 <h2 class="font-bold text-2xl mb-6 text-white flex items-center gap-3">
                     <div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse-slow"></div>
                     Filters
                 </h2>
+            </div>
+            <div class="flex-1 overflow-y-auto px-6 pb-6">
                 
                 <form id="filters" class="space-y-8">
                     <div class="animate-fade-in">
@@ -110,7 +112,7 @@
         </aside>
 
         <!-- Main Content -->
-        <section class="flex-1 p-6 lg:p-8 flex flex-col">
+        <section class="flex-1 p-6 lg:p-8 lg:ml-80 flex flex-col">
             <!-- Header with Search Bar and User Profile -->
             <div class="flex justify-between items-center mb-8 mt-12 lg:mt-0 animate-fade-in">
                 <!-- Search Bar (centered) -->
@@ -921,6 +923,13 @@
                         }
                         
                         likeCount.textContent = data.like_count;
+                        
+                        // Update the post element's data attributes
+                        const postElement = document.querySelector(`[data-post-id="${postId}"]`);
+                        if (postElement) {
+                            postElement.setAttribute('data-like-count', data.like_count);
+                            postElement.setAttribute('data-is-liked', data.liked ? 'true' : 'false');
+                        }
                     }
                 } catch (error) {
                     console.error('Error toggling like:', error);
@@ -955,7 +964,14 @@
                         
                         const commentCount = modal.querySelector('.comment-count');
                         if (commentCount) {
-                            commentCount.textContent = parseInt(commentCount.textContent) + 1;
+                            const newCount = parseInt(commentCount.textContent) + 1;
+                            commentCount.textContent = newCount;
+                            
+                            // Update the post element's data attribute
+                            const postElement = document.querySelector(`[data-post-id="${postId}"]`);
+                            if (postElement) {
+                                postElement.setAttribute('data-comment-count', newCount);
+                            }
                         }
                     }
                 } catch (error) {

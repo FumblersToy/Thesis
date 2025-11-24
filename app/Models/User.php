@@ -46,6 +46,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'last_seen_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -131,5 +132,21 @@ class User extends Authenticatable implements MustVerifyEmail
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
+    }
+
+    // Update last seen timestamp
+    public function updateLastSeen(): void
+    {
+        $this->update(['last_seen_at' => now()]);
+    }
+
+    // Check if user is online (seen within last 5 minutes)
+    public function isOnline(): bool
+    {
+        if (!$this->last_seen_at) {
+            return false;
+        }
+        
+        return $this->last_seen_at->diffInMinutes(now()) < 5;
     }
 }

@@ -21,6 +21,12 @@ class MessageController extends Controller
     {
         $conversations = Message::getRecentConversations(Auth::id());
         
+        // Add is_online status to each conversation
+        $conversations = $conversations->map(function($conversation) {
+            $conversation['is_online'] = $conversation['user']->isOnline();
+            return $conversation;
+        });
+        
         return response()->json([
             'success' => true,
             'conversations' => $conversations
@@ -49,6 +55,7 @@ class MessageController extends Controller
         return response()->json([
             'success' => true,
             'user' => $user,
+            'is_online' => $user->isOnline(),
             'messages' => $messages
         ]);
     }
