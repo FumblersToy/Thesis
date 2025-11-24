@@ -216,7 +216,14 @@ class PostController extends Controller
                     ->leftJoin('businesses', 'users.id', '=', 'businesses.user_id');
 
                 if ($maxDistance) {
-                    $query->havingRaw('distance <= ?', [$maxDistance]);
+                    // Use a WHERE clause with the full distance calculation instead of HAVING
+                    $query->whereRaw('
+                        COALESCE(
+                            (6371 * acos(cos(radians(?)) * cos(radians(COALESCE(musicians.latitude, businesses.latitude))) 
+                            * cos(radians(COALESCE(musicians.longitude, businesses.longitude)) - radians(?)) 
+                            + sin(radians(?)) * sin(radians(COALESCE(musicians.latitude, businesses.latitude))))),
+                            999999
+                        ) <= ?', [$userLat, $userLng, $userLat, $maxDistance]);
                 }
 
                 $query->orderBy('distance', 'asc');
