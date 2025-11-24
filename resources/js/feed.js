@@ -365,6 +365,7 @@ function initFeed() {
 
                 const data = await response.json();
                 console.log('Posts loaded:', data);
+                console.log('First post image paths:', data.posts[0]?.image_path, data.posts[0]?.image_path_2, data.posts[0]?.image_path_3);
 
                 if (data.success) {
                     if (append) {
@@ -592,6 +593,13 @@ function initFeed() {
     const likeCountAttr = post.like_count || post.likes_count || 0;
     const commentCountAttr = post.comment_count || post.comments_count || 0;
     const isLikedAttr = post.is_liked ? 'true' : 'false';
+    
+    // Debug: Log image paths when creating post element
+    console.log(`Creating post ${post.id} with images:`, {
+        image_path: post.image_path,
+        image_path_2: post.image_path_2,
+        image_path_3: post.image_path_3
+    });
 
     // Build user meta string with distance if available
     let userMeta = [userGenre, userLocation].filter(Boolean).join(' · ');
