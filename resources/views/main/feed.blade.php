@@ -486,13 +486,17 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Delegate clicks on images to open modal (mirrors profile modal behavior)
             document.addEventListener('click', function(e) {
+                console.log('Click detected', e.target);
+                
                 // Don't open modal if clicking elements marked as no-modal-trigger (delete button, username)
                 if (e.target.closest('.no-modal-trigger')) {
+                    console.log('Clicked no-modal-trigger element');
                     return;
                 }
                 
                 const imgEl = e.target.closest('.post-image');
                 if (imgEl) {
+                    console.log('Clicked post-image');
                     e.preventDefault();
                     const postData = extractPostDataFromImage(imgEl);
                     showImageModal(postData);
@@ -502,8 +506,10 @@
                 // Handle clicks on post content area (entire section below media)
                 const contentEl = e.target.closest('.post-content-clickable');
                 if (contentEl) {
+                    console.log('Clicked post-content-clickable', contentEl);
                     e.preventDefault();
                     const postData = extractPostDataFromImage(contentEl);
+                    console.log('Post data:', postData);
                     showImageModal(postData);
                 }
             });
