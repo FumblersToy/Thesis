@@ -231,9 +231,9 @@
                 </h2>
                 <form id="createPostForm" class="space-y-6" enctype="multipart/form-data" action="{{ route('posts.store') }}" method="POST">
                     @csrf
-                    <label for="image" class="block text-gray-700 font-medium mb-3 text-lg">📷 Upload Images (Up to 3)</label>
+                    <label for="image" class="block text-gray-700 font-medium mb-3 text-lg">📷 Upload Images/Videos (Up to 3)</label>
                     <div class="custom-file-input">
-                        <input type="file" name="images[]" id="image" accept="image/*" multiple>
+                        <input type="file" name="images[]" id="image" accept="image/*,video/*" multiple>
                         <label for="image" class="custom-file-label cursor-pointer">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
@@ -552,7 +552,13 @@
                     `<div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">${(postData.userName||'U').charAt(0).toUpperCase()}</div>`;
 
                 function renderModal() {
-                    const mediaHtml = `
+                    const isVideo = postData.mediaType === 'video';
+                    const mediaHtml = isVideo ? `
+                        <video controls class="max-w-full max-h-full" style="width: 100%; height: 100%; object-fit: contain;">
+                            <source src="${images[currentImageIndex]}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    ` : `
                         <img src="${images[currentImageIndex]}" 
                              alt="Post image" 
                              class="max-w-full max-h-full object-contain" 

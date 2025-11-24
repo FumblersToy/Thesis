@@ -23,7 +23,7 @@ class PostController extends Controller
         try {
             $request->validate([
                 'description' => 'nullable|string|max:1000',
-                'images.*' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:10240', // 10MB per image
+                'images.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov,avi,wmv|max:51200', // 50MB for videos
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->wantsJson() || $request->ajax()) {
@@ -65,15 +65,23 @@ class PostController extends Controller
             foreach ($files as $index => $file) {
                 if ($file->isValid()) {
                     try {
+                        $mimeType = $file->getMimeType();
+                        $isVideo = str_starts_with($mimeType, 'video/');
+                        
                         $uploadOptions = [
                             'folder' => 'musician_posts',
-                            'transformation' => [
+                        ];
+                        
+                        if ($isVideo) {
+                            $uploadOptions['resource_type'] = 'video';
+                        } else {
+                            $uploadOptions['transformation'] = [
                                 'width' => 1200,
                                 'height' => 1200,
                                 'crop' => 'limit',
                                 'quality' => 'auto'
-                            ]
-                        ];
+                            ];
+                        }
                         
                         $uploadedFile = Cloudinary::upload($file->getRealPath(), $uploadOptions);
                         
@@ -111,8 +119,19 @@ class PostController extends Controller
                 'image_public_id' => $imagePublicIds[0],
                 'image_public_id_2' => $imagePublicIds[1],
                 'image_public_id_3' => $imagePublicIds[2],
-                'media_type' => $imagePaths[0] ? 'image' : null,
+                'media_type' => null,
             ]);
+            
+            // Detect media type from first file if exists
+            if ($request->hasFile('images')) {
+                $files = $request->file('images');
+                $firstFile = $files[0];
+                if ($firstFile && $firstFile->isValid()) {
+                    $mimeType = $firstFile->getMimeType();
+                    $post->media_type = str_starts_with($mimeType, 'video/') ? 'video' : 'image';
+                    $post->save();
+                }
+            }
 
             Log::info('Post created successfully', [
                 'post_id' => $post->id,

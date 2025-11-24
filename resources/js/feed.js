@@ -185,18 +185,18 @@ function initFeed() {
             const fileCount = e.target.files.length;
             if (fileCount > 0) {
                 if (fileCount > 3) {
-                    alert('You can only upload up to 3 images');
+                    alert('You can only upload up to 3 files');
                     e.target.value = '';
                     fileName.classList.add('hidden');
-                    fileText.textContent = 'Choose up to 3 images or drag them here';
+                    fileText.textContent = 'Choose up to 3 images/videos or drag them here';
                     return;
                 }
-                fileName.textContent = `${fileCount} image${fileCount > 1 ? 's' : ''} selected`;
+                fileName.textContent = `${fileCount} file${fileCount > 1 ? 's' : ''} selected`;
                 fileName.classList.remove('hidden');
                 fileText.textContent = `${fileCount} file${fileCount > 1 ? 's' : ''} selected`;
             } else {
                 fileName.classList.add('hidden');
-                fileText.textContent = 'Choose up to 3 images or drag them here';
+                fileText.textContent = 'Choose up to 3 images/videos or drag them here';
             }
         });
 
