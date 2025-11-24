@@ -66,7 +66,11 @@
                                 @else bg-gray-100 text-gray-800 @endif">
                                 {{ $userType }}
                             </span>
-                            @if($user->business && $user->business->verified)
+                            @if($user->musician && $user->musician->verified)
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    ✓ Verified
+                                </span>
+                            @elseif($user->business && $user->business->verified)
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                     ✓ Verified
                                 </span>
@@ -74,7 +78,36 @@
                         </div>
                     </div>
                     
-                    @if($user->business)
+                    @if($user->musician)
+                    <div class="ml-auto flex flex-col gap-2">
+                        @if($user->musician->credential_document)
+                            <a href="{{ $user->musician->credential_document }}" target="_blank" 
+                               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm text-center">
+                                📄 View Musician Credentials
+                            </a>
+                        @else
+                            <span class="bg-gray-300 text-gray-600 px-4 py-2 rounded-md text-sm text-center">
+                                No Credentials Uploaded
+                            </span>
+                        @endif
+                        
+                        @if($user->musician->verified)
+                            <button onclick="toggleMusicianVerification({{ $user->musician->id }}, false)" 
+                                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
+                                Unverify Musician
+                            </button>
+                        @else
+                            <button onclick="toggleMusicianVerification({{ $user->musician->id }}, true)" 
+                                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm">
+                                Verify Musician
+                            </button>
+                        @endif
+                        
+                        <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm text-center">
+                            ← Back to Dashboard
+                        </a>
+                    </div>
+                    @elseif($user->business)
                     <div class="ml-auto flex flex-col gap-2">
                         @if($user->business->business_permit)
                             <a href="{{ $user->business->business_permit }}" target="_blank" 
@@ -189,6 +222,36 @@
 
             try {
                 const response = await fetch(`/admin/businesses/${businessId}/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ verified: verify })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Network error occurred');
+            }
+        }
+
+        async function toggleMusicianVerification(musicianId, verify) {
+            const action = verify ? 'verify' : 'unverify';
+            if (!confirm(`Are you sure you want to ${action} this musician?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/musicians/${musicianId}/verify`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
