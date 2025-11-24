@@ -662,7 +662,7 @@
                     ` : '';
                     
                     modal.innerHTML = `
-                        <div class="flex h-full max-h-[90vh]">
+                        <div class="flex flex-col lg:flex-row h-full max-h-[90vh]">
                             <!-- Media Section with Navigation -->
                             <div class="flex-1 bg-black flex items-center justify-center relative">
                                 ${mediaHtml}
@@ -670,7 +670,7 @@
                             </div>
                             
                             <!-- Details Section -->
-                            <div class="w-96 bg-white flex flex-col">
+                            <div class="w-full lg:w-96 bg-white flex flex-col max-h-[50vh] lg:max-h-full">
                                 <!-- Header -->
                                 <div class="p-6 border-b border-gray-200">
                                     <div class="flex items-center gap-4 mb-4">
