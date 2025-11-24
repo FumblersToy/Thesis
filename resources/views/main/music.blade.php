@@ -20,7 +20,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-20">
                     <a href="{{ route('feed') }}">
-                        <img src="{{ asset('images/logo.png') }}" alt="Bandmate Logo" class="h-12 cursor-pointer hover:opacity-90 transition-opacity">
+                        <img src="{{ asset('images/logo_both.png') }}" alt="Bandmate Logo" class="h-12 cursor-pointer hover:opacity-90 transition-opacity">
                     </a>
 
                     <div class="flex items-center gap-4">
@@ -55,10 +55,12 @@
                                     <span id="notificationBadge" class="hidden absolute top-2 left-6 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
                                 </button>
 
-                                <a href="{{ route('music.index') }}" class="flex items-center gap-3 p-3 rounded-xl bg-purple-50 transition-colors text-purple-700 font-medium">
+                                @if(Auth::user()->musician)
+                                <a href="{{ route('music.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
                                     <span class="text-lg">🎵</span>
                                     My Music
                                 </a>
+                                @endif
 
                                 <a href="{{ route('settings.show') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
                                     <span class="text-lg">⚙️</span>
