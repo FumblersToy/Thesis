@@ -97,21 +97,15 @@ Route::get('/debug/test-email/{email}', function ($email) {
     }
 })->name('debug.test-email');
 
-Route::get('/register', function () {
-    return response()->view('register')
-        ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-        ->header('Pragma', 'no-cache')
-        ->header('Expires', '0');
-})->middleware('guest')->name('register');
-
-Route::post('/register', 
-[RegisterController::class, 'store']);
+Route::get('/register', [RegisterController::class, 'create'])->middleware('guest')->name('register');
+Route::post('/register', [RegisterController::class, 'store']);
 
 // Email Verification Routes
 Route::get('/email/verify', [EmailVerificationPromptController::class, '__invoke'])
+    ->middleware('guest')
     ->name('verification.notice');
 
-Route::get('/email/verify/{token}', [VerifyEmailController::class, '__invoke'])
+Route::get('/verify-email/{token}', [VerifyEmailController::class, '__invoke'])
     ->name('verification.verify');
 
 Route::get('/create', function () {

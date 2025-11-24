@@ -6,38 +6,56 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class VerifyEmailController extends Controller
 {
     public function __invoke(Request $request, $token)
     {
-        $pendingUser = session('pending_user');
+        Log::info('[VERIFICATION] Token verification started', ['token' => $token]);
 
-        // Check if session data exists
-        if (!$pendingUser) {
-            return redirect()->route('register')->with('error', 'Registration session expired. Please register again.');
+        // Get pending registration from session
+        $pendingData = session('pending_registration');
+
+        if (!$pendingData) {
+            Log::error('[VERIFICATION] No pending registration found');
+            return redirect()->route('register')->withErrors(['email' => 'No pending registration found. Please register again.']);
         }
 
-        // Check if token matches and not expired
-        if ($pendingUser['token'] !== $token || now()->greaterThan($pendingUser['expires_at'])) {
-            session()->forget('pending_user');
-            return redirect()->route('register')->with('error', 'Verification link is invalid or expired. Please register again.');
+        // Verify token matches
+        if ($pendingData['token'] !== $token) {
+            Log::error('[VERIFICATION] Invalid token', ['expected' => $pendingData['token'], 'received' => $token]);
+            return redirect()->route('register')->withErrors(['email' => 'Invalid verification token. Please register again.']);
         }
 
-        // NOW create the user in database (only after verification)
+        // Check if token has expired
+        if (now()->greaterThan($pendingData['expires_at'])) {
+            Log::error('[VERIFICATION] Token expired');
+            session()->forget('pending_registration');
+            return redirect()->route('register')->withErrors(['email' => 'Verification link has expired. Please register again.']);
+        }
+
+        Log::info('[VERIFICATION] Creating user', ['email' => $pendingData['email']]);
+
+        // Create the user now that email is verified
         $user = User::create([
-            'email' => $pendingUser['email'],
-            'password' => $pendingUser['password'],
+            'email' => $pendingData['email'],
+            'password' => $pendingData['password'],
+            'account_type' => 'pending',
             'email_verified_at' => now(),
         ]);
 
-        // Clear session data
-        session()->forget('pending_user');
+        Log::info('[VERIFICATION] User created successfully', ['user_id' => $user->id]);
 
-        // Log user in
+        // Clear the pending registration
+        session()->forget('pending_registration');
+
+        // Log the user in
         Auth::login($user);
 
-        // Redirect to account type selection
-        return redirect()->route('create')->with('verified', true);
+        Log::info('[VERIFICATION] User logged in, redirecting to account-type');
+
+        // Redirect to account type selection (profile creation)
+        return redirect()->route('account-type')->with('verified', true);
     }
 }

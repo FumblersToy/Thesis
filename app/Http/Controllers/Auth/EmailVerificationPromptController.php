@@ -10,7 +10,7 @@ class EmailVerificationPromptController extends Controller
     public function __invoke(Request $request)
     {
         // Check if there's pending registration
-        if (!session()->has('pending_user')) {
+        if (!session()->has('pending_registration')) {
             return redirect()->route('register')->with('error', 'No pending registration. Please register first.');
         }
 
