@@ -37,7 +37,7 @@ Route::post('/forgot-password', [App\Http\Controllers\Auth\ForgotPasswordControl
 Route::get('/reset-password/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->middleware('guest')->name('password.reset');
 Route::post('/reset-password', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->middleware('guest')->name('password.update');
 
-// Debug route - check mail configuration
+// Debug routes - Email related only
 Route::get('/debug/mail-config', function () {
     return response()->json([
         'MAIL_MAILER' => config('mail.default'),
@@ -52,7 +52,6 @@ Route::get('/debug/mail-config', function () {
     ]);
 })->name('debug.mail');
 
-// Debug route - clear config cache
 Route::get('/debug/clear-config', function () {
     \Illuminate\Support\Facades\Artisan::call('config:clear');
     \Illuminate\Support\Facades\Artisan::call('cache:clear');
@@ -64,7 +63,6 @@ Route::get('/debug/clear-config', function () {
     ]);
 })->name('debug.clear-config');
 
-// Debug route - test email sending
 Route::get('/debug/test-email/{email}', function ($email) {
     try {
         \Log::info('[DEBUG] Testing email to: ' . $email);
@@ -166,71 +164,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/map', function () {
         return view('main.map');
     })->name('map');
-});
-
-// Test Cloudinary connection
-Route::get('/test-cloudinary', function() {
-    try {
-        $cloudinaryUrl = env('CLOUDINARY_URL');
-        
-        if (!$cloudinaryUrl) {
-            return response()->json([
-                'success' => false,
-                'message' => 'CLOUDINARY_URL not set in .env'
-            ]);
-        }
-        
-        $cloudinary = new \Cloudinary\Cloudinary($cloudinaryUrl);
-        
-        // Test upload with a placeholder image
-        $result = $cloudinary->uploadApi()->upload('https://via.placeholder.com/300', [
-            'folder' => 'test',
-            'public_id' => 'test_upload_' . time()
-        ]);
-        
-        return response()->json([
-            'success' => true,
-            'cloudinary_url' => substr($cloudinaryUrl, 0, 30) . '...',
-            'uploaded_url' => $result['secure_url'] ?? null,
-            'public_id' => $result['public_id'] ?? null,
-            'message' => 'Cloudinary is working perfectly!'
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ], 500);
-    }
-})->middleware('auth');
-
-Route::get('/debug-admin', function() {
-    $admin = \App\Models\Admin::first();
-    
-    return response()->json([
-        'admin_exists' => $admin ? true : false,
-        'email' => $admin ? $admin->email : null,
-        'password_hash' => $admin ? substr($admin->password, 0, 20) . '...' : null,
-        'can_login_hash' => $admin ? \Illuminate\Support\Facades\Hash::check('admin123', $admin->password) : false,
-        'current_admin' => \Illuminate\Support\Facades\Auth::guard('admin')->user(),
-        'admin_routes' => [
-            'login' => route('admin.login'),
-            'dashboard' => route('admin.dashboard')
-        ]
-    ]);
-});
-
-// Test route to check if admin dashboard works without auth
-Route::get('/test-admin-dashboard', function() {
-    return view('admin.dashboard', [
-        'users' => collect([]),
-        'stats' => [
-            'total_users' => 0,
-            'total_posts' => 0,
-            'total_musicians' => 0,
-            'total_businesses' => 0,
-        ]
-    ]);
 });
 
 // Admin Routes
