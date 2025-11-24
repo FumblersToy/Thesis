@@ -175,7 +175,7 @@
                         </div>
                         <div>
                             <label class="block text-white/80 mb-1">Location</label>
-                            <select name="musician[location]" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <select name="musician[location]" id="musicianLocation" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
                                 @php $locVal = old('musician.location', $musician->location); @endphp
                                 <option value="" disabled {{ $locVal ? '' : 'selected' }}>Select your location</option>
                                 <option class="text-black" value="Balibago" {{ $locVal === 'Balibago' ? 'selected' : '' }}>Balibago</option>
@@ -192,6 +192,8 @@
                                 <option class="text-black" value="Malabanias" {{ $locVal === 'Malabanias' ? 'selected' : '' }}>Malabanias</option>
                                 <option class="text-black" value="Tabun" {{ $locVal === 'Tabun' ? 'selected' : '' }}>Tabun</option>
                             </select>
+                            <input type="hidden" name="musician[latitude]" id="musicianLatitude" value="{{ old('musician.latitude', $musician->latitude) }}">
+                            <input type="hidden" name="musician[longitude]" id="musicianLongitude" value="{{ old('musician.longitude', $musician->longitude) }}">
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-white/80 mb-1">Bio</label>
@@ -281,7 +283,7 @@
                         </div>
                         <div>
                             <label class="block text-white/80 mb-1">Location</label>
-                            <select name="business[location]" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <select name="business[location]" id="businessLocation" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
                                 @php $locationVal = old('business.location', $business->location); @endphp
                                 <option class="text-black" value="" disabled {{ $locationVal ? '' : 'selected' }}>Select your location</option>
                                 <option class="text-black" value="Balibago" {{ $locationVal === 'Balibago' ? 'selected' : '' }}>Balibago</option>
@@ -291,6 +293,8 @@
                                 <option class="text-black" value="Friendship" {{ $locationVal === 'Friendship' ? 'selected' : '' }}>Friendship</option>
                                 <option class="text-black" value="Other" {{ $locationVal === 'Other' ? 'selected' : '' }}>Other</option>
                             </select>
+                            <input type="hidden" name="business[latitude]" id="businessLatitude" value="{{ old('business.latitude', $business->latitude) }}">
+                            <input type="hidden" name="business[longitude]" id="businessLongitude" value="{{ old('business.longitude', $business->longitude) }}">
                         </div>
                         <div>
                             <label class="block text-white/80 mb-1">Venue Offered</label>
@@ -415,6 +419,55 @@
             warning.style.display = 'none';
         }
     });
+
+    // Location coordinate mapping
+    const locationCoordinates = {
+        'Balibago': { lat: 15.1455, lng: 120.5896 },
+        'CM Recto': { lat: 15.1467, lng: 120.5847 },
+        'Pampang': { lat: 15.1589, lng: 120.5881 },
+        'San Nicolas': { lat: 15.1391, lng: 120.5869 },
+        'Santa Teresa': { lat: 15.1523, lng: 120.5934 },
+        'Anunas': { lat: 15.1401, lng: 120.5761 },
+        'Agapito del Rosario': { lat: 15.1356, lng: 120.5923 },
+        'Cutcut': { lat: 15.1612, lng: 120.5734 },
+        'Capaya': { lat: 15.1723, lng: 120.5645 },
+        'Telabastagan': { lat: 15.1289, lng: 120.5678 },
+        'Lourdes': { lat: 15.1478, lng: 120.5812 },
+        'Malabanias': { lat: 15.1634, lng: 120.5923 },
+        'Tabun': { lat: 15.1556, lng: 120.5667 },
+        'Clark': { lat: 15.1859, lng: 120.5600 },
+        'Friendship': { lat: 15.1789, lng: 120.5523 }
+    };
+
+    // Update musician location coordinates
+    const musicianLocation = document.getElementById('musicianLocation');
+    const musicianLatitude = document.getElementById('musicianLatitude');
+    const musicianLongitude = document.getElementById('musicianLongitude');
+    
+    if (musicianLocation && musicianLatitude && musicianLongitude) {
+        musicianLocation.addEventListener('change', function() {
+            const selectedLocation = this.value;
+            if (locationCoordinates[selectedLocation]) {
+                musicianLatitude.value = locationCoordinates[selectedLocation].lat;
+                musicianLongitude.value = locationCoordinates[selectedLocation].lng;
+            }
+        });
+    }
+
+    // Update business location coordinates
+    const businessLocation = document.getElementById('businessLocation');
+    const businessLatitude = document.getElementById('businessLatitude');
+    const businessLongitude = document.getElementById('businessLongitude');
+    
+    if (businessLocation && businessLatitude && businessLongitude) {
+        businessLocation.addEventListener('change', function() {
+            const selectedLocation = this.value;
+            if (locationCoordinates[selectedLocation]) {
+                businessLatitude.value = locationCoordinates[selectedLocation].lat;
+                businessLongitude.value = locationCoordinates[selectedLocation].lng;
+            }
+        });
+    }
 
     // Prevent submission if too short
     form.addEventListener('submit', (e) => {

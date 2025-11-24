@@ -161,9 +161,9 @@ class SettingsController extends Controller
             $musician->instrument2 = $request->input('musician.instrument2');
             $musician->instrument3 = $request->input('musician.instrument3');
             $musician->bio = $request->input('musician.bio');
+            $musician->location = $request->input('musician.location');
             $musician->latitude = $request->input('musician.latitude');
             $musician->longitude = $request->input('musician.longitude');
-            $musician->location_name = $request->input('musician.location_name');
             $musician->save();
         }
 
@@ -263,9 +263,9 @@ class SettingsController extends Controller
             $business->phone_number = $request->input('business.phone_number');
             $business->address = $request->input('business.address');
             $business->venue = $request->input('business.venue');
+            $business->location = $request->input('business.location');
             $business->latitude = $request->input('business.latitude');
             $business->longitude = $request->input('business.longitude');
-            $business->location_name = $request->input('business.location_name');
             $business->address_latitude = $request->input('business.address_latitude');
             $business->address_longitude = $request->input('business.address_longitude');
             $business->save();

@@ -92,6 +92,32 @@ class BusinessController extends Controller
 
         Log::info('[PROFILE CREATION] Creating business profile', ['user_id' => $user->id]);
 
+        // Map location names to coordinates (Angeles City, Pampanga, Philippines)
+        $locationCoordinates = [
+            'Balibago' => ['lat' => 15.1455, 'lng' => 120.5896],
+            'CM Recto' => ['lat' => 15.1467, 'lng' => 120.5847],
+            'Pampang' => ['lat' => 15.1589, 'lng' => 120.5881],
+            'San Nicolas' => ['lat' => 15.1391, 'lng' => 120.5869],
+            'Santa Teresa' => ['lat' => 15.1523, 'lng' => 120.5934],
+            'Anunas' => ['lat' => 15.1401, 'lng' => 120.5761],
+            'Agapito del Rosario' => ['lat' => 15.1356, 'lng' => 120.5923],
+            'Cutcut' => ['lat' => 15.1612, 'lng' => 120.5734],
+            'Capaya' => ['lat' => 15.1723, 'lng' => 120.5645],
+            'Telabastagan' => ['lat' => 15.1289, 'lng' => 120.5678],
+            'Lourdes' => ['lat' => 15.1478, 'lng' => 120.5812],
+            'Malabanias' => ['lat' => 15.1634, 'lng' => 120.5923],
+            'Tabun' => ['lat' => 15.1556, 'lng' => 120.5667],
+        ];
+
+        $latitude = null;
+        $longitude = null;
+        $locationName = $request->location;
+
+        if ($locationName && isset($locationCoordinates[$locationName])) {
+            $latitude = $locationCoordinates[$locationName]['lat'];
+            $longitude = $locationCoordinates[$locationName]['lng'];
+        }
+
         $business = Business::create([
             'user_id' => $user->id,
             'business_name' => $request->business_name,
@@ -99,7 +125,9 @@ class BusinessController extends Controller
             'phone_number' => $request->phone_number,
             'address' => $request->address,
             'venue' => $request->venue,
-            'location' => $request->location,
+            'location' => $locationName,
+            'latitude' => $latitude,
+            'longitude' => $longitude,
             'profile_picture' => $profilePictureUrl,
             'profile_picture_public_id' => $profilePicturePublicId,
         ]);

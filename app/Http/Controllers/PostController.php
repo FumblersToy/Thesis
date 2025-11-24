@@ -205,25 +205,23 @@ class PostController extends Controller
             if ($sortBy === 'distance' && $userLat && $userLng) {
                 $query->select('posts.*')
                     ->selectRaw('
-                        COALESCE(
-                            (6371 * acos(cos(radians(?)) * cos(radians(COALESCE(musicians.latitude, businesses.latitude))) 
-                            * cos(radians(COALESCE(musicians.longitude, businesses.longitude)) - radians(?)) 
-                            + sin(radians(?)) * sin(radians(COALESCE(musicians.latitude, businesses.latitude))))),
-                            999999
-                        ) AS distance', [$userLat, $userLng, $userLat])
+                        (6371 * acos(cos(radians(?)) * cos(radians(COALESCE(musicians.latitude, businesses.latitude))) 
+                        * cos(radians(COALESCE(musicians.longitude, businesses.longitude)) - radians(?)) 
+                        + sin(radians(?)) * sin(radians(COALESCE(musicians.latitude, businesses.latitude))))) AS distance', 
+                        [$userLat, $userLng, $userLat])
                     ->leftJoin('users', 'posts.user_id', '=', 'users.id')
                     ->leftJoin('musicians', 'users.id', '=', 'musicians.user_id')
-                    ->leftJoin('businesses', 'users.id', '=', 'businesses.user_id');
+                    ->leftJoin('businesses', 'users.id', '=', 'businesses.user_id')
+                    // Only show posts from users with location data
+                    ->whereNotNull(DB::raw('COALESCE(musicians.latitude, businesses.latitude)'));
 
                 if ($maxDistance) {
                     // Use a WHERE clause with the full distance calculation instead of HAVING
                     $query->whereRaw('
-                        COALESCE(
-                            (6371 * acos(cos(radians(?)) * cos(radians(COALESCE(musicians.latitude, businesses.latitude))) 
-                            * cos(radians(COALESCE(musicians.longitude, businesses.longitude)) - radians(?)) 
-                            + sin(radians(?)) * sin(radians(COALESCE(musicians.latitude, businesses.latitude))))),
-                            999999
-                        ) <= ?', [$userLat, $userLng, $userLat, $maxDistance]);
+                        (6371 * acos(cos(radians(?)) * cos(radians(COALESCE(musicians.latitude, businesses.latitude))) 
+                        * cos(radians(COALESCE(musicians.longitude, businesses.longitude)) - radians(?)) 
+                        + sin(radians(?)) * sin(radians(COALESCE(musicians.latitude, businesses.latitude))))) <= ?', 
+                        [$userLat, $userLng, $userLat, $maxDistance]);
                 }
 
                 $query->orderBy('distance', 'asc');
