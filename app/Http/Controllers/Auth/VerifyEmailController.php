@@ -53,9 +53,9 @@ class VerifyEmailController extends Controller
         // Log the user in
         Auth::login($user);
 
-        Log::info('[VERIFICATION] User logged in, redirecting to account-type');
+        Log::info('[VERIFICATION] User logged in, redirecting to create');
 
-        // Redirect to account type selection (profile creation)
-        return redirect()->route('account-type')->with('verified', true);
+        // Redirect to profile creation
+        return redirect()->route('create')->with('verified', true);
     }
 }
