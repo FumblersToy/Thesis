@@ -414,6 +414,7 @@
                                     data-image-url-2="{{ $imageUrl2 ?? '' }}"
                                     data-image-url-3="{{ $imageUrl3 ?? '' }}"
                                     data-media-type="video"
+                                    data-user-id="{{ $post->user_id }}"
                                     data-user-name="{{ $displayName }}"
                                     data-user-genre="{{ $roleLabel }}"
                                     data-user-type="{{ $musician ? 'musician' : ($business ? 'business' : 'member') }}"
@@ -439,6 +440,7 @@
                                     data-image-url-2="{{ $imageUrl2 ?? '' }}"
                                     data-image-url-3="{{ $imageUrl3 ?? '' }}"
                                     data-media-type="image"
+                                    data-user-id="{{ $post->user_id }}"
                                     data-user-name="{{ $displayName }}"
                                     data-user-genre="{{ $roleLabel }}"
                                     data-user-type="{{ $musician ? 'musician' : ($business ? 'business' : 'member') }}"
@@ -459,6 +461,7 @@
                              data-image-url-2="{{ $imageUrl2 ?? '' }}"
                              data-image-url-3="{{ $imageUrl3 ?? '' }}"
                              data-media-type="{{ $isVideo ? 'video' : 'image' }}"
+                             data-user-id="{{ $post->user_id }}"
                              data-user-name="{{ $displayName }}"
                              data-user-genre="{{ $roleLabel }}"
                              data-user-type="{{ $musician ? 'musician' : ($business ? 'business' : 'member') }}"
@@ -501,6 +504,7 @@
                                  data-post-id="{{ $post->id }}"
                                  data-image-url="{{ $imageUrl }}"
                                  data-media-type="video"
+                                 data-user-id="{{ $post->user_id }}"
                                  data-user-name="{{ $displayName }}"
                                  data-user-genre="{{ $roleLabel }}"
                                  data-user-type="{{ $musician ? 'musician' : ($business ? 'business' : 'member') }}"
@@ -1182,6 +1186,7 @@
                     imageUrl3: img.getAttribute('data-image-url-3'),
                     mediaType: img.getAttribute('data-media-type') || 'image',
                     userName: img.getAttribute('data-user-name'),
+                    userId: img.getAttribute('data-user-id'),
                     userGenre: img.getAttribute('data-user-genre'),
                     userType: img.getAttribute('data-user-type'),
                     userAvatar: img.getAttribute('data-user-avatar'),
@@ -1292,7 +1297,7 @@
                                         ${avatarElement}
                                         <div>
                                             <div class="flex items-center gap-2">
-                                                <h3 class="font-bold text-gray-800 text-xl">${postData.userName}</h3>
+                                                <a href="/profile/${postData.userId}" class="font-bold text-gray-800 text-xl hover:text-purple-600 transition-colors">${postData.userName}</a>
                                                 ${postData.is_verified ? `<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>` : ''}
                                             </div>
                                             <p class="text-gray-600">${[postData.userGenre, postData.userLocation].filter(Boolean).join(' · ')}</p>

@@ -19,14 +19,9 @@
         <nav class="bg-white/10 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-20">
-                    <div class="flex items-center gap-8">
-                        <h1 class="text-3xl font-bold text-white">Gigsly</h1>
-                        <div class="hidden md:flex gap-6">
-                            <a href="{{ route('feed') }}" class="text-white/80 hover:text-white transition-colors font-medium">Feed</a>
-                            <a href="{{ route('profile.show', Auth::id()) }}" class="text-white/80 hover:text-white transition-colors font-medium">Profile</a>
-                            <a href="{{ route('music.index') }}" class="text-white font-semibold border-b-2 border-white">My Music</a>
-                        </div>
-                    </div>
+                    <a href="{{ route('feed') }}">
+                        <img src="{{ asset('images/logo.png') }}" alt="Bandmate Logo" class="h-12 cursor-pointer hover:opacity-90 transition-opacity">
+                    </a>
 
                     <div class="flex items-center gap-4">
                         <button id="profileBtn" class="flex items-center gap-3 bg-white/20 hover:bg-white/30 backdrop-blur-xl px-4 py-2 rounded-full transition-all duration-300">
@@ -53,6 +48,12 @@
                                     <span class="text-lg">👤</span>
                                     View Profile
                                 </a>
+
+                                <button id="notificationsBtn" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900 relative">
+                                    <span class="text-lg">🔔</span>
+                                    Notifications
+                                    <span id="notificationBadge" class="hidden absolute top-2 left-6 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                                </button>
 
                                 <a href="{{ route('music.index') }}" class="flex items-center gap-3 p-3 rounded-xl bg-purple-50 transition-colors text-purple-700 font-medium">
                                     <span class="text-lg">🎵</span>
@@ -84,6 +85,29 @@
                 </div>
             </div>
         </nav>
+
+        <!-- Notifications Modal -->
+        <div id="notificationsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+                <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-gray-800">Notifications</h2>
+                    <button id="closeNotificationsModal" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="notificationsContent" class="p-6 overflow-y-auto max-h-[calc(80vh-100px)]">
+                    <div class="text-center py-8 text-gray-500">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                        <p class="text-lg font-medium">No notifications yet</p>
+                        <p class="text-sm">When someone likes or comments on your posts, you'll see it here</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Main Content -->
         <div class="max-w-5xl mx-auto px-4 py-8">
@@ -180,6 +204,132 @@
                 profileDropdown.classList.add('hidden');
             }
         });
+
+        // Notifications Modal functionality
+        const notificationsBtn = document.getElementById('notificationsBtn');
+        const notificationsModal = document.getElementById('notificationsModal');
+        const closeNotificationsModal = document.getElementById('closeNotificationsModal');
+        const notificationBadge = document.getElementById('notificationBadge');
+        
+        if (notificationsBtn && notificationsModal) {
+            notificationsBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                notificationsModal.classList.remove('hidden');
+                notificationsModal.classList.add('flex');
+                profileDropdown.classList.add('hidden');
+                loadNotifications();
+            });
+            
+            closeNotificationsModal.addEventListener('click', function() {
+                notificationsModal.classList.add('hidden');
+                notificationsModal.classList.remove('flex');
+            });
+            
+            notificationsModal.addEventListener('click', function(e) {
+                if (e.target === notificationsModal) {
+                    notificationsModal.classList.add('hidden');
+                    notificationsModal.classList.remove('flex');
+                }
+            });
+        }
+        
+        // Load notifications
+        async function loadNotifications() {
+            const content = document.getElementById('notificationsContent');
+            content.innerHTML = '<div class="text-center py-8"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div></div>';
+            
+            try {
+                const response = await fetch('/api/notifications', {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.notifications && data.notifications.length > 0) {
+                    const notificationsHtml = data.notifications.map(notif => {
+                        const timeAgo = getTimeAgo(notif.created_at);
+                        const icon = notif.type === 'like' ? '❤️' : '💬';
+                        const bgColor = notif.read ? 'bg-white' : 'bg-blue-50';
+                        
+                        return `
+                            <div class="${bgColor} p-4 rounded-xl hover:shadow-md transition-all mb-3 border border-gray-100 cursor-pointer" onclick="window.location.href='/feed#post-${notif.post_id}'; markNotificationAsReadRedirect(${notif.id})">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-2xl">${icon}</span>
+                                    <div class="flex-1">
+                                        <p class="text-gray-800 font-medium">${notif.message}</p>
+                                        <p class="text-gray-500 text-sm mt-1">${timeAgo}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    content.innerHTML = notificationsHtml;
+                    
+                    // Update badge
+                    if (data.unread_count > 0) {
+                        notificationBadge.textContent = data.unread_count;
+                        notificationBadge.classList.remove('hidden');
+                    } else {
+                        notificationBadge.classList.add('hidden');
+                    }
+                } else {
+                    content.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                            <p class="text-lg font-medium">No notifications yet</p>
+                            <p class="text-sm">When someone likes or comments on your posts, you'll see it here</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                content.innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <p>Failed to load notifications</p>
+                        <button onclick="loadNotifications()" class="mt-4 px-4 py-2 bg-purple-500 text-white rounded-full hover:bg-purple-600">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        function getTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+            if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+            return date.toLocaleDateString();
+        }
+        
+        // Mark notification as read and redirect to feed
+        window.markNotificationAsReadRedirect = async function(notificationId) {
+            try {
+                await fetch(`/api/notifications/${notificationId}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                });
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+            }
+        };
+        
+        // Load notification count on page load
+        loadNotifications();
 
         // Upload form
         const uploadForm = document.getElementById('uploadMusicForm');
