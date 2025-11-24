@@ -514,6 +514,11 @@
             function extractPostDataFromElement(element) {
                 if (!element) return null;
                 
+                console.log('Extracting from element:', element);
+                console.log('data-image-url:', element.getAttribute('data-image-url'));
+                console.log('data-image-url-2:', element.getAttribute('data-image-url-2'));
+                console.log('data-image-url-3:', element.getAttribute('data-image-url-3'));
+                
                 return {
                     id: element.getAttribute('data-post-id'),
                     imageUrl: element.getAttribute('data-image-url'),
