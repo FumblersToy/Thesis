@@ -930,22 +930,43 @@
                 return {
                     id: img.getAttribute('data-post-id'),
                     imageUrl: img.getAttribute('data-image-url'),
+                    imageUrl2: img.getAttribute('data-image-url-2'),
+                    imageUrl3: img.getAttribute('data-image-url-3'),
                     mediaType: img.getAttribute('data-media-type') || 'image',
                     userName: img.getAttribute('data-user-name'),
                     userGenre: img.getAttribute('data-user-genre'),
                     userType: img.getAttribute('data-user-type'),
                     userAvatar: img.getAttribute('data-user-avatar'),
+                    userLocation: img.getAttribute('data-user-location'),
                     description: img.getAttribute('data-description'),
                     createdAt: img.getAttribute('data-created-at'),
                     like_count: parseInt(img.getAttribute('data-like-count')) || 0,
                     comment_count: parseInt(img.getAttribute('data-comment-count')) || 0,
-                    is_liked: img.getAttribute('data-is-liked') === 'true'
+                    is_liked: img.getAttribute('data-is-liked') === 'true',
+                    is_verified: img.getAttribute('data-is-verified') === 'true'
                 };
             }
 
-            // Show image modal
+            // Show image modal with carousel support
             function showImageModal(postData) {
                 if (!postData) return;
+                
+                console.log('=== PROFILE MODAL DEBUG START ===');
+                console.log('Full Post Data:', postData);
+                console.log('imageUrl:', postData.imageUrl);
+                console.log('imageUrl2:', postData.imageUrl2);
+                console.log('imageUrl3:', postData.imageUrl3);
+                
+                // Collect all images/videos - filter out empty strings and null values
+                const images = [postData.imageUrl, postData.imageUrl2, postData.imageUrl3]
+                    .filter(url => url && url !== '' && url !== 'null' && url !== 'undefined');
+                
+                console.log('Filtered images array:', images);
+                console.log('Images array length:', images.length);
+                console.log('Will show navigation buttons:', images.length > 1);
+                console.log('=== PROFILE MODAL DEBUG END ===');
+                
+                let currentImageIndex = 0;
                 
                 // Create modal overlay
                 const overlay = document.createElement('div');
@@ -962,115 +983,178 @@
                 
                 const avatarElement = postData.userAvatar ? 
                     `<img class="w-16 h-16 rounded-full object-cover border-2 border-gray-200" src="${postData.userAvatar}" alt="avatar">` :
-                    `<div class="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-xl">${postData.userName.charAt(0).toUpperCase()}</div>`;
+                    `<div class="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-xl">${postData.userName ? postData.userName.charAt(0).toUpperCase() : 'U'}</div>`;
                 
-                const isVideo = postData.mediaType === 'video';
-                const mediaHtml = isVideo ? `
-                    <video controls class="max-w-full max-h-full" style="width: 100%; height: 100%; object-fit: contain;">
-                        <source src="${postData.imageUrl}" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                ` : `
-                    <img src="${postData.imageUrl}" 
-                         alt="Post image" 
-                         class="max-w-full max-h-full object-contain">
-                `;
-                
-                modal.innerHTML = `
-                    <div class="flex h-full max-h-[90vh]">
-                        <!-- Media Section -->
-                        <div class="flex-1 bg-black flex items-center justify-center">
-                            ${mediaHtml}
+                function renderModal() {
+                    // Check if current media is a video by URL pattern
+                    const currentUrl = images[currentImageIndex];
+                    const isVideo = currentUrl && (
+                        currentUrl.includes('.mp4') || 
+                        currentUrl.includes('.mov') || 
+                        currentUrl.includes('.avi') || 
+                        currentUrl.includes('.wmv') ||
+                        currentUrl.includes('/video/upload/') ||  // Cloudinary video URL
+                        postData.mediaType === 'video'
+                    );
+                    
+                    console.log('Current URL:', currentUrl);
+                    console.log('Is Video:', isVideo);
+                    
+                    const mediaHtml = isVideo ? `
+                        <video controls class="max-w-full max-h-full" style="width: 100%; height: 100%; object-fit: contain;">
+                            <source src="${currentUrl}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    ` : `
+                        <img src="${currentUrl}" 
+                             alt="Post image" 
+                             class="max-w-full max-h-full object-contain">
+                    `;
+
+                    // Add navigation buttons if multiple images
+                    const navigationHtml = images.length > 1 ? `
+                        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-black/50 px-4 py-2 rounded-full">
+                            <button id="prevImage" class="text-white hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed" ${currentImageIndex === 0 ? 'disabled' : ''}>
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+                            <span class="text-white font-medium">${currentImageIndex + 1} / ${images.length}</span>
+                            <button id="nextImage" class="text-white hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed" ${currentImageIndex === images.length - 1 ? 'disabled' : ''}>
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
                         </div>
-                        
-                        <!-- Details Section -->
-                        <div class="w-96 bg-white flex flex-col">
-                            <!-- Header -->
-                            <div class="p-6 border-b border-gray-200">
-                                <div class="flex items-center gap-4 mb-4">
-                                    ${avatarElement}
-                                    <div>
-                                        <h3 class="font-bold text-gray-800 text-xl">${postData.userName}</h3>
-                                        <p class="text-gray-600">${postData.userGenre}</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-2 text-sm text-gray-500">
-                                    <span>${userTypeEmoji} ${postData.userType}</span>
-                                    <span>•</span>
-                                    <span>${new Date(postData.createdAt).toLocaleDateString()}</span>
-                                </div>
+                    ` : '';
+                    
+                    modal.innerHTML = `
+                        <div class="flex h-full max-h-[90vh]">
+                            <!-- Media Section with Navigation -->
+                            <div class="flex-1 bg-black flex items-center justify-center relative">
+                                ${mediaHtml}
+                                ${navigationHtml}
                             </div>
                             
-                            <!-- Description -->
-                            <div class="flex-1 p-6 overflow-y-auto">
-                                ${postData.description ? `
-                                    <div class="mb-6">
-                                        <p class="text-gray-700 leading-relaxed">${postData.description}</p>
+                            <!-- Details Section -->
+                            <div class="w-96 bg-white flex flex-col">
+                                <!-- Header -->
+                                <div class="p-6 border-b border-gray-200">
+                                    <div class="flex items-center gap-4 mb-4">
+                                        ${avatarElement}
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <h3 class="font-bold text-gray-800 text-xl">${postData.userName}</h3>
+                                                ${postData.is_verified ? `<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>` : ''}
+                                            </div>
+                                            <p class="text-gray-600">${[postData.userGenre, postData.userLocation].filter(Boolean).join(' · ')}</p>
+                                        </div>
                                     </div>
-                                ` : ''}
+                                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                                        <span>${userTypeEmoji} ${postData.userType}</span>
+                                        <span>•</span>
+                                        <span>${new Date(postData.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
                                 
-                                <!-- Comments Section -->
-                                <div class="space-y-4">
-                                    <h4 class="font-semibold text-gray-800">Comments</h4>
-                                    <div class="space-y-3">
-                                        <div class="text-center py-8 text-gray-500">
-                                            <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                                            </svg>
-                                            <p>No comments yet</p>
-                                            <p class="text-sm">Be the first to comment!</p>
+                                <!-- Description -->
+                                <div class="flex-1 p-6 overflow-y-auto">
+                                    ${postData.description ? `
+                                        <div class="mb-6">
+                                            <p class="text-gray-700 leading-relaxed">${postData.description}</p>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    <!-- Comments Section -->
+                                    <div class="space-y-4">
+                                        <h4 class="font-semibold text-gray-800">Comments</h4>
+                                        <div class="space-y-3">
+                                            <div class="text-center py-8 text-gray-500">
+                                                <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                                </svg>
+                                                <p>No comments yet</p>
+                                                <p class="text-sm">Be the first to comment!</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <!-- Actions -->
-                            <div class="p-6 border-t border-gray-200">
-                                <div class="flex items-center gap-6 mb-4">
-                                    <button class="like-btn flex items-center gap-2 transition-colors" 
-                                            data-post-id="${postData.id}"
-                                            data-liked="${postData.is_liked || false}">
-                                        <svg class="w-6 h-6 ${postData.is_liked ? 'fill-red-500 text-red-500' : 'fill-none text-gray-600 hover:text-red-500'}" 
-                                             stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                        </svg>
-                                        <span class="font-medium like-count">${postData.like_count || 0}</span>
-                                    </button>
-                                    <button class="comment-btn flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                                        </svg>
-                                        <span class="font-medium comment-count">${postData.comment_count || 0}</span>
-                                    </button>
-                                    <button class="share-btn flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
-                                        </svg>
-                                        <span class="font-medium">Share</span>
-                                    </button>
-                                </div>
                                 
-                                <!-- Comment Input -->
-                                <div class="flex gap-3">
-                                    <input type="text" 
-                                           placeholder="Add a comment..." 
-                                           class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <button class="comment-submit-btn px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
-                                        Post
-                                    </button>
+                                <!-- Actions -->
+                                <div class="p-6 border-t border-gray-200">
+                                    <div class="flex items-center gap-6 mb-4">
+                                        <button class="like-btn flex items-center gap-2 transition-colors" 
+                                                data-post-id="${postData.id}"
+                                                data-liked="${postData.is_liked || false}">
+                                            <svg class="w-6 h-6 ${postData.is_liked ? 'fill-red-500 text-red-500' : 'fill-none text-gray-600 hover:text-red-500'}" 
+                                                 stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                            </svg>
+                                            <span class="font-medium like-count">${postData.like_count || 0}</span>
+                                        </button>
+                                        <button class="comment-btn flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                            </svg>
+                                            <span class="font-medium comment-count">${postData.comment_count || 0}</span>
+                                        </button>
+                                        <button class="share-btn flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
+                                            </svg>
+                                            <span class="font-medium">Share</span>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Comment Input -->
+                                    <div class="flex gap-3">
+                                        <input type="text" 
+                                               placeholder="Add a comment..." 
+                                               class="comment-input flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <button class="comment-submit-btn px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
+                                            Post
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Close Button -->
-                    <button class="close-modal absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors z-10">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                `;
+                        
+                        <!-- Close Button -->
+                        <button class="close-modal absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors z-10">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    `;
+
+                    // Re-attach carousel event listeners after rendering
+                    if (images.length > 1) {
+                        const prevBtn = modal.querySelector('#prevImage');
+                        const nextBtn = modal.querySelector('#nextImage');
+
+                        if (prevBtn) {
+                            prevBtn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                if (currentImageIndex > 0) {
+                                    currentImageIndex--;
+                                    renderModal();
+                                }
+                            });
+                        }
+
+                        if (nextBtn) {
+                            nextBtn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                if (currentImageIndex < images.length - 1) {
+                                    currentImageIndex++;
+                                    renderModal();
+                                }
+                            });
+                        }
+                    }
+                }
                 
+                renderModal();
                 overlay.appendChild(modal);
                 document.body.appendChild(overlay);
                 
@@ -1097,6 +1181,57 @@
                 };
                 
                 closeBtn.addEventListener('click', closeModal);
+                
+                // Close on overlay click
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        closeModal();
+                    }
+                });
+                
+                // Close on Escape key
+                const handleEscape = (e) => {
+                    if (e.key === 'Escape') {
+                        closeModal();
+                        document.removeEventListener('keydown', handleEscape);
+                    }
+                };
+                document.addEventListener('keydown', handleEscape);
+
+                // Add like functionality
+                const likeBtn = modal.querySelector('.like-btn');
+                if (likeBtn) {
+                    likeBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        toggleLike(likeBtn, postData.id);
+                    });
+                }
+
+                // Add comment functionality
+                const commentInput = modal.querySelector('.comment-input');
+                const commentSubmitBtn = modal.querySelector('.comment-submit-btn');
+                if (commentInput && commentSubmitBtn) {
+                    commentSubmitBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const content = commentInput.value.trim();
+                        if (content) {
+                            addComment(postData.id, content, commentInput, modal);
+                        }
+                    });
+                    
+                    commentInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            const content = commentInput.value.trim();
+                            if (content) {
+                                addComment(postData.id, content, commentInput, modal);
+                            }
+                        }
+                    });
+                }
+
+                // Load comments
+                loadComments(postData.id, modal);
+            }
                 
                 // Close on overlay click (but not on modal content)
                 overlay.addEventListener('click', (e) => {

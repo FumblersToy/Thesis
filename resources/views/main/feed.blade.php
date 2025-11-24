@@ -585,9 +585,12 @@
                         currentUrl.includes('.mov') || 
                         currentUrl.includes('.avi') || 
                         currentUrl.includes('.wmv') ||
-                        currentUrl.includes('/video/') ||
+                        currentUrl.includes('/video/upload/') ||  // Cloudinary video URL
                         postData.mediaType === 'video'
                     );
+                    
+                    console.log('Current URL:', currentUrl);
+                    console.log('Is Video:', isVideo);
                     
                     const mediaHtml = isVideo ? `
                         <video controls class="max-w-full max-h-full" style="width: 100%; height: 100%; object-fit: contain;">
