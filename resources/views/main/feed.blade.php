@@ -573,14 +573,24 @@
                     `<div class="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-xl">${postData.userName ? postData.userName.charAt(0).toUpperCase() : 'U'}</div>`;
                 
                 function renderModal() {
-                    const isVideo = postData.mediaType === 'video';
+                    // Check if current media is a video by URL pattern
+                    const currentUrl = images[currentImageIndex];
+                    const isVideo = currentUrl && (
+                        currentUrl.includes('.mp4') || 
+                        currentUrl.includes('.mov') || 
+                        currentUrl.includes('.avi') || 
+                        currentUrl.includes('.wmv') ||
+                        currentUrl.includes('/video/') ||
+                        postData.mediaType === 'video'
+                    );
+                    
                     const mediaHtml = isVideo ? `
                         <video controls class="max-w-full max-h-full" style="width: 100%; height: 100%; object-fit: contain;">
-                            <source src="${images[currentImageIndex]}" type="video/mp4">
+                            <source src="${currentUrl}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
                     ` : `
-                        <img src="${images[currentImageIndex]}" 
+                        <img src="${currentUrl}" 
                              alt="Post image" 
                              class="max-w-full max-h-full object-contain">
                     `;
