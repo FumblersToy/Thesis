@@ -116,10 +116,10 @@ Route::get('/create', function () {
         ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
         ->header('Pragma', 'no-cache')
         ->header('Expires', '0');
-})->middleware(['auth', 'verified'])->name('create');
+})->middleware('auth')->name('create');
 
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware('auth')->group(function () {
     Route::get('/create/musician', [App\Http\Controllers\Auth\MusicianController::class, 'showCreateForm'])->name('create.musician');
     Route::post('/musician', [App\Http\Controllers\Auth\MusicianController::class, 'createMusicianProfile'])->name('musician.store');
     Route::get('/create/business', [App\Http\Controllers\Auth\BusinessController::class, 'showCreateForm'])->name('create.business');
