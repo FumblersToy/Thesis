@@ -805,17 +805,13 @@ function initFeed() {
 
     // Post modal functionality - open modal when clicking on post image or content area
     document.addEventListener('click', function(e) {
-        console.log('Feed.js click detected:', e.target);
-        
         // Don't open modal if clicking elements marked as no-modal-trigger (delete button, username)
         if (e.target.closest('.no-modal-trigger')) {
-            console.log('Clicked no-modal-trigger element');
             return;
         }
         
         const imgEl = e.target.closest('.post-image');
         if (imgEl) {
-            console.log('Clicked post-image');
             e.preventDefault();
             const postData = extractPostDataFromElement(imgEl);
             if (window.showImageModal) {
@@ -827,10 +823,8 @@ function initFeed() {
         // Handle clicks on post content area (entire section below media)
         const contentEl = e.target.closest('.post-content-clickable');
         if (contentEl) {
-            console.log('Clicked post-content-clickable', contentEl);
             e.preventDefault();
             const postData = extractPostDataFromElement(contentEl);
-            console.log('Post data:', postData);
             if (window.showImageModal) {
                 window.showImageModal(postData);
             }

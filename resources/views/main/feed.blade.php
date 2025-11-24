@@ -537,7 +537,8 @@
                 };
             }
 
-            function showImageModal(postData) {
+            // Make showImageModal globally accessible for feed.js
+            window.showImageModal = function showImageModal(postData) {
                 if (!postData) return;
 
                 // Collect all images
@@ -759,7 +760,7 @@
             }
 
             // Match profile modal behavior for likes/comments
-            async function toggleLike(likeBtn, postId) {
+            window.toggleLike = async function toggleLike(likeBtn, postId) {
                 // Check if this is a sample post (not a real database post)
                 if (postId.startsWith('sample-')) {
                     alert('Like functionality is only available for real posts. Create a post to test this feature!');
@@ -808,7 +809,7 @@
             }
 
             // Add comment function
-            async function addComment(postId, content, commentInput, modal) {
+            window.addComment = async function addComment(postId, content, commentInput, modal) {
                 // Check if this is a sample post (not a real database post)
                 if (postId.startsWith('sample-')) {
                     alert('Comment functionality is only available for real posts. Create a post to test this feature!');
@@ -859,7 +860,7 @@
             }
 
             // Load comments function
-            async function loadComments(postId, modal) {
+            window.loadComments = async function loadComments(postId, modal) {
                 // Check if this is a sample post (not a real database post)
                 if (postId.startsWith('sample-')) {
                     return;
@@ -900,7 +901,7 @@
             }
 
             // Add comment to modal function
-            function addCommentToModal(comment, modal) {
+            window.addCommentToModal = function addCommentToModal(comment, modal) {
                 const commentsContainer = modal.querySelector('.space-y-3');
                 
                 if (!commentsContainer) {
