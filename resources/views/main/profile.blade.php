@@ -761,14 +761,21 @@
 
             // Image modal functionality - WITH MORE DEBUGGING
             document.addEventListener('click', function(e) {
+                console.log('========== PROFILE CLICK DEBUG ==========');
                 console.log('🔍 Click detected on:', e.target);
-                console.log('🔍 Target classes:', e.target.className);
+                console.log('🔍 Target tagName:', e.target.tagName);
+                console.log('🔍 Target className:', e.target.className);
+                console.log('🔍 Target id:', e.target.id);
                 console.log('🔍 Closest .post-image:', e.target.closest('.post-image'));
+                console.log('🔍 Closest .post-content-clickable:', e.target.closest('.post-content-clickable'));
+                console.log('🔍 Closest .delete-post-btn:', e.target.closest('.delete-post-btn'));
+                console.log('========================================');
                 
                 // Handle delete button clicks - stop propagation to prevent modal
                 if (e.target.closest('.delete-post-btn')) {
                     e.preventDefault();
                     e.stopPropagation();
+                    console.log('🗑️ Delete button clicked');
                     const deleteBtn = e.target.closest('.delete-post-btn');
                     const postId = deleteBtn.getAttribute('data-post-id');
                     if (postId) {
@@ -780,11 +787,12 @@
                 // Handle post image clicks
                 if (e.target.closest('.post-image')) {
                     e.preventDefault();
-                    console.log('✅ Post image clicked!');
+                    console.log('✅ Post image clicked! Opening modal...');
                     const img = e.target.closest('.post-image');
                     const postData = extractPostDataFromImage(img);
                     
-                    console.log('📦 Post data:', postData);
+                    console.log('📦 Post data extracted:', postData);
+                    console.log('🚀 Calling showImageModal...');
                     showImageModal(postData);
                     return;
                 }
@@ -793,12 +801,15 @@
                 const contentEl = e.target.closest('.post-content-clickable');
                 if (contentEl && !e.target.closest('.delete-post-btn')) {
                     e.preventDefault();
-                    console.log('✅ Post content clicked!');
+                    console.log('✅ Post content clicked! Opening modal...');
                     const postData = extractPostDataFromImage(contentEl);
-                    console.log('📦 Post data:', postData);
+                    console.log('📦 Post data extracted:', postData);
+                    console.log('🚀 Calling showImageModal...');
                     showImageModal(postData);
                     return;
                 }
+                
+                console.log('❌ No matching element found for modal');
             });
 
             // Search functionality
