@@ -427,10 +427,12 @@
                                     </button>
                                 ` : ''}
                             </div>
-                            <div class="${isVideo ? 'cursor-pointer hover:bg-gray-50 transition-colors rounded-lg p-2 -m-2 post-details-clickable' : ''}" 
-                                 ${isVideo ? `data-post-id="${post.id}"
+                            <div class="cursor-pointer hover:bg-gray-50 transition-colors rounded-lg p-2 -m-2 post-details-clickable" 
+                                 data-post-id="${post.id}"
                                  data-image-url="${post.image_path}"
-                                 data-media-type="video"
+                                 data-image-url-2="${post.image_path_2 || ''}"
+                                 data-image-url-3="${post.image_path_3 || ''}"
+                                 data-media-type="${post.media_type || 'image'}"
                                  data-user-name="${(post.user_name||'')}"
                                  data-user-genre="${(post.user_genre||'')}"
                                  data-user-location="${(post.user_location||post.user_city||'')}"
@@ -440,7 +442,8 @@
                                  data-created-at="${(post.created_at||'')}"
                                  data-like-count="${likeCount}"
                                  data-comment-count="${commentCount}"
-                                 data-is-liked="${(post.is_liked? 'true' : 'false')}"` : ''}>
+                                 data-is-liked="${(post.is_liked? 'true' : 'false')}"
+                                 data-is-verified="${(isVerified ? 'true' : 'false')}">
                                 <p class="text-gray-700 mb-4 leading-relaxed">${(post.description||'')}</p>
                                 <div class="flex justify-between items-center text-gray-500 text-sm">
                                     <span>${formattedDate}</span>
@@ -496,9 +499,9 @@
                     return;
                 }
                 
-                // Handle clicks on video post details clickable area (description/metadata only)
+                // Handle clicks on post details clickable area (description/metadata)
                 const detailsEl = e.target.closest('.post-details-clickable');
-                if (detailsEl && detailsEl.getAttribute('data-media-type') === 'video') {
+                if (detailsEl) {
                     e.preventDefault();
                     const postData = extractPostDataFromImage(detailsEl);
                     showImageModal(postData);
