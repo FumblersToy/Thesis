@@ -481,86 +481,84 @@
             }
         });
     </script>
-    <!-- Inline modal implementation for feed page (kept here to match profile.blade.php behavior) -->
+
+    <!-- Modal functionality for feed page -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Delegate clicks on images to open modal (mirrors profile modal behavior)
+            // Delegate clicks on images and post content to open modal
             document.addEventListener('click', function(e) {
-                console.log('Click detected', e.target);
-                
-                // Don't open modal if clicking elements marked as no-modal-trigger (delete button, username)
-                if (e.target.closest('.no-modal-trigger')) {
-                    console.log('Clicked no-modal-trigger element');
+                // Don't open modal if clicking delete button
+                if (e.target.closest('.delete-post-btn')) {
                     return;
                 }
                 
-                const imgEl = e.target.closest('.post-image');
-                if (imgEl) {
-                    console.log('Clicked post-image');
+                // Check if clicked on post image
+                if (e.target.closest('.post-image')) {
                     e.preventDefault();
-                    const postData = extractPostDataFromImage(imgEl);
+                    const img = e.target.closest('.post-image');
+                    const postData = extractPostDataFromElement(img);
                     showImageModal(postData);
                     return;
                 }
                 
-                // Handle clicks on post content area (entire section below media)
+                // Check if clicked on post content area (entire section below media)
                 const contentEl = e.target.closest('.post-content-clickable');
                 if (contentEl) {
-                    console.log('Clicked post-content-clickable', contentEl);
                     e.preventDefault();
-                    const postData = extractPostDataFromImage(contentEl);
-                    console.log('Post data:', postData);
+                    const postData = extractPostDataFromElement(contentEl);
                     showImageModal(postData);
                 }
             });
 
-            function extractPostDataFromImage(img) {
-                if (!img) return null;
-
+            // Extract post data from element
+            function extractPostDataFromElement(element) {
+                if (!element) return null;
+                
                 return {
-                    id: img.getAttribute('data-post-id'),
-                    imageUrl: img.getAttribute('data-image-url'),
-                    imageUrl2: img.getAttribute('data-image-url-2'),
-                    imageUrl3: img.getAttribute('data-image-url-3'),
-                    mediaType: img.getAttribute('data-media-type') || 'image',
-                    userName: img.getAttribute('data-user-name'),
-                    userGenre: img.getAttribute('data-user-genre'),
-                    userType: img.getAttribute('data-user-type'),
-                    userAvatar: img.getAttribute('data-user-avatar'),
-                    userLocation: img.getAttribute('data-user-location'),
-                    description: img.getAttribute('data-description'),
-                    createdAt: img.getAttribute('data-created-at'),
-                    like_count: parseInt(img.getAttribute('data-like-count')) || 0,
-                    comment_count: parseInt(img.getAttribute('data-comment-count')) || 0,
-                    is_liked: img.getAttribute('data-is-liked') === 'true',
-                    is_verified: img.getAttribute('data-is-verified') === 'true'
+                    id: element.getAttribute('data-post-id'),
+                    imageUrl: element.getAttribute('data-image-url'),
+                    imageUrl2: element.getAttribute('data-image-url-2'),
+                    imageUrl3: element.getAttribute('data-image-url-3'),
+                    mediaType: element.getAttribute('data-media-type') || 'image',
+                    userName: element.getAttribute('data-user-name'),
+                    userGenre: element.getAttribute('data-user-genre'),
+                    userType: element.getAttribute('data-user-type'),
+                    userAvatar: element.getAttribute('data-user-avatar'),
+                    userLocation: element.getAttribute('data-user-location'),
+                    description: element.getAttribute('data-description'),
+                    createdAt: element.getAttribute('data-created-at'),
+                    like_count: parseInt(element.getAttribute('data-like-count')) || 0,
+                    comment_count: parseInt(element.getAttribute('data-comment-count')) || 0,
+                    is_liked: element.getAttribute('data-is-liked') === 'true',
+                    is_verified: element.getAttribute('data-is-verified') === 'true'
                 };
             }
 
-            // Make showImageModal globally accessible for feed.js
-            window.showImageModal = function showImageModal(postData) {
+            // Show image modal with carousel support
+            function showImageModal(postData) {
                 if (!postData) return;
-
-                // Collect all images
-                const images = [postData.imageUrl, postData.imageUrl2, postData.imageUrl3].filter(url => url);
+                
+                // Collect all images/videos
+                const images = [postData.imageUrl, postData.imageUrl2, postData.imageUrl3].filter(url => url && url !== '');
                 let currentImageIndex = 0;
-
-                // Create overlay
+                
+                // Create modal overlay
                 const overlay = document.createElement('div');
-                overlay.className = 'fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+                overlay.className = 'fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center';
                 overlay.style.opacity = '0';
-                overlay.style.transition = 'opacity 0.2s ease-out';
-
-                // Modal container
+                overlay.style.transition = 'opacity 0.3s ease-out';
+                
+                // Create modal content
                 const modal = document.createElement('div');
-                modal.className = 'bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden transform scale-95 transition-transform duration-200';
-
-                const userTypeEmoji = postData.userType === 'musician' ? '🎵' : (postData.userType === 'business' ? '🏢' : '👤');
-
-                const avatarHtml = postData.userAvatar ?
-                    `<img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200" src="${postData.userAvatar}" alt="avatar">` :
-                    `<div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">${(postData.userName||'U').charAt(0).toUpperCase()}</div>`;
-
+                modal.className = 'bg-white rounded-2xl shadow-2xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-hidden transform scale-95 transition-transform duration-300';
+                
+                const userTypeEmoji = postData.userType === 'musician' ? '🎵' : 
+                                     postData.userType === 'business' ? '🏢' : '👤';
+                
+                const avatarElement = postData.userAvatar ? 
+                    `<img class="w-16 h-16 rounded-full object-cover border-2 border-gray-200" src="${postData.userAvatar}" alt="avatar">` :
+                    `<div class="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-xl">${postData.userName ? postData.userName.charAt(0).toUpperCase() : 'U'}</div>`;
+                
                 function renderModal() {
                     const isVideo = postData.mediaType === 'video';
                     const mediaHtml = isVideo ? `
@@ -571,10 +569,10 @@
                     ` : `
                         <img src="${images[currentImageIndex]}" 
                              alt="Post image" 
-                             class="max-w-full max-h-full object-contain" 
-                             id="modalImage">
+                             class="max-w-full max-h-full object-contain">
                     `;
 
+                    // Add navigation buttons if multiple images
                     const navigationHtml = images.length > 1 ? `
                         <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-black/50 px-4 py-2 rounded-full">
                             <button id="prevImage" class="text-white hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed" ${currentImageIndex === 0 ? 'disabled' : ''}>
@@ -590,117 +588,121 @@
                             </button>
                         </div>
                     ` : '';
-
-                modal.innerHTML = `
-                    <div class="flex h-full max-h-[90vh]">
-                        <!-- Media Section -->
-                        <div class="flex-1 bg-black flex items-center justify-center relative">
-                            ${mediaHtml}
-                            ${navigationHtml}
-                        </div>
-                        
-                        <!-- Details Section -->
-                        <div class="w-96 bg-white flex flex-col">
-                            <!-- Header -->
-                            <div class="p-6 border-b border-gray-200">`;
-                                <div class="flex items-center gap-4 mb-4">
-                                    ${avatarHtml}
-                                    <div>
-                                        <div class="flex items-center gap-2">
-                                            <h3 class="font-bold text-gray-800 text-xl">${postData.userName}</h3>
-                                            ${postData.is_verified ? `<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>` : ''}
-                                        </div>
-                                        <p class="text-gray-600">${[postData.userGenre, postData.userLocation].filter(Boolean).join(' · ')}</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-2 text-sm text-gray-500">
-                                    <span>${userTypeEmoji} ${postData.userType}</span>
-                                    <span>•</span>
-                                    <span>${new Date(postData.createdAt).toLocaleDateString()}</span>
-                                </div>
+                    
+                    modal.innerHTML = `
+                        <div class="flex h-full max-h-[90vh]">
+                            <!-- Media Section with Navigation -->
+                            <div class="flex-1 bg-black flex items-center justify-center relative">
+                                ${mediaHtml}
+                                ${navigationHtml}
                             </div>
                             
-                            <!-- Description -->
-                            <div class="flex-1 p-6 overflow-y-auto">
-                                ${postData.description ? `
-                                    <div class="mb-6">
-                                        <p class="text-gray-700 leading-relaxed">${postData.description}</p>
+                            <!-- Details Section -->
+                            <div class="w-96 bg-white flex flex-col">
+                                <!-- Header -->
+                                <div class="p-6 border-b border-gray-200">
+                                    <div class="flex items-center gap-4 mb-4">
+                                        ${avatarElement}
+                                        <div>
+                                            <div class="flex items-center gap-2">
+                                                <h3 class="font-bold text-gray-800 text-xl">${postData.userName}</h3>
+                                                ${postData.is_verified ? `<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>` : ''}
+                                            </div>
+                                            <p class="text-gray-600">${[postData.userGenre, postData.userLocation].filter(Boolean).join(' · ')}</p>
+                                        </div>
                                     </div>
-                                ` : ''}
+                                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                                        <span>${userTypeEmoji} ${postData.userType}</span>
+                                        <span>•</span>
+                                        <span>${new Date(postData.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                </div>
                                 
-                                <!-- Comments Section -->
-                                <div class="space-y-4">
-                                    <h4 class="font-semibold text-gray-800">Comments</h4>
-                                    <div class="space-y-3">
-                                        <div class="text-center py-8 text-gray-500">
-                                            <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <!-- Description -->
+                                <div class="flex-1 p-6 overflow-y-auto">
+                                    ${postData.description ? `
+                                        <div class="mb-6">
+                                            <p class="text-gray-700 leading-relaxed">${postData.description}</p>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    <!-- Comments Section -->
+                                    <div class="space-y-4">
+                                        <h4 class="font-semibold text-gray-800">Comments</h4>
+                                        <div class="space-y-3">
+                                            <div class="text-center py-8 text-gray-500">
+                                                <svg class="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                                </svg>
+                                                <p>No comments yet</p>
+                                                <p class="text-sm">Be the first to comment!</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Actions -->
+                                <div class="p-6 border-t border-gray-200">
+                                    <div class="flex items-center gap-6 mb-4">
+                                        <button class="like-btn flex items-center gap-2 transition-colors" 
+                                                data-post-id="${postData.id}"
+                                                data-liked="${postData.is_liked || false}">
+                                            <svg class="w-6 h-6 ${postData.is_liked ? 'fill-red-500 text-red-500' : 'fill-none text-gray-600 hover:text-red-500'}" 
+                                                 stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                            </svg>
+                                            <span class="font-medium like-count">${postData.like_count || 0}</span>
+                                        </button>
+                                        <button class="comment-btn flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                                             </svg>
-                                            <p>No comments yet</p>
-                                            <p class="text-sm">Be the first to comment!</p>
-                                        </div>
+                                            <span class="font-medium comment-count">${postData.comment_count || 0}</span>
+                                        </button>
+                                        <button class="share-btn flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
+                                            </svg>
+                                            <span class="font-medium">Share</span>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Comment Input -->
+                                    <div class="flex gap-3">
+                                        <input type="text" 
+                                               placeholder="Add a comment..." 
+                                               class="comment-input flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <button class="comment-submit-btn px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
+                                            Post
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- Actions -->
-                            <div class="p-6 border-t border-gray-200">
-                                <div class="flex items-center gap-6 mb-4">
-                                    <button class="like-btn flex items-center gap-2 transition-colors" 
-                                            data-post-id="${postData.id}"
-                                            data-liked="${postData.is_liked || false}">
-                                        <svg class="w-6 h-6 ${postData.is_liked ? 'fill-red-500 text-red-500' : 'fill-none text-gray-600 hover:text-red-500'}" 
-                                             stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                                        </svg>
-                                        <span class="font-medium like-count">${postData.like_count || 0}</span>
-                                    </button>
-                                    <button class="comment-btn flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                                        </svg>
-                                        <span class="font-medium comment-count">${postData.comment_count || 0}</span>
-                                    </button>
-                                    <button class="share-btn flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
-                                        </svg>
-                                        <span class="font-medium">Share</span>
-                                    </button>
-                                </div>
-                                
-                                <!-- Comment Input -->
-                                <div class="flex gap-3">
-                                    <input type="text" 
-                                           placeholder="Add a comment..." 
-                                           class="comment-input flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <button class="comment-submit-btn px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
-                                        Post
-                                    </button>
-                                </div>
-                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Close Button -->
-                    <button class="close-modal absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors z-10">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                `;
-
+                        
+                        <!-- Close Button -->
+                        <button class="close-modal absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors z-10">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    `;
                 }
-
+                
                 renderModal();
-
                 overlay.appendChild(modal);
                 document.body.appendChild(overlay);
+                
+                // Prevent body scroll
                 document.body.style.overflow = 'hidden';
+                
+                // Animate in
+                setTimeout(() => {
+                    overlay.style.opacity = '1';
+                    modal.style.transform = 'scale(1)';
+                }, 10);
 
-                setTimeout(() => { overlay.style.opacity = '1'; modal.style.transform = 'scale(1)'; }, 10);
-
-                // Add navigation event listeners
+                // Add carousel navigation event listeners
                 if (images.length > 1) {
                     const prevBtn = modal.querySelector('#prevImage');
                     const nextBtn = modal.querySelector('#nextImage');
@@ -723,52 +725,81 @@
                         });
                     }
                 }
-                // wire up buttons
+                
+                // Handle close button
                 const closeBtn = modal.querySelector('.close-modal');
-                const likeBtn = modal.querySelector('.like-btn');
-                const commentInput = modal.querySelector('.comment-input');
-                const commentSubmitBtn = modal.querySelector('.comment-submit-btn');
-
-                const removeModal = () => {
+                const closeModal = () => {
                     overlay.style.opacity = '0';
                     modal.style.transform = 'scale(0.95)';
                     document.body.style.overflow = '';
-                    setTimeout(() => overlay.remove(), 220);
-                    document.removeEventListener('keydown', handleEsc);
+                    setTimeout(() => {
+                        if (document.body.contains(overlay)) {
+                            document.body.removeChild(overlay);
+                        }
+                    }, 300);
                 };
+                
+                closeBtn.addEventListener('click', closeModal);
+                
+                // Close on overlay click
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        closeModal();
+                    }
+                });
+                
+                // Close on Escape key
+                const handleEscape = (e) => {
+                    if (e.key === 'Escape') {
+                        closeModal();
+                        document.removeEventListener('keydown', handleEscape);
+                    }
+                };
+                document.addEventListener('keydown', handleEscape);
 
-                closeBtn.addEventListener('click', removeModal);
-                overlay.addEventListener('click', (ev) => { if (ev.target === overlay) removeModal(); });
-
-                function handleEsc(ev) { if (ev.key === 'Escape') removeModal(); }
-                document.addEventListener('keydown', handleEsc);
-
+                // Add like functionality
+                const likeBtn = modal.querySelector('.like-btn');
                 if (likeBtn) {
-                    likeBtn.addEventListener('click', () => toggleLike(likeBtn, postData.id));
-                }
-
-                if (commentSubmitBtn) {
-                    commentSubmitBtn.addEventListener('click', async () => {
-                        const value = commentInput.value.trim();
-                        if (!value) return;
-                        await addComment(postData.id, value, commentInput, modal);
+                    likeBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        toggleLike(likeBtn, postData.id);
                     });
                 }
 
-                // load existing comments
+                // Add comment functionality
+                const commentInput = modal.querySelector('.comment-input');
+                const commentSubmitBtn = modal.querySelector('.comment-submit-btn');
+                if (commentInput && commentSubmitBtn) {
+                    commentSubmitBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const content = commentInput.value.trim();
+                        if (content) {
+                            addComment(postData.id, content, commentInput, modal);
+                        }
+                    });
+                    
+                    commentInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            const content = commentInput.value.trim();
+                            if (content) {
+                                addComment(postData.id, content, commentInput, modal);
+                            }
+                        }
+                    });
+                }
+
+                // Load comments
                 loadComments(postData.id, modal);
             }
 
-            // Match profile modal behavior for likes/comments
-            window.toggleLike = async function toggleLike(likeBtn, postId) {
-                // Check if this is a sample post (not a real database post)
+            // Toggle like function
+            async function toggleLike(likeBtn, postId) {
                 if (postId.startsWith('sample-')) {
-                    alert('Like functionality is only available for real posts. Create a post to test this feature!');
+                    alert('Like functionality is only available for real posts.');
                     return;
                 }
                 
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                const isLiked = likeBtn.getAttribute('data-liked') === 'true';
                 
                 try {
                     const response = await fetch(`/posts/${postId}/like`, {
@@ -782,7 +813,6 @@
                     const data = await response.json();
 
                     if (data.success) {
-                        // Update like button state
                         const svg = likeBtn.querySelector('svg');
                         const likeCount = likeBtn.querySelector('.like-count');
                         
@@ -795,13 +825,6 @@
                         }
                         
                         likeCount.textContent = data.like_count;
-                        
-                        // Also update the original post data for consistency
-                        const originalPostImage = document.querySelector(`[data-post-id="${postId}"]`);
-                        if (originalPostImage) {
-                            originalPostImage.setAttribute('data-like-count', data.like_count);
-                            originalPostImage.setAttribute('data-is-liked', data.liked);
-                        }
                     }
                 } catch (error) {
                     console.error('Error toggling like:', error);
@@ -809,10 +832,9 @@
             }
 
             // Add comment function
-            window.addComment = async function addComment(postId, content, commentInput, modal) {
-                // Check if this is a sample post (not a real database post)
+            async function addComment(postId, content, commentInput, modal) {
                 if (postId.startsWith('sample-')) {
-                    alert('Comment functionality is only available for real posts. Create a post to test this feature!');
+                    alert('Comment functionality is only available for real posts.');
                     return;
                 }
                 
@@ -832,27 +854,13 @@
                     const data = await response.json();
 
                     if (data.success) {
-                        // Clear input
                         commentInput.value = '';
-
-                        // Add comment to the list
                         addCommentToModal(data.comment, modal);
-
-                        // Update comment count in modal
+                        
                         const commentCount = modal.querySelector('.comment-count');
                         if (commentCount) {
-                            const newCount = parseInt(commentCount.textContent || '0') + 1;
-                            commentCount.textContent = newCount;
+                            commentCount.textContent = parseInt(commentCount.textContent) + 1;
                         }
-
-                        // Also update the original post element's data attribute so counts stay consistent
-                        const originalPostImage = document.querySelector(`[data-post-id="${postId}"]`);
-                        if (originalPostImage) {
-                            const origCount = parseInt(originalPostImage.getAttribute('data-comment-count') || '0') + 1;
-                            originalPostImage.setAttribute('data-comment-count', origCount);
-                        }
-                    } else {
-                        console.error('Failed to add comment:', data);
                     }
                 } catch (error) {
                     console.error('Error adding comment:', error);
@@ -860,8 +868,7 @@
             }
 
             // Load comments function
-            window.loadComments = async function loadComments(postId, modal) {
-                // Check if this is a sample post (not a real database post)
+            async function loadComments(postId, modal) {
                 if (postId.startsWith('sample-')) {
                     return;
                 }
@@ -882,18 +889,11 @@
                     if (data.success && data.comments.length > 0) {
                         const commentsContainer = modal.querySelector('.space-y-3');
                         if (commentsContainer) {
-                            // Clear the "no comments" message
                             commentsContainer.innerHTML = '';
-                            
-                            // Add each comment
                             data.comments.forEach(comment => {
                                 addCommentToModal(comment, modal);
                             });
                         }
-                    } else if (data.success && data.comments.length === 0) {
-                        // No comments found — leave the placeholder
-                    } else {
-                        console.log('Error loading comments:', data);
                     }
                 } catch (error) {
                     console.error('Error loading comments:', error);
@@ -901,25 +901,18 @@
             }
 
             // Add comment to modal function
-            window.addCommentToModal = function addCommentToModal(comment, modal) {
+            function addCommentToModal(comment, modal) {
                 const commentsContainer = modal.querySelector('.space-y-3');
-                
-                if (!commentsContainer) {
-                    return;
-                }
+                if (!commentsContainer) return;
 
                 const commentElement = document.createElement('div');
                 commentElement.className = 'flex gap-3 p-3 bg-gray-50 rounded-lg';
                 const userName = comment.user_name || 'Unknown User';
                 const userInitial = userName.charAt(0).toUpperCase();
                 
-                // Check if user has an avatar
-                let avatarHtml = '';
-                if (comment.user_avatar) {
-                    avatarHtml = `<img src="${comment.user_avatar}" alt="${userName}" class="w-8 h-8 rounded-full object-cover">`;
-                } else {
-                    avatarHtml = `<div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-sm">${userInitial}</div>`;
-                }
+                let avatarHtml = comment.user_avatar ? 
+                    `<img src="${comment.user_avatar}" alt="${userName}" class="w-8 h-8 rounded-full object-cover">` :
+                    `<div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-sm">${userInitial}</div>`;
                 
                 commentElement.innerHTML = `
                     <div class="w-8 h-8 flex-shrink-0">

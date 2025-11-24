@@ -803,57 +803,6 @@ function initFeed() {
         }
     });
 
-    // Post modal functionality - open modal when clicking on post image or content area
-    document.addEventListener('click', function(e) {
-        // Don't open modal if clicking elements marked as no-modal-trigger (delete button, username)
-        if (e.target.closest('.no-modal-trigger')) {
-            return;
-        }
-        
-        const imgEl = e.target.closest('.post-image');
-        if (imgEl) {
-            e.preventDefault();
-            const postData = extractPostDataFromElement(imgEl);
-            if (window.showImageModal) {
-                window.showImageModal(postData);
-            }
-            return;
-        }
-        
-        // Handle clicks on post content area (entire section below media)
-        const contentEl = e.target.closest('.post-content-clickable');
-        if (contentEl) {
-            e.preventDefault();
-            const postData = extractPostDataFromElement(contentEl);
-            if (window.showImageModal) {
-                window.showImageModal(postData);
-            }
-        }
-    });
-
-    function extractPostDataFromElement(element) {
-        if (!element) return null;
-
-        return {
-            id: element.getAttribute('data-post-id'),
-            imageUrl: element.getAttribute('data-image-url'),
-            imageUrl2: element.getAttribute('data-image-url-2'),
-            imageUrl3: element.getAttribute('data-image-url-3'),
-            mediaType: element.getAttribute('data-media-type') || 'image',
-            userName: element.getAttribute('data-user-name'),
-            userGenre: element.getAttribute('data-user-genre'),
-            userType: element.getAttribute('data-user-type'),
-            userAvatar: element.getAttribute('data-user-avatar'),
-            userLocation: element.getAttribute('data-user-location'),
-            description: element.getAttribute('data-description'),
-            createdAt: element.getAttribute('data-created-at'),
-            like_count: parseInt(element.getAttribute('data-like-count')) || 0,
-            comment_count: parseInt(element.getAttribute('data-comment-count')) || 0,
-            is_liked: element.getAttribute('data-is-liked') === 'true',
-            is_verified: element.getAttribute('data-is-verified') === 'true'
-        };
-    }
-
     // Custom confirmation modal
     function showDeleteConfirmation(postId, buttonElement) {
         // Create modal overlay
