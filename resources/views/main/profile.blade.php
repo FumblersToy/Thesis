@@ -1276,57 +1276,6 @@
                 // Load comments
                 loadComments(postData.id, modal);
             }
-                
-                // Close on overlay click (but not on modal content)
-                overlay.addEventListener('click', (e) => {
-                    if (e.target === overlay) {
-                        closeModal();
-                    }
-                });
-                
-                // Close on Escape key
-                const handleEscape = (e) => {
-                    if (e.key === 'Escape') {
-                        closeModal();
-                        document.removeEventListener('keydown', handleEscape);
-                    }
-                };
-                document.addEventListener('keydown', handleEscape);
-
-                // Add like functionality
-                const likeBtn = modal.querySelector('.like-btn');
-                if (likeBtn) {
-                    likeBtn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        toggleLike(likeBtn, postData.id);
-                    });
-                }
-
-                // Add comment functionality
-                const commentInput = modal.querySelector('input[type="text"]');
-                const commentSubmitBtn = modal.querySelector('.comment-submit-btn');
-                if (commentInput && commentSubmitBtn) {
-                    commentSubmitBtn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const content = commentInput.value.trim();
-                        if (content) {
-                            addComment(postData.id, content, commentInput, modal);
-                        }
-                    });
-                    
-                    commentInput.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter') {
-                            const content = commentInput.value.trim();
-                            if (content) {
-                                addComment(postData.id, content, commentInput, modal);
-                            }
-                        }
-                    });
-                }
-
-                // Load comments
-                loadComments(postData.id, modal);
-            }
 
             // Toggle like function
             async function toggleLike(likeBtn, postId) {
