@@ -360,9 +360,12 @@
                     @php
                         $exists = $post->image_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($post->image_path);
                         $imageUrl = $post->image_path ? getImageUrl($post->image_path) : '/images/sample-post-1.jpg';
+                        $imageUrl2 = $post->image_path_2 ? getImageUrl($post->image_path_2) : null;
+                        $imageUrl3 = $post->image_path_3 ? getImageUrl($post->image_path_3) : null;
                         $isOwner = $post->user_id === auth()->id();
                         $mediaType = $post->media_type ?? 'image';
                         $isVideo = $mediaType === 'video';
+                        $isVerified = ($business && $business->verified) || ($musician && $musician->verified);
                     @endphp
                     <article class="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 animate-scale-in border border-gray-200">
                         <div class="relative">
@@ -372,16 +375,20 @@
                                     class="post-image w-full h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                                     data-post-id="{{ $post->id }}"
                                     data-image-url="{{ $imageUrl }}"
+                                    data-image-url-2="{{ $imageUrl2 ?? '' }}"
+                                    data-image-url-3="{{ $imageUrl3 ?? '' }}"
                                     data-media-type="video"
                                     data-user-name="{{ $displayName }}"
                                     data-user-genre="{{ $roleLabel }}"
                                     data-user-type="{{ $musician ? 'musician' : ($business ? 'business' : 'member') }}"
                                     data-user-avatar="{{ $profileImage }}"
+                                    data-user-location="{{ $musician?->location ?: ($business?->location ?: '') }}"
                                     data-description="{{ $post->description }}"
                                     data-created-at="{{ $post->created_at->toDateTimeString() }}"
                                     data-like-count="{{ $post->likes()->count() }}"
                                     data-comment-count="{{ $post->comments()->count() }}"
-                                    data-is-liked="{{ $post->likes()->where('user_id', auth()->id())->exists() ? 'true' : 'false' }}">
+                                    data-is-liked="{{ $post->likes()->where('user_id', auth()->id())->exists() ? 'true' : 'false' }}"
+                                    data-is-verified="{{ $isVerified ? 'true' : 'false' }}">
                                     <source src="{{ $imageUrl }}" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video>
@@ -393,20 +400,41 @@
                                     onerror="this.onerror=null;this.src='/images/sample-post-1.jpg';"
                                     data-post-id="{{ $post->id }}"
                                     data-image-url="{{ $imageUrl }}"
+                                    data-image-url-2="{{ $imageUrl2 ?? '' }}"
+                                    data-image-url-3="{{ $imageUrl3 ?? '' }}"
                                     data-media-type="image"
                                     data-user-name="{{ $displayName }}"
                                     data-user-genre="{{ $roleLabel }}"
                                     data-user-type="{{ $musician ? 'musician' : ($business ? 'business' : 'member') }}"
                                     data-user-avatar="{{ $profileImage }}"
+                                    data-user-location="{{ $musician?->location ?: ($business?->location ?: '') }}"
                                     data-description="{{ $post->description }}"
                                     data-created-at="{{ $post->created_at->toDateTimeString() }}"
                                     data-like-count="{{ $post->likes()->count() }}"
                                     data-comment-count="{{ $post->comments()->count() }}"
                                     data-is-liked="{{ $post->likes()->where('user_id', auth()->id())->exists() ? 'true' : 'false' }}"
+                                    data-is-verified="{{ $isVerified ? 'true' : 'false' }}"
                                 >
                             @endif
                         </div>
-                        <div class="p-6">
+                        <div class="p-6 cursor-pointer hover:bg-gray-50 transition-colors post-content-clickable"
+                             data-post-id="{{ $post->id }}"
+                             data-image-url="{{ $imageUrl }}"
+                             data-image-url-2="{{ $imageUrl2 ?? '' }}"
+                             data-image-url-3="{{ $imageUrl3 ?? '' }}"
+                             data-media-type="{{ $isVideo ? 'video' : 'image' }}"
+                             data-user-name="{{ $displayName }}"
+                             data-user-genre="{{ $roleLabel }}"
+                             data-user-type="{{ $musician ? 'musician' : ($business ? 'business' : 'member') }}"
+                             data-user-avatar="{{ $profileImage }}"
+                             data-user-location="{{ $musician?->location ?: ($business?->location ?: '') }}"
+                             data-description="{{ $post->description }}"
+                             data-created-at="{{ $post->created_at->toDateTimeString() }}"
+                             data-like-count="{{ $post->likes()->count() }}"
+                             data-comment-count="{{ $post->comments()->count() }}"
+                             data-is-liked="{{ $post->likes()->where('user_id', auth()->id())->exists() ? 'true' : 'false' }}"
+                             data-is-verified="{{ $isVerified ? 'true' : 'false' }}"
+                        >
                             <div class="flex items-center gap-4 mb-4">
                                 <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200" 
                                      src="{{ $profileImage }}" 
@@ -737,7 +765,7 @@
                 console.log('🔍 Target classes:', e.target.className);
                 console.log('🔍 Closest .post-image:', e.target.closest('.post-image'));
                 
-                // Handle delete button clicks
+                // Handle delete button clicks - stop propagation to prevent modal
                 if (e.target.closest('.delete-post-btn')) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -749,25 +777,27 @@
                     return;
                 }
                 
+                // Handle post image clicks
                 if (e.target.closest('.post-image')) {
                     e.preventDefault();
-                    console.log('✅ Post image clicked!'); // Debug log
+                    console.log('✅ Post image clicked!');
                     const img = e.target.closest('.post-image');
                     const postData = extractPostDataFromImage(img);
                     
-                    console.log('📦 Post data:', postData); // Debug log
+                    console.log('📦 Post data:', postData);
                     showImageModal(postData);
                     return;
                 }
                 
-                // Handle clicks on video post details clickable area (description/metadata only)
-                const detailsEl = e.target.closest('.post-details-clickable');
-                if (detailsEl && detailsEl.getAttribute('data-media-type') === 'video') {
+                // Handle post content clicks (description area)
+                const contentEl = e.target.closest('.post-content-clickable');
+                if (contentEl && !e.target.closest('.delete-post-btn')) {
                     e.preventDefault();
-                    console.log('✅ Video post details clicked!');
-                    const postData = extractPostDataFromImage(detailsEl);
+                    console.log('✅ Post content clicked!');
+                    const postData = extractPostDataFromImage(contentEl);
                     console.log('📦 Post data:', postData);
                     showImageModal(postData);
+                    return;
                 }
             });
 
