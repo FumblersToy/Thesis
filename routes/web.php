@@ -189,6 +189,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/posts/{post}', [App\Http\Controllers\Admin\DashboardController::class, 'deletePost'])->name('post.delete');
         Route::delete('/users/{user}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteUser'])->name('user.delete');
         Route::post('/businesses/{business}/verify', [App\Http\Controllers\Admin\DashboardController::class, 'toggleVerification'])->name('business.verify');
+        Route::post('/musicians/{musician}/verify', [App\Http\Controllers\Admin\DashboardController::class, 'toggleMusicianVerification'])->name('musician.verify');
     });
 });
 

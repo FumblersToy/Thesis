@@ -135,4 +135,18 @@ class DashboardController extends Controller
             'message' => $verified ? 'Business verified successfully' : 'Business unverified successfully'
         ]);
     }
+
+    public function toggleMusicianVerification(Request $request, $musicianId)
+    {
+        $musician = \App\Models\Musician::findOrFail($musicianId);
+        $verified = $request->input('verified', false);
+        
+        $musician->verified = $verified;
+        $musician->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $verified ? 'Musician verified successfully' : 'Musician unverified successfully'
+        ]);
+    }
 }

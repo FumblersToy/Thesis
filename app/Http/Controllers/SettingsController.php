@@ -59,6 +59,7 @@ class SettingsController extends Controller
         if ($musician) {
             $validatedMusician = $request->validate([
                 'musician.profile_picture' => 'nullable|image|max:3072',
+                'musician.credential_document' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
                 'musician.first_name' => 'nullable|string|max:255',
                 'musician.last_name' => 'nullable|string|max:255',
                 'musician.stage_name' => 'nullable|string|max:255',
@@ -109,6 +110,43 @@ class SettingsController extends Controller
                     }
                 }
             }
+            
+            // Handle credential document upload
+            if ($request->hasFile('musician.credential_document')) {
+                $file = $request->file('musician.credential_document');
+                if ($file->isValid()) {
+                    // Delete old credential document from Cloudinary if it exists
+                    if ($musician->credential_document_public_id) {
+                        try {
+                            $cloudinaryUrl = config('cloudinary.cloud_url');
+                            if ($cloudinaryUrl) {
+                                $cloudinary = new Cloudinary($cloudinaryUrl);
+                                $cloudinary->uploadApi()->destroy($musician->credential_document_public_id);
+                            }
+                        } catch (Exception $e) {
+                            Log::error('Cloudinary delete error for old musician credential: ' . $e->getMessage());
+                        }
+                    }
+
+                    // Upload new credential document to Cloudinary
+                    try {
+                        $cloudinaryUrl = config('cloudinary.cloud_url');
+                        if ($cloudinaryUrl) {
+                            $cloudinary = new Cloudinary($cloudinaryUrl);
+                            $uploadedFile = $cloudinary->uploadApi()->upload($file->getRealPath(), [
+                                'folder' => 'musician_credentials',
+                                'resource_type' => 'auto', // Allows PDF and images
+                            ]);
+
+                            $musician->credential_document = $uploadedFile['secure_url'] ?? '';
+                            $musician->credential_document_public_id = $uploadedFile['public_id'] ?? null;
+                        }
+                    } catch (Exception $e) {
+                        Log::error('Cloudinary upload error for musician credential: ' . $e->getMessage());
+                    }
+                }
+            }
+            
             $musician->first_name = $request->input('musician.first_name');
             $musician->last_name = $request->input('musician.last_name');
             $musician->stage_name = $request->input('musician.stage_name');

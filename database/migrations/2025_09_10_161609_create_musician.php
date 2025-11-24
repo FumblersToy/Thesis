@@ -23,6 +23,9 @@ return new class extends Migration
             $table->string('instrument')->nullable();
             $table->string('location')->nullable();
             $table->text('bio')->nullable();
+            $table->string('credential_document')->nullable();
+            $table->string('credential_document_public_id')->nullable();
+            $table->boolean('verified')->default(false);
             $table->timestamps();
         });
     }

@@ -139,6 +139,24 @@
                             <label class="block text-white/80 mb-1">Bio</label>
                             <textarea name="musician[bio]" rows="4" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30">{{ old('musician.bio', $musician->bio) }}</textarea>
                         </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-white/80 mb-2 text-center">Musician Credentials</label>
+                            <div class="flex items-center justify-center gap-4">
+                                @if($musician->credential_document)
+                                    <a href="{{ $musician->credential_document }}" target="_blank" class="text-purple-400 hover:text-purple-300 underline text-sm">View Current Credentials</a>
+                                @else
+                                    <span class="text-white/50 text-sm">No credentials uploaded</span>
+                                @endif
+                                <div>
+                                    <input id="musician_credential" type="file" name="musician[credential_document]" accept=".jpg,.jpeg,.png,.pdf" class="hidden">
+                                    <label for="musician_credential" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 transition-all shadow-lg">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                        Upload Credentials
+                                    </label>
+                                    <p class="text-xs text-white/60 mt-1">JPG, PNG, PDF up to 5MB. (e.g., certificates, awards, performance history)</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 @endif
