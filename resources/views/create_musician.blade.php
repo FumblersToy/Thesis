@@ -21,7 +21,7 @@
             <div class="form-group">
                 <label for="profile_picture">Profile Picture</label>
                 <div class="file-input-wrapper">
-                    <input type="file" name="profile_picture" id="profile_picture" accept="image/*" class="file-input">
+                    <input required type="file" name="profile_picture" id="profile_picture" accept="image/*" class="file-input">
                     <label for="profile_picture" class="file-input-label" id="file-label">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>

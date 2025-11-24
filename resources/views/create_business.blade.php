@@ -21,7 +21,7 @@
             <div class="form-group">
                 <label for="profile_image">Business Logo</label>
                 <div class="file-input-wrapper">
-                    <input type="file" name="profile_picture" id="profile_image" accept="image/*" class="file-input">
+                    <input required type="file" name="profile_picture" id="profile_image" accept="image/*" class="file-input">
                     <label for="profile_image" class="file-input-label" id="file-label">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
