@@ -238,7 +238,12 @@ Route::get('/search', function () {
                   ->orWhere('first_name', 'like', "%{$query}%")
                   ->orWhere('last_name', 'like', "%{$query}%")
                   ->orWhere('genre', 'like', "%{$query}%")
-                  ->orWhere('instrument', 'like', "%{$query}%");
+                  ->orWhere('genre2', 'like', "%{$query}%")
+                  ->orWhere('genre3', 'like', "%{$query}%")
+                  ->orWhere('instrument', 'like', "%{$query}%")
+                  ->orWhere('instrument2', 'like', "%{$query}%")
+                  ->orWhere('instrument3', 'like', "%{$query}%")
+                  ->orWhere('location', 'like', "%{$query}%");
             });
         })
         ->get();
@@ -248,7 +253,8 @@ Route::get('/search', function () {
             $q->where(function ($w) use ($query) {
                 $w->where('business_name', 'like', "%{$query}%")
                   ->orWhere('venue', 'like', "%{$query}%")
-                  ->orWhere('address', 'like', "%{$query}%");
+                  ->orWhere('address', 'like', "%{$query}%")
+                  ->orWhere('location', 'like', "%{$query}%");
             });
         })
         ->get();
@@ -276,7 +282,12 @@ Route::get('/api/search', function () {
                   ->orWhere('first_name', 'like', "%{$query}%")
                   ->orWhere('last_name', 'like', "%{$query}%")
                   ->orWhere('genre', 'like', "%{$query}%")
-                  ->orWhere('instrument', 'like', "%{$query}%");
+                  ->orWhere('genre2', 'like', "%{$query}%")
+                  ->orWhere('genre3', 'like', "%{$query}%")
+                  ->orWhere('instrument', 'like', "%{$query}%")
+                  ->orWhere('instrument2', 'like', "%{$query}%")
+                  ->orWhere('instrument3', 'like', "%{$query}%")
+                  ->orWhere('location', 'like', "%{$query}%");
             });
         })
         ->limit(5)
@@ -295,7 +306,8 @@ Route::get('/api/search', function () {
             $q->where(function ($w) use ($query) {
                 $w->where('business_name', 'like', "%{$query}%")
                   ->orWhere('venue', 'like', "%{$query}%")
-                  ->orWhere('address', 'like', "%{$query}%");
+                  ->orWhere('address', 'like', "%{$query}%")
+                  ->orWhere('location', 'like', "%{$query}%");
             });
         })
         ->limit(5)
