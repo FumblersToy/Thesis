@@ -43,39 +43,41 @@ class RegisterController extends Controller
 
         Log::info('[REGISTRATION] Session stored', ['elapsed_ms' => round((microtime(true) - $startTime) * 1000)]);
 
-        // Send verification email
+        // Send verification email asynchronously
         $verificationUrl = route('verification.verify', ['token' => $token]);
+        $email = $request->email;
         
-        try {
-            $emailStart = microtime(true);
-            Log::info('[REGISTRATION] Sending email', ['to' => $request->email]);
-            
-            Mail::raw(
-                "Welcome to Bandmate!\n\n" .
-                "Please click the link below to verify your email address:\n\n" .
-                $verificationUrl . "\n\n" .
-                "This link will expire in 24 hours.\n\n" .
-                "If you didn't create an account, please ignore this email.\n\n" .
-                "Best regards,\nThe Bandmate Team",
-                function ($message) use ($request) {
-                    $message->to($request->email)
-                            ->subject('Verify Your Bandmate Account');
-                }
-            );
-            
-            Log::info('[REGISTRATION] Email sent', [
-                'email_ms' => round((microtime(true) - $emailStart) * 1000),
-                'total_ms' => round((microtime(true) - $startTime) * 1000)
-            ]);
-            
-        } catch (\Exception $e) {
-            Log::error('[REGISTRATION] Email failed', [
-                'error' => $e->getMessage(),
-                'elapsed_ms' => round((microtime(true) - $startTime) * 1000)
-            ]);
-        }
+        // Dispatch email sending to background (non-blocking)
+        dispatch(function() use ($email, $verificationUrl) {
+            try {
+                Log::info('[EMAIL] Attempting to send verification email', ['to' => $email]);
+                
+                Mail::raw(
+                    "Welcome to Bandmate!\n\n" .
+                    "Please click the link below to verify your email address:\n\n" .
+                    $verificationUrl . "\n\n" .
+                    "This link will expire in 24 hours.\n\n" .
+                    "If you didn't create an account, please ignore this email.\n\n" .
+                    "Best regards,\nThe Bandmate Team",
+                    function ($message) use ($email) {
+                        $message->to($email)
+                                ->subject('Verify Your Bandmate Account');
+                    }
+                );
+                
+                Log::info('[EMAIL] Verification email sent successfully', ['to' => $email]);
+                
+            } catch (\Exception $e) {
+                Log::error('[EMAIL] Failed to send verification email', [
+                    'to' => $email,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        })->afterResponse();
 
-        Log::info('[REGISTRATION] Completed', ['total_ms' => round((microtime(true) - $startTime) * 1000)]);
+        $totalTime = round((microtime(true) - $startTime) * 1000);
+        Log::info('[REGISTRATION] Completed (email dispatched to background)', ['total_ms' => $totalTime]);
 
         return redirect()->route('verification.notice')->with('email', $request->email);
     }
