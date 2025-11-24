@@ -407,9 +407,25 @@
                     }
 
                     inner += `
-                        <div class="p-6">
+                        <div class="p-6 cursor-pointer hover:bg-gray-50 transition-colors post-content-clickable" 
+                             data-post-id="${post.id}"
+                             data-image-url="${post.image_path}"
+                             data-image-url-2="${post.image_path_2 || ''}"
+                             data-image-url-3="${post.image_path_3 || ''}"
+                             data-media-type="${post.media_type || 'image'}"
+                             data-user-name="${(post.user_name||'')}"
+                             data-user-genre="${(post.user_genre||'')}"
+                             data-user-location="${(post.user_location||post.user_city||'')}"
+                             data-user-type="${(post.user_type||'member')}"
+                             data-user-avatar="${(post.user_avatar||'')}"
+                             data-description="${(post.description||'')}"
+                             data-created-at="${(post.created_at||'')}"
+                             data-like-count="${likeCount}"
+                             data-comment-count="${commentCount}"
+                             data-is-liked="${(post.is_liked? 'true' : 'false')}"
+                             data-is-verified="${(isVerified ? 'true' : 'false')}">
                             <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-4 no-modal-trigger">
                                     ${avatarHtml}
                                     <div>
                                         <div class="flex items-center gap-2">
@@ -420,30 +436,14 @@
                                     </div>
                                 </div>
                                 ${isOwner ? `
-                                    <button class="delete-post-btn text-red-500 hover:text-red-700 transition-colors" data-post-id="${post.id}">
+                                    <button class="delete-post-btn no-modal-trigger text-red-500 hover:text-red-700 transition-colors" data-post-id="${post.id}">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                         </svg>
                                     </button>
                                 ` : ''}
                             </div>
-                            <div class="cursor-pointer hover:bg-gray-50 transition-colors rounded-lg p-2 -m-2 post-details-clickable" 
-                                 data-post-id="${post.id}"
-                                 data-image-url="${post.image_path}"
-                                 data-image-url-2="${post.image_path_2 || ''}"
-                                 data-image-url-3="${post.image_path_3 || ''}"
-                                 data-media-type="${post.media_type || 'image'}"
-                                 data-user-name="${(post.user_name||'')}"
-                                 data-user-genre="${(post.user_genre||'')}"
-                                 data-user-location="${(post.user_location||post.user_city||'')}"
-                                 data-user-type="${(post.user_type||'member')}"
-                                 data-user-avatar="${(post.user_avatar||'')}"
-                                 data-description="${(post.description||'')}"
-                                 data-created-at="${(post.created_at||'')}"
-                                 data-like-count="${likeCount}"
-                                 data-comment-count="${commentCount}"
-                                 data-is-liked="${(post.is_liked? 'true' : 'false')}"
-                                 data-is-verified="${(isVerified ? 'true' : 'false')}">
+                            <div>
                                 <p class="text-gray-700 mb-4 leading-relaxed">${(post.description||'')}</p>
                                 <div class="flex justify-between items-center text-gray-500 text-sm">
                                     <span>${formattedDate}</span>
@@ -486,8 +486,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Delegate clicks on images to open modal (mirrors profile modal behavior)
             document.addEventListener('click', function(e) {
-                // Don't open modal if clicking delete button or anywhere in the header area with delete button
-                if (e.target.closest('.delete-post-btn')) {
+                // Don't open modal if clicking elements marked as no-modal-trigger (delete button, username)
+                if (e.target.closest('.no-modal-trigger')) {
                     return;
                 }
                 
@@ -499,11 +499,11 @@
                     return;
                 }
                 
-                // Handle clicks on post details clickable area (description/metadata)
-                const detailsEl = e.target.closest('.post-details-clickable');
-                if (detailsEl) {
+                // Handle clicks on post content area (entire section below media)
+                const contentEl = e.target.closest('.post-content-clickable');
+                if (contentEl) {
                     e.preventDefault();
-                    const postData = extractPostDataFromImage(detailsEl);
+                    const postData = extractPostDataFromImage(contentEl);
                     showImageModal(postData);
                 }
             });
