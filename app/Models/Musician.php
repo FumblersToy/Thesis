@@ -30,5 +30,9 @@ class Musician extends Model
         'latitude',
         'longitude',
         'location_name',
+        'instagram_url',
+        'facebook_url',
+        'twitter_url',
+        'youtube_url',
     ];
 }

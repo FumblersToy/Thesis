@@ -30,6 +30,10 @@ class Business extends Model
         'location_name',
         'address_latitude',
         'address_longitude',
+        'instagram_url',
+        'facebook_url',
+        'twitter_url',
+        'website_url',
     ];
 
     public function user(): BelongsTo
