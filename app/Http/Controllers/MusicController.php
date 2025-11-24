@@ -30,6 +30,26 @@ class MusicController extends Controller
         return view('main.music', compact('musicTracks'));
     }
 
+    public function show($userId)
+    {
+        $profileUser = \App\Models\User::findOrFail($userId);
+        $musician = $profileUser->musician;
+        
+        // Only musicians have music pages
+        if (!$musician) {
+            abort(404, 'This user is not a musician');
+        }
+
+        $musicTracks = Music::where('musician_id', $musician->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Check if viewing own music page
+        $isOwner = Auth::id() === $profileUser->id;
+
+        return view('main.music-view', compact('musicTracks', 'musician', 'profileUser', 'isOwner'));
+    }
+
     public function store(Request $request)
     {
         $user = Auth::user();

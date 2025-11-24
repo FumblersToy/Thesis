@@ -20,7 +20,8 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-20">
                     <a href="{{ route('feed') }}">
-                        <img src="{{ asset('images/logo_both.png') }}" alt="Bandmate Logo" class="h-12 cursor-pointer hover:opacity-90 transition-opacity">
+                        <img src="{{ asset('assets/logo_black.png') }}" alt="Bandmate Logo" class="h-10 md:hidden cursor-pointer hover:opacity-90 transition-opacity">
+                        <img src="{{ asset('assets/logo_both.png') }}" alt="Bandmate Logo" class="h-12 hidden md:block cursor-pointer hover:opacity-90 transition-opacity">
                     </a>
 
                     <div class="flex items-center gap-4">

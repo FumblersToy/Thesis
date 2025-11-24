@@ -18,8 +18,15 @@
         
         $profileUserId = $id ?? request()->route('id');
         $profileUser = \App\Models\User::find($profileUserId);
-        $musician = $profileUser ? \App\Models\Musician::where('user_id', $profileUser->id)->first() : null;
-        $business = $profileUser ? \App\Models\Business::where('user_id', $profileUser->id)->first() : null;
+        
+        // Redirect to feed if user not found
+        if (!$profileUser) {
+            header('Location: ' . route('feed'));
+            exit;
+        }
+        
+        $musician = \App\Models\Musician::where('user_id', $profileUser->id)->first();
+        $business = \App\Models\Business::where('user_id', $profileUser->id)->first();
 
         $displayName = $musician?->stage_name
             ?: ($business?->business_name ?: ($profileUser->name ?? 'User'));
@@ -84,7 +91,8 @@
                 <!-- Logo -->
                 <div class="flex-shrink-0">
                     <a href="{{ route('feed') }}" class="flex items-center bg-white/10 backdrop-blur-xl rounded-2xl px-4 py-2 hover:bg-white/20 transition-all duration-300 shadow-lg">
-                        <img src="{{ asset('assets/logo_both.png') }}" class="h-10" alt="Bandmate logo">
+                        <img src="{{ asset('assets/logo_black.png') }}" class="h-10 md:hidden" alt="Bandmate logo">
+                        <img src="{{ asset('assets/logo_both.png') }}" class="h-10 hidden md:block" alt="Bandmate logo">
                     </a>
                 </div>
                 
@@ -166,7 +174,7 @@
                                 <span id="notificationBadge" class="hidden absolute top-2 left-6 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
                             </button>
 
-                            @if($user->musician)
+                            @if($user->musician()->exists())
                             <a href="{{ route('music.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
                                 <span class="text-lg">🎵</span>
                                 My Music
@@ -258,6 +266,13 @@
                                         <span class="follow-text {{ $isFollowing ? 'hidden' : '' }}">Follow</span>
                                         <span class="following-text {{ $isFollowing ? '' : 'hidden' }}">Following</span>
                                     </button>
+                                    @endif
+                                    @if($musician)
+                                        <a href="{{ route('music.show', $profileUserId) }}" 
+                                           class="bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 px-6 py-2 rounded-xl text-white text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl border-2 border-white/20 inline-flex items-center gap-2">
+                                            <span class="text-lg">🎵</span>
+                                            My Music
+                                        </a>
                                     @endif
                                     @if($user && $user->id != $profileUserId)
                                         <a href="{{ route('messages.index') }}?user={{ $profileUserId }}" 

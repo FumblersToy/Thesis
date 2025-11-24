@@ -350,6 +350,7 @@ Route::post('/api/notifications/read-all', [App\Http\Controllers\NotificationCon
 
 // Music routes (musicians only)
 Route::get('/music', [App\Http\Controllers\MusicController::class, 'index'])->middleware('auth')->name('music.index');
+Route::get('/music/{userId}', [App\Http\Controllers\MusicController::class, 'show'])->middleware('auth')->name('music.show');
 Route::post('/music', [App\Http\Controllers\MusicController::class, 'store'])->middleware('auth')->name('music.store');
 Route::delete('/music/{id}', [App\Http\Controllers\MusicController::class, 'destroy'])->middleware('auth')->name('music.destroy');
 

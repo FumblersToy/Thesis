@@ -27,7 +27,8 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <img src="{{ asset('assets/logo_both.png') }}" alt="BandMate" class="h-8">
+                    <img src="{{ asset('assets/logo_black.png') }}" alt="BandMate" class="h-8 md:hidden">
+                    <img src="{{ asset('assets/logo_both.png') }}" alt="BandMate" class="h-8 hidden md:block">
                     <span class="ml-2 text-xl font-semibold text-gray-800">Admin Dashboard</span>
                 </div>
                 <div class="flex items-center space-x-4">

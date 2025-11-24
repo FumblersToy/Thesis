@@ -18,7 +18,8 @@
     </div>
 
     <header class="w-full h-16 flex items-center justify-between bg-white px-6 border-b border-gray-100">
-        <img src="/assets/logo_both.png" class="h-10">
+        <img src="/assets/logo_black.png" class="h-10 md:hidden">
+        <img src="/assets/logo_both.png" class="h-10 hidden md:block">
         <div class="flex items-center space-x-3">
             <a href="{{ route('login')}}" class="nav-btn login">
                 Login

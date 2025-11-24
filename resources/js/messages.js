@@ -422,6 +422,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 messageText.value = '';
                 
+                // Remove empty state if it exists
+                const emptyStateMsg = messagesContainer.querySelector('.text-center.py-8');
+                if (emptyStateMsg) {
+                    messagesContainer.innerHTML = '';
+                }
+                
                 // Add message to UI
                 const messageElement = createMessageElement(data.message);
                 messagesContainer.appendChild(messageElement);
