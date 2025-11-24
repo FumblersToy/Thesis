@@ -538,8 +538,13 @@
             function showImageModal(postData) {
                 if (!postData) return;
                 
-                // Collect all images/videos
-                const images = [postData.imageUrl, postData.imageUrl2, postData.imageUrl3].filter(url => url && url !== '');
+                // Collect all images/videos - filter out empty strings and null values
+                const images = [postData.imageUrl, postData.imageUrl2, postData.imageUrl3]
+                    .filter(url => url && url !== '' && url !== 'null' && url !== 'undefined');
+                
+                console.log('Modal opened with images:', images); // Debug log
+                console.log('Post data:', postData); // Debug log
+                
                 let currentImageIndex = 0;
                 
                 // Create modal overlay
@@ -687,6 +692,32 @@
                             </svg>
                         </button>
                     `;
+
+                    // Re-attach carousel event listeners after rendering
+                    if (images.length > 1) {
+                        const prevBtn = modal.querySelector('#prevImage');
+                        const nextBtn = modal.querySelector('#nextImage');
+
+                        if (prevBtn) {
+                            prevBtn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                if (currentImageIndex > 0) {
+                                    currentImageIndex--;
+                                    renderModal();
+                                }
+                            });
+                        }
+
+                        if (nextBtn) {
+                            nextBtn.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                if (currentImageIndex < images.length - 1) {
+                                    currentImageIndex++;
+                                    renderModal();
+                                }
+                            });
+                        }
+                    }
                 }
                 
                 renderModal();
