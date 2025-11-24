@@ -433,10 +433,9 @@
                             const timeAgo = getTimeAgo(notif.created_at);
                             const icon = notif.type === 'like' ? '❤️' : '💬';
                             const bgColor = notif.read ? 'bg-white' : 'bg-blue-50';
-                            const postUrl = notif.post_id ? `/feed#post-${notif.post_id}` : '#';
                             
                             return `
-                                <a href="${postUrl}" class="block ${bgColor} p-4 rounded-xl hover:shadow-md transition-all mb-3 border border-gray-100 cursor-pointer" onclick="markNotificationAsRead(${notif.id}, event)">
+                                <div class="${bgColor} p-4 rounded-xl hover:shadow-md transition-all mb-3 border border-gray-100 cursor-pointer" onclick="window.location.href='/feed#post-${notif.post_id}'; markNotificationAsReadRedirect(${notif.id})">
                                     <div class="flex items-start gap-3">
                                         <span class="text-2xl">${icon}</span>
                                         <div class="flex-1">
@@ -444,7 +443,7 @@
                                             <p class="text-gray-500 text-sm mt-1">${timeAgo}</p>
                                         </div>
                                     </div>
-                                </a>
+                                </div>
                             `;
                         }).join('');
                         
@@ -493,8 +492,8 @@
                 return date.toLocaleDateString();
             }
             
-            // Mark notification as read when clicked
-            window.markNotificationAsRead = async function(notificationId, event) {
+            // Mark notification as read and redirect to feed
+            window.markNotificationAsReadRedirect = async function(notificationId) {
                 try {
                     await fetch(`/api/notifications/${notificationId}/read`, {
                         method: 'POST',
@@ -503,13 +502,6 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                         }
                     });
-                    
-                    // Close modal and refresh notifications
-                    notificationsModal.classList.add('hidden');
-                    notificationsModal.classList.remove('flex');
-                    
-                    // Update badge count
-                    setTimeout(() => loadNotifications(), 100);
                 } catch (error) {
                     console.error('Error marking notification as read:', error);
                 }

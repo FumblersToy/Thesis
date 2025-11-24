@@ -605,10 +605,9 @@
                             const timeAgo = getTimeAgo(notif.created_at);
                             const icon = notif.type === 'like' ? '❤️' : '💬';
                             const bgColor = notif.read ? 'bg-white' : 'bg-blue-50';
-                            const postUrl = notif.post_id ? `/feed#post-${notif.post_id}` : '#';
                             
                             return `
-                                <a href="${postUrl}" class="block ${bgColor} p-4 rounded-xl hover:shadow-md transition-all mb-3 border border-gray-100 cursor-pointer" onclick="markNotificationAsRead(${notif.id}, event)">
+                                <div class="${bgColor} p-4 rounded-xl hover:shadow-md transition-all mb-3 border border-gray-100 cursor-pointer" onclick="openNotificationPost(${notif.post_id}, ${notif.id})">
                                     <div class="flex items-start gap-3">
                                         <span class="text-2xl">${icon}</span>
                                         <div class="flex-1">
@@ -616,7 +615,7 @@
                                             <p class="text-gray-500 text-sm mt-1">${timeAgo}</p>
                                         </div>
                                     </div>
-                                </a>
+                                </div>
                             `;
                         }).join('');
                         
@@ -666,9 +665,10 @@
                 return date.toLocaleDateString();
             }
             
-            // Mark notification as read when clicked
-            window.markNotificationAsRead = async function(notificationId, event) {
+            // Open post modal from notification
+            window.openNotificationPost = async function(postId, notificationId) {
                 try {
+                    // Mark notification as read
                     await fetch(`/api/notifications/${notificationId}/read`, {
                         method: 'POST',
                         headers: {
@@ -677,14 +677,50 @@
                         }
                     });
                     
-                    // Close modal and refresh notifications
+                    // Close notifications modal
                     notificationsModal.classList.add('hidden');
                     notificationsModal.classList.remove('flex');
+                    
+                    // Fetch post data and open in modal
+                    const postElement = document.querySelector(`[data-post-id="${postId}"]`);
+                    if (postElement) {
+                        const postData = extractPostDataFromImage(postElement);
+                        showImageModal(postData);
+                    } else {
+                        // If post not in DOM, fetch from API
+                        const response = await fetch(`/api/posts?post_id=${postId}`, {
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        });
+                        const data = await response.json();
+                        if (data.success && data.posts && data.posts.length > 0) {
+                            const post = data.posts[0];
+                            showImageModal({
+                                id: post.id,
+                                imageUrl: post.image_path,
+                                imageUrl2: post.image_path_2,
+                                imageUrl3: post.image_path_3,
+                                mediaType: post.image_path?.includes('/video/upload/') ? 'video' : 'image',
+                                userName: post.user_name,
+                                userGenre: post.user_genre || '',
+                                userType: post.user_type || 'musician',
+                                userAvatar: post.user_avatar,
+                                userLocation: post.user_location || '',
+                                description: post.description,
+                                createdAt: post.created_at,
+                                like_count: post.like_count || 0,
+                                comment_count: post.comment_count || 0,
+                                is_liked: post.is_liked || false
+                            });
+                        }
+                    }
                     
                     // Update badge count
                     setTimeout(() => loadNotifications(), 100);
                 } catch (error) {
-                    console.error('Error marking notification as read:', error);
+                    console.error('Error opening notification post:', error);
                 }
             }
             

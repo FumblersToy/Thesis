@@ -196,6 +196,53 @@ class PostController extends Controller
     public function index(Request $request)
     {
         try {
+            // Check if requesting a specific post by ID
+            $postId = $request->input('post_id');
+            if ($postId) {
+                $post = Post::find($postId);
+                if (!$post) {
+                    return response()->json(['success' => false, 'message' => 'Post not found'], 404);
+                }
+
+                $user = \App\Models\User::find($post->user_id);
+                $musician = $user ? \App\Models\Musician::where('user_id', $user->id)->first() : null;
+                $business = $user && !$musician ? \App\Models\Business::where('user_id', $user->id)->first() : null;
+
+                $userType = $musician ? 'musician' : ($business ? 'business' : 'member');
+                $userName = $musician?->stage_name ?: ($business?->business_name ?: ($user->name ?? 'User'));
+                $userGenre = $musician?->instrument ?: ($business?->venue ?: '');
+                $userAvatarPath = $musician?->profile_picture ?: ($business?->profile_picture ?: null);
+                $userLocation = $musician?->location ?: ($business?->location ?: '');
+
+                $likeCount = \App\Models\Like::where('post_id', $post->id)->count();
+                $commentCount = \App\Models\Comment::where('post_id', $post->id)->count();
+                $isLiked = Auth::check() ? 
+                    \App\Models\Like::where('post_id', $post->id)->where('user_id', Auth::id())->exists() : false;
+
+                $postData = [
+                    'id' => $post->id,
+                    'description' => $post->description,
+                    'image_path' => $post->image_path ? getImageUrl($post->image_path) : null,
+                    'image_path_2' => $post->image_path_2 ? getImageUrl($post->image_path_2) : null,
+                    'image_path_3' => $post->image_path_3 ? getImageUrl($post->image_path_3) : null,
+                    'media_type' => $post->media_type,
+                    'created_at' => optional($post->created_at)->toDateTimeString(),
+                    'user_type' => $userType,
+                    'user_name' => $userName,
+                    'user_genre' => $userGenre,
+                    'user_avatar' => $userAvatarPath,
+                    'user_location' => $userLocation,
+                    'like_count' => $likeCount,
+                    'comment_count' => $commentCount,
+                    'is_liked' => $isLiked,
+                ];
+
+                return response()->json([
+                    'success' => true,
+                    'posts' => [$postData],
+                ]);
+            }
+
             $perPage = max(1, (int) $request->input('per_page', 12));
             $instruments = collect(explode(',', (string) $request->input('instruments', '')))->filter()->values();
             $venues = collect(explode(',', (string) $request->input('venues', '')))->filter()->values();
