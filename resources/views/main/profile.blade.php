@@ -270,12 +270,12 @@
                                     $hasLocation = true;
                                     $latitude = $profileUser->musician->latitude;
                                     $longitude = $profileUser->musician->longitude;
-                                    $locationName = $profileUser->musician->location_name;
+                                    $locationName = $profileUser->musician->location ?? 'Location not set';
                                 } elseif ($profileUser->business && $profileUser->business->latitude && $profileUser->business->longitude) {
                                     $hasLocation = true;
                                     $latitude = $profileUser->business->latitude;
                                     $longitude = $profileUser->business->longitude;
-                                    $locationName = $profileUser->business->location_name;
+                                    $locationName = $profileUser->business->location ?? 'Location not set';
                                 }
                             @endphp
                             
@@ -290,11 +290,7 @@
                                     </div>
                                     <div class="flex flex-col">
                                         <span class="text-sm font-medium text-gray-700">Location</span>
-                                        @if ($locationName)
-                                            <span class="text-xs text-gray-600">{{ $locationName }}</span>
-                                        @else
-                                            <span class="text-xs text-gray-500">Coordinates: {{ number_format($latitude, 4) }}, {{ number_format($longitude, 4) }}</span>
-                                        @endif
+                                        <span class="text-xs text-gray-600">{{ $locationName }}</span>
                                     </div>
                                 </div>
                             </div>
