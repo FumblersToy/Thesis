@@ -213,7 +213,7 @@ class PostController extends Controller
                     ->leftJoin('musicians', 'users.id', '=', 'musicians.user_id')
                     ->leftJoin('businesses', 'users.id', '=', 'businesses.user_id')
                     // Only show posts from users with location data
-                    ->whereNotNull(DB::raw('COALESCE(musicians.latitude, businesses.latitude)'));
+                    ->whereRaw('(musicians.latitude IS NOT NULL OR businesses.latitude IS NOT NULL)');
 
                 if ($maxDistance) {
                     // Use a WHERE clause with the full distance calculation instead of HAVING
