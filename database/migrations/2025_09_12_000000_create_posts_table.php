@@ -13,7 +13,11 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->text('description')->nullable();
             $table->string('image_path')->nullable();
-            $table->string('image_public_id')->nullable();  // ADD THIS LINE
+            $table->string('image_path_2')->nullable();
+            $table->string('image_path_3')->nullable();
+            $table->string('image_public_id')->nullable();
+            $table->string('image_public_id_2')->nullable();
+            $table->string('image_public_id_3')->nullable();
             $table->timestamps();
         });
     }

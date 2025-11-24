@@ -66,8 +66,8 @@
                 </select>
             </div>
 
-            <!-- Secondary Genre (Optional) -->
-            <div class="form-group">
+            <!-- Secondary Genre (Optional, Hidden by default) -->
+            <div class="form-group" id="genre2-group" style="display: none;">
                 <label for="genre2">Secondary Genre <span style="color: #888; font-size: 0.9em;">(Optional)</span></label>
                 <select id="genre2" name="genre2">
                     <option value="">None</option>
@@ -81,8 +81,8 @@
                 </select>
             </div>
 
-            <!-- Third Genre (Optional) -->
-            <div class="form-group">
+            <!-- Third Genre (Optional, Hidden by default) -->
+            <div class="form-group" id="genre3-group" style="display: none;">
                 <label for="genre3">Third Genre <span style="color: #888; font-size: 0.9em;">(Optional)</span></label>
                 <select id="genre3" name="genre3">
                     <option value="">None</option>
@@ -95,6 +95,11 @@
                     <option value="Rock">Rock</option>
                 </select>
             </div>
+
+            <!-- Add Genre Button -->
+            <button type="button" id="add-genre-btn" class="add-field-btn" style="margin-bottom: 1rem;">
+                + Add Secondary Genre
+            </button>
 
             <!-- Instrument -->
             <div class="form-group">
@@ -112,8 +117,8 @@
                 </select>
             </div>
 
-            <!-- Secondary Instrument (Optional) -->
-            <div class="form-group">
+            <!-- Secondary Instrument (Optional, Hidden by default) -->
+            <div class="form-group" id="instrument2-group" style="display: none;">
                 <label for="instrument2">Secondary Instrument <span style="color: #888; font-size: 0.9em;">(Optional)</span></label>
                 <select id="instrument2" name="instrument2">
                     <option value="">None</option>
@@ -128,8 +133,8 @@
                 </select>
             </div>
 
-            <!-- Third Instrument (Optional) -->
-            <div class="form-group">
+            <!-- Third Instrument (Optional, Hidden by default) -->
+            <div class="form-group" id="instrument3-group" style="display: none;">
                 <label for="instrument3">Third Instrument <span style="color: #888; font-size: 0.9em;">(Optional)</span></label>
                 <select id="instrument3" name="instrument3">
                     <option value="">None</option>
@@ -143,6 +148,11 @@
                     <option value="Other">Other</option>
                 </select>
             </div>
+
+            <!-- Add Instrument Button -->
+            <button type="button" id="add-instrument-btn" class="add-field-btn" style="margin-bottom: 1rem;">
+                + Add Secondary Instrument
+            </button>
 
             <div class="form-group">
             <label for="location">Location</label>

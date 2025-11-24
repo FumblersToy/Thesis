@@ -182,14 +182,21 @@ function initFeed() {
     // File upload handling
     if (fileInput) {
         fileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                fileName.textContent = file.name;
+            const fileCount = e.target.files.length;
+            if (fileCount > 0) {
+                if (fileCount > 3) {
+                    alert('You can only upload up to 3 images');
+                    e.target.value = '';
+                    fileName.classList.add('hidden');
+                    fileText.textContent = 'Choose up to 3 images or drag them here';
+                    return;
+                }
+                fileName.textContent = `${fileCount} image${fileCount > 1 ? 's' : ''} selected`;
                 fileName.classList.remove('hidden');
-                fileText.textContent = 'File selected';
+                fileText.textContent = `${fileCount} file${fileCount > 1 ? 's' : ''} selected`;
             } else {
                 fileName.classList.add('hidden');
-                fileText.textContent = 'Choose an image or drag it here';
+                fileText.textContent = 'Choose up to 3 images or drag them here';
             }
         });
 
@@ -598,6 +605,8 @@ function initFeed() {
                loading="lazy"
                data-post-id="${post.id}"
                data-image-url="${post.image_path}"
+               data-image-url-2="${post.image_path_2 || ''}"
+               data-image-url-3="${post.image_path_3 || ''}"
                data-media-type="video"
                data-user-name="${userName}"
                data-user-genre="${userGenre}"
@@ -619,6 +628,8 @@ function initFeed() {
              onerror="this.src='/images/sample-post-1.jpg'"
              data-post-id="${post.id}"
              data-image-url="${post.image_path}"
+             data-image-url-2="${post.image_path_2 || ''}"
+             data-image-url-3="${post.image_path_3 || ''}"
              data-media-type="image"
              data-user-name="${userName}"
              data-user-genre="${userGenre}"

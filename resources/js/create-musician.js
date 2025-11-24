@@ -14,6 +14,41 @@
             }
         });
 
+        // Add Genre/Instrument buttons
+        const addGenreBtn = document.getElementById('add-genre-btn');
+        const addInstrumentBtn = document.getElementById('add-instrument-btn');
+        const genre2Group = document.getElementById('genre2-group');
+        const genre3Group = document.getElementById('genre3-group');
+        const instrument2Group = document.getElementById('instrument2-group');
+        const instrument3Group = document.getElementById('instrument3-group');
+
+        let genreCount = 1;
+        let instrumentCount = 1;
+
+        addGenreBtn.addEventListener('click', function() {
+            if (genreCount === 1) {
+                genre2Group.style.display = 'block';
+                genreCount = 2;
+                addGenreBtn.textContent = '+ Add Third Genre';
+            } else if (genreCount === 2) {
+                genre3Group.style.display = 'block';
+                genreCount = 3;
+                addGenreBtn.style.display = 'none';
+            }
+        });
+
+        addInstrumentBtn.addEventListener('click', function() {
+            if (instrumentCount === 1) {
+                instrument2Group.style.display = 'block';
+                instrumentCount = 2;
+                addInstrumentBtn.textContent = '+ Add Third Instrument';
+            } else if (instrumentCount === 2) {
+                instrument3Group.style.display = 'block';
+                instrumentCount = 3;
+                addInstrumentBtn.style.display = 'none';
+            }
+        });
+
         // Genre and Instrument selection logic - prevent duplicates
         const genreSelects = ['genre', 'genre2', 'genre3'];
         const instrumentSelects = ['instrument', 'instrument2', 'instrument3'];

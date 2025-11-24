@@ -23,7 +23,7 @@ class PostController extends Controller
         try {
             $request->validate([
                 'description' => 'nullable|string|max:1000',
-                'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov,avi,wmv|max:51200', // 50MB for videos
+                'images.*' => 'nullable|file|mimes:jpeg,png,jpg,gif|max:10240', // 10MB per image
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->wantsJson() || $request->ajax()) {
@@ -38,9 +38,9 @@ class PostController extends Controller
 
         // Ensure at least one field is provided
         $hasDescription = !empty($request->input('description'));
-        $hasImage = $request->hasFile('image');
+        $hasImages = $request->hasFile('images');
         
-        if (!$hasDescription && !$hasImage) {
+        if (!$hasDescription && !$hasImages) {
             $errorMessage = 'Please provide at least a description or an image.';
             
             if ($request->wantsJson() || $request->ajax()) {
@@ -53,55 +53,49 @@ class PostController extends Controller
             return redirect()->back()->with('error', $errorMessage);
         }
 
-        $imageUrl = null;
-        $imagePublicId = null;
-        $mediaType = null;
+        $imagePaths = [null, null, null];
+        $imagePublicIds = [null, null, null];
 
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            if ($file->isValid()) {
-                try {
-                    // Detect if file is a video or image
-                    $mimeType = $file->getMimeType();
-                    $isVideo = str_starts_with($mimeType, 'video/');
-                    $mediaType = $isVideo ? 'video' : 'image';
-                    
-                    // Upload to Cloudinary using Facade with appropriate resource type
-                    $uploadOptions = [
-                        'folder' => 'musician_posts',
-                    ];
-                    
-                    if ($isVideo) {
-                        $uploadOptions['resource_type'] = 'video';
-                    } else {
-                        $uploadOptions['transformation'] = [
-                            'width' => 1200,
-                            'height' => 1200,
-                            'crop' => 'limit',
-                            'quality' => 'auto'
-                        ];
-                    }
-                    
-                    $uploadedFile = Cloudinary::upload($file->getRealPath(), $uploadOptions);
-
-                    $imageUrl = $uploadedFile->getSecurePath();
-                    $imagePublicId = $uploadedFile->getPublicId();
-                    
-                    Log::info('Cloudinary upload successful', [
-                        'url' => $imageUrl,
-                        'public_id' => $imagePublicId
-                    ]);
-                } catch (Exception $e) {
-                    Log::error('Cloudinary upload error: ' . $e->getMessage());
-                    Log::error('Stack trace: ' . $e->getTraceAsString());
-                    
-                    // Fallback to local storage on error
+        if ($request->hasFile('images')) {
+            $files = $request->file('images');
+            
+            // Limit to 3 images
+            $files = array_slice($files, 0, 3);
+            
+            foreach ($files as $index => $file) {
+                if ($file->isValid()) {
                     try {
-                        $storedPath = $file->store('posts', 'public');
-                        $imageUrl = $storedPath; // Store path, getImageUrl() will convert it
-                        Log::info('Using local storage fallback: ' . $imageUrl);
-                    } catch (Exception $fallbackError) {
-                        Log::error('Local storage fallback error: ' . $fallbackError->getMessage());
+                        $uploadOptions = [
+                            'folder' => 'musician_posts',
+                            'transformation' => [
+                                'width' => 1200,
+                                'height' => 1200,
+                                'crop' => 'limit',
+                                'quality' => 'auto'
+                            ]
+                        ];
+                        
+                        $uploadedFile = Cloudinary::upload($file->getRealPath(), $uploadOptions);
+                        
+                        $imagePaths[$index] = $uploadedFile->getSecurePath();
+                        $imagePublicIds[$index] = $uploadedFile->getPublicId();
+                        
+                        Log::info('Cloudinary upload successful', [
+                            'index' => $index,
+                            'url' => $imagePaths[$index],
+                            'public_id' => $imagePublicIds[$index]
+                        ]);
+                    } catch (Exception $e) {
+                        Log::error('Cloudinary upload error: ' . $e->getMessage());
+                        
+                        // Fallback to local storage on error
+                        try {
+                            $storedPath = $file->store('posts', 'public');
+                            $imagePaths[$index] = $storedPath;
+                            Log::info('Using local storage fallback: ' . $imagePaths[$index]);
+                        } catch (Exception $fallbackError) {
+                            Log::error('Local storage fallback error: ' . $fallbackError->getMessage());
+                        }
                     }
                 }
             }
@@ -111,16 +105,20 @@ class PostController extends Controller
             $post = Post::create([
                 'user_id' => Auth::id(),
                 'description' => $request->description,
-                'image_path' => $imageUrl,
-                'image_public_id' => $imagePublicId,
-                'media_type' => $mediaType,
+                'image_path' => $imagePaths[0],
+                'image_path_2' => $imagePaths[1],
+                'image_path_3' => $imagePaths[2],
+                'image_public_id' => $imagePublicIds[0],
+                'image_public_id_2' => $imagePublicIds[1],
+                'image_public_id_3' => $imagePublicIds[2],
+                'media_type' => $imagePaths[0] ? 'image' : null,
             ]);
 
             Log::info('Post created successfully', [
                 'post_id' => $post->id,
                 'user_id' => Auth::id(),
-                'has_image' => !empty($imageUrl),
-                'image_url' => $imageUrl,
+                'has_images' => !empty($imagePaths[0]),
+                'image_count' => count(array_filter($imagePaths)),
             ]);
 
             // Handle AJAX requests
@@ -254,6 +252,8 @@ class PostController extends Controller
                     'id' => $post->id,
                     'description' => $post->description,
                     'image_path' => $post->image_path ? getImageUrl($post->image_path) : null,
+                    'image_path_2' => $post->image_path_2 ? getImageUrl($post->image_path_2) : null,
+                    'image_path_3' => $post->image_path_3 ? getImageUrl($post->image_path_3) : null,
                     'media_type' => $post->media_type,
                     'created_at' => optional($post->created_at)->toDateTimeString(),
                     'user_type' => $userType,

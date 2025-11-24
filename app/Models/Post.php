@@ -15,7 +15,11 @@ class Post extends Model
         'user_id',
         'description',
         'image_path',
+        'image_path_2',
+        'image_path_3',
         'image_public_id',
+        'image_public_id_2',
+        'image_public_id_3',
         'media_type',
     ];
 

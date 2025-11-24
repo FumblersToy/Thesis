@@ -231,14 +231,14 @@
                 </h2>
                 <form id="createPostForm" class="space-y-6" enctype="multipart/form-data" action="{{ route('posts.store') }}" method="POST">
                     @csrf
-                    <label for="image" class="block text-gray-700 font-medium mb-3 text-lg">📷 Upload Image or Video (Optional)</label>
+                    <label for="image" class="block text-gray-700 font-medium mb-3 text-lg">📷 Upload Images (Up to 3)</label>
                     <div class="custom-file-input">
-                        <input type="file" name="image" id="image" accept="image/*,video/*">
+                        <input type="file" name="images[]" id="image" accept="image/*" multiple>
                         <label for="image" class="custom-file-label cursor-pointer">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                             </svg>
-                            <span id="fileText">Choose an image/video or drag it here</span>
+                            <span id="fileText">Choose up to 3 images or drag them here</span>
                         </label>
                         
                         <span id="fileName" class="text-sm text-gray-600 hidden"></span>
@@ -511,6 +511,8 @@
                 return {
                     id: img.getAttribute('data-post-id'),
                     imageUrl: img.getAttribute('data-image-url'),
+                    imageUrl2: img.getAttribute('data-image-url-2'),
+                    imageUrl3: img.getAttribute('data-image-url-3'),
                     mediaType: img.getAttribute('data-media-type') || 'image',
                     userName: img.getAttribute('data-user-name'),
                     userGenre: img.getAttribute('data-user-genre'),
@@ -529,6 +531,10 @@
             function showImageModal(postData) {
                 if (!postData) return;
 
+                // Collect all images
+                const images = [postData.imageUrl, postData.imageUrl2, postData.imageUrl3].filter(url => url);
+                let currentImageIndex = 0;
+
                 // Create overlay
                 const overlay = document.createElement('div');
                 overlay.className = 'fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4';
@@ -545,29 +551,42 @@
                     `<img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200" src="${postData.userAvatar}" alt="avatar">` :
                     `<div class="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold">${(postData.userName||'U').charAt(0).toUpperCase()}</div>`;
 
-                const isVideo = postData.mediaType === 'video';
-                const mediaHtml = isVideo ? `
-                    <video controls class="max-w-full max-h-full" style="width: 100%; height: 100%; object-fit: contain;">
-                        <source src="${postData.imageUrl}" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                ` : `
-                    <img src="${postData.imageUrl}" 
-                         alt="Post image" 
-                         class="max-w-full max-h-full object-contain">
-                `;
+                function renderModal() {
+                    const mediaHtml = `
+                        <img src="${images[currentImageIndex]}" 
+                             alt="Post image" 
+                             class="max-w-full max-h-full object-contain" 
+                             id="modalImage">
+                    `;
+
+                    const navigationHtml = images.length > 1 ? `
+                        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-black/50 px-4 py-2 rounded-full">
+                            <button id="prevImage" class="text-white hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed" ${currentImageIndex === 0 ? 'disabled' : ''}>
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+                            <span class="text-white font-medium">${currentImageIndex + 1} / ${images.length}</span>
+                            <button id="nextImage" class="text-white hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed" ${currentImageIndex === images.length - 1 ? 'disabled' : ''}>
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    ` : '';
 
                 modal.innerHTML = `
                     <div class="flex h-full max-h-[90vh]">
                         <!-- Media Section -->
-                        <div class="flex-1 bg-black flex items-center justify-center">
+                        <div class="flex-1 bg-black flex items-center justify-center relative">
                             ${mediaHtml}
+                            ${navigationHtml}
                         </div>
                         
                         <!-- Details Section -->
                         <div class="w-96 bg-white flex flex-col">
                             <!-- Header -->
-                            <div class="p-6 border-b border-gray-200">
+                            <div class="p-6 border-b border-gray-200">`;
                                 <div class="flex items-center gap-4 mb-4">
                                     ${avatarHtml}
                                     <div>
@@ -655,12 +674,39 @@
                     </button>
                 `;
 
+                }
+
+                renderModal();
+
                 overlay.appendChild(modal);
                 document.body.appendChild(overlay);
                 document.body.style.overflow = 'hidden';
 
                 setTimeout(() => { overlay.style.opacity = '1'; modal.style.transform = 'scale(1)'; }, 10);
 
+                // Add navigation event listeners
+                if (images.length > 1) {
+                    const prevBtn = modal.querySelector('#prevImage');
+                    const nextBtn = modal.querySelector('#nextImage');
+
+                    if (prevBtn) {
+                        prevBtn.addEventListener('click', () => {
+                            if (currentImageIndex > 0) {
+                                currentImageIndex--;
+                                renderModal();
+                            }
+                        });
+                    }
+
+                    if (nextBtn) {
+                        nextBtn.addEventListener('click', () => {
+                            if (currentImageIndex < images.length - 1) {
+                                currentImageIndex++;
+                                renderModal();
+                            }
+                        });
+                    }
+                }
                 // wire up buttons
                 const closeBtn = modal.querySelector('.close-modal');
                 const likeBtn = modal.querySelector('.like-btn');
