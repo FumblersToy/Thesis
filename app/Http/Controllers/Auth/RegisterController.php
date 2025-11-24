@@ -20,7 +20,7 @@ class RegisterController extends Controller
     public function store(Request $request)
     {
         $startTime = microtime(true);
-        Log::info('[REGISTRATION] Registration started', ['email' => $request->email]);
+        Log::info('[REGISTRATION] Started', ['email' => $request->email]);
 
         $request->validate([
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
@@ -28,7 +28,7 @@ class RegisterController extends Controller
             'terms' => ['accepted'],
         ]);
 
-        Log::info('[REGISTRATION] Validation passed', ['time' => microtime(true) - $startTime]);
+        Log::info('[REGISTRATION] Validation passed', ['elapsed_ms' => round((microtime(true) - $startTime) * 1000)]);
 
         // Generate verification token
         $token = Str::random(64);
@@ -41,19 +41,14 @@ class RegisterController extends Controller
             'expires_at' => now()->addHours(24),
         ]);
 
-        Log::info('[REGISTRATION] Session data stored', ['time' => microtime(true) - $startTime]);
+        Log::info('[REGISTRATION] Session stored', ['elapsed_ms' => round((microtime(true) - $startTime) * 1000)]);
 
         // Send verification email
         $verificationUrl = route('verification.verify', ['token' => $token]);
         
-        Log::info('[REGISTRATION] Attempting to send verification email', [
-            'to' => $request->email,
-            'url' => $verificationUrl,
-            'time' => microtime(true) - $startTime
-        ]);
-
         try {
-            $emailStartTime = microtime(true);
+            $emailStart = microtime(true);
+            Log::info('[REGISTRATION] Sending email', ['to' => $request->email]);
             
             Mail::raw(
                 "Welcome to Bandmate!\n\n" .
@@ -68,24 +63,19 @@ class RegisterController extends Controller
                 }
             );
             
-            $emailDuration = microtime(true) - $emailStartTime;
-            Log::info('[REGISTRATION] Email sent successfully', [
-                'email_duration' => $emailDuration,
-                'total_time' => microtime(true) - $startTime
+            Log::info('[REGISTRATION] Email sent', [
+                'email_ms' => round((microtime(true) - $emailStart) * 1000),
+                'total_ms' => round((microtime(true) - $startTime) * 1000)
             ]);
             
         } catch (\Exception $e) {
             Log::error('[REGISTRATION] Email failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'time' => microtime(true) - $startTime
+                'elapsed_ms' => round((microtime(true) - $startTime) * 1000)
             ]);
-            
-            // Continue anyway - don't block registration
         }
 
-        $totalTime = microtime(true) - $startTime;
-        Log::info('[REGISTRATION] Registration completed', ['total_time' => $totalTime]);
+        Log::info('[REGISTRATION] Completed', ['total_ms' => round((microtime(true) - $startTime) * 1000)]);
 
         return redirect()->route('verification.notice')->with('email', $request->email);
     }
