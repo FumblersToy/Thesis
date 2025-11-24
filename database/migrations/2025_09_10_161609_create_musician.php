@@ -26,6 +26,9 @@ return new class extends Migration
             $table->string('instrument2')->nullable();
             $table->string('instrument3')->nullable();
             $table->string('location')->nullable();
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
+            $table->string('location_name')->nullable();
             $table->text('bio')->nullable();
             $table->string('credential_document')->nullable();
             $table->string('credential_document_public_id')->nullable();

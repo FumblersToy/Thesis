@@ -88,7 +88,7 @@
                         </div>
                         <div>
                             <label class="block text-white/80 mb-1">Primary Genre</label>
-                            <select name="musician[genre]" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <select name="musician[genre]" id="genre" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
                                 @php $genreVal = old('musician.genre', $musician->genre); @endphp
                                 <option selected value="" disabled {{ $genreVal ? '' : 'selected' }}>Choose your main genre</option>
                                 <option class="text-black" value="RnB" {{ $genreVal === 'RnB' ? 'selected' : '' }}>RnB</option>
@@ -101,8 +101,36 @@
                             </select>
                         </div>
                         <div>
+                            <label class="block text-white/80 mb-1">Secondary Genre <span style="opacity: 0.7;">(Optional)</span></label>
+                            <select name="musician[genre2]" id="genre2" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+                                @php $genre2Val = old('musician.genre2', $musician->genre2); @endphp
+                                <option class="text-black" value="">None</option>
+                                <option class="text-black" value="RnB" {{ $genre2Val === 'RnB' ? 'selected' : '' }}>RnB</option>
+                                <option class="text-black" value="House" {{ $genre2Val === 'House' ? 'selected' : '' }}>House</option>
+                                <option class="text-black" value="Pop Punk" {{ $genre2Val === 'Pop Punk' ? 'selected' : '' }}>Pop Punk</option>
+                                <option class="text-black" value="Electronic" {{ $genre2Val === 'Electronic' ? 'selected' : '' }}>Electronic</option>
+                                <option class="text-black" value="Reggae" {{ $genre2Val === 'Reggae' ? 'selected' : '' }}>Reggae</option>
+                                <option class="text-black" value="Jazz" {{ $genre2Val === 'Jazz' ? 'selected' : '' }}>Jazz</option>
+                                <option class="text-black" value="Rock" {{ $genre2Val === 'Rock' ? 'selected' : '' }}>Rock</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-white/80 mb-1">Third Genre <span style="opacity: 0.7;">(Optional)</span></label>
+                            <select name="musician[genre3]" id="genre3" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+                                @php $genre3Val = old('musician.genre3', $musician->genre3); @endphp
+                                <option class="text-black" value="">None</option>
+                                <option class="text-black" value="RnB" {{ $genre3Val === 'RnB' ? 'selected' : '' }}>RnB</option>
+                                <option class="text-black" value="House" {{ $genre3Val === 'House' ? 'selected' : '' }}>House</option>
+                                <option class="text-black" value="Pop Punk" {{ $genre3Val === 'Pop Punk' ? 'selected' : '' }}>Pop Punk</option>
+                                <option class="text-black" value="Electronic" {{ $genre3Val === 'Electronic' ? 'selected' : '' }}>Electronic</option>
+                                <option class="text-black" value="Reggae" {{ $genre3Val === 'Reggae' ? 'selected' : '' }}>Reggae</option>
+                                <option class="text-black" value="Jazz" {{ $genre3Val === 'Jazz' ? 'selected' : '' }}>Jazz</option>
+                                <option class="text-black" value="Rock" {{ $genre3Val === 'Rock' ? 'selected' : '' }}>Rock</option>
+                            </select>
+                        </div>
+                        <div>
                             <label class="block text-white/80 mb-1">Primary Instrument</label>
-                            <select name="musician[instrument]" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <select name="musician[instrument]" id="instrument" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
                                 @php $instrVal = old('musician.instrument', $musician->instrument); @endphp
                                 <option value="" disabled {{ $instrVal ? '' : 'selected' }}>Choose your main instrument</option>
                                 <option class="text-black" value="Guitar" {{ $instrVal === 'Guitar' ? 'selected' : '' }}>Guitar</option>
@@ -113,6 +141,36 @@
                                 <option class="text-black" value="Violin" {{ $instrVal === 'Violin' ? 'selected' : '' }}>Violin</option>
                                 <option class="text-black" value="Saxophone" {{ $instrVal === 'Saxophone' ? 'selected' : '' }}>Saxophone</option>
                                 <option class="text-black" value="Other" {{ $instrVal === 'Other' ? 'selected' : '' }}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-white/80 mb-1">Secondary Instrument <span style="opacity: 0.7;">(Optional)</span></label>
+                            <select name="musician[instrument2]" id="instrument2" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+                                @php $instr2Val = old('musician.instrument2', $musician->instrument2); @endphp
+                                <option class="text-black" value="">None</option>
+                                <option class="text-black" value="Guitar" {{ $instr2Val === 'Guitar' ? 'selected' : '' }}>Guitar</option>
+                                <option class="text-black" value="Drums" {{ $instr2Val === 'Drums' ? 'selected' : '' }}>Drums</option>
+                                <option class="text-black" value="Piano" {{ $instr2Val === 'Piano' ? 'selected' : '' }}>Piano</option>
+                                <option class="text-black" value="Bass" {{ $instr2Val === 'Bass' ? 'selected' : '' }}>Bass</option>
+                                <option class="text-black" value="Vocals" {{ $instr2Val === 'Vocals' ? 'selected' : '' }}>Vocals</option>
+                                <option class="text-black" value="Violin" {{ $instr2Val === 'Violin' ? 'selected' : '' }}>Violin</option>
+                                <option class="text-black" value="Saxophone" {{ $instr2Val === 'Saxophone' ? 'selected' : '' }}>Saxophone</option>
+                                <option class="text-black" value="Other" {{ $instr2Val === 'Other' ? 'selected' : '' }}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-white/80 mb-1">Third Instrument <span style="opacity: 0.7;">(Optional)</span></label>
+                            <select name="musician[instrument3]" id="instrument3" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-white/30">
+                                @php $instr3Val = old('musician.instrument3', $musician->instrument3); @endphp
+                                <option class="text-black" value="">None</option>
+                                <option class="text-black" value="Guitar" {{ $instr3Val === 'Guitar' ? 'selected' : '' }}>Guitar</option>
+                                <option class="text-black" value="Drums" {{ $instr3Val === 'Drums' ? 'selected' : '' }}>Drums</option>
+                                <option class="text-black" value="Piano" {{ $instr3Val === 'Piano' ? 'selected' : '' }}>Piano</option>
+                                <option class="text-black" value="Bass" {{ $instr3Val === 'Bass' ? 'selected' : '' }}>Bass</option>
+                                <option class="text-black" value="Vocals" {{ $instr3Val === 'Vocals' ? 'selected' : '' }}>Vocals</option>
+                                <option class="text-black" value="Violin" {{ $instr3Val === 'Violin' ? 'selected' : '' }}>Violin</option>
+                                <option class="text-black" value="Saxophone" {{ $instr3Val === 'Saxophone' ? 'selected' : '' }}>Saxophone</option>
+                                <option class="text-black" value="Other" {{ $instr3Val === 'Other' ? 'selected' : '' }}>Other</option>
                             </select>
                         </div>
                         <div>
@@ -274,6 +332,56 @@
                 initBusinessMap();
             }
             // businessAddressMap removed — address is still saved via hidden inputs
+            
+            // Genre and Instrument duplicate prevention for musicians
+            const genreSelects = ['genre', 'genre2', 'genre3'];
+            const instrumentSelects = ['instrument', 'instrument2', 'instrument3'];
+            
+            function updateSelectOptions(selectIds) {
+                const selectedValues = selectIds.map(id => {
+                    const select = document.getElementById(id);
+                    return select ? select.value : null;
+                }).filter(v => v);
+                
+                selectIds.forEach(id => {
+                    const select = document.getElementById(id);
+                    if (!select) return;
+                    
+                    const currentValue = select.value;
+                    const options = select.querySelectorAll('option');
+                    
+                    options.forEach(option => {
+                        if (option.value === '' || option.value === currentValue) {
+                            option.disabled = false;
+                            option.style.display = '';
+                        } else if (selectedValues.includes(option.value)) {
+                            option.disabled = true;
+                            option.style.display = 'none';
+                        } else {
+                            option.disabled = false;
+                            option.style.display = '';
+                        }
+                    });
+                });
+            }
+            
+            genreSelects.forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    select.addEventListener('change', () => updateSelectOptions(genreSelects));
+                }
+            });
+            
+            instrumentSelects.forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    select.addEventListener('change', () => updateSelectOptions(instrumentSelects));
+                }
+            });
+            
+            // Initial update to handle pre-selected values
+            updateSelectOptions(genreSelects);
+            updateSelectOptions(instrumentSelects);
         });
 
         // Maps removed: provide simple geocoding-only helpers that set hidden coords and fill the location input.

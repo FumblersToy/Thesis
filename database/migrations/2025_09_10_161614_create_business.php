@@ -24,7 +24,12 @@ return new class extends Migration
             $table->string('contact_email')->nullable()->unique();
             $table->string('phone_number', 20)->nullable();
             $table->string('location')->nullable();
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
+            $table->string('location_name')->nullable();
             $table->string('address')->nullable();
+            $table->decimal('address_latitude', 10, 8)->nullable();
+            $table->decimal('address_longitude', 11, 8)->nullable();
             $table->string('venue')->nullable();
         });
     }

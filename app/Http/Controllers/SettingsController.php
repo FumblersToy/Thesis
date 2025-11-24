@@ -64,7 +64,11 @@ class SettingsController extends Controller
                 'musician.last_name' => 'nullable|string|max:255',
                 'musician.stage_name' => 'nullable|string|max:255',
                 'musician.genre' => 'nullable|string|max:255',
+                'musician.genre2' => 'nullable|string|max:255',
+                'musician.genre3' => 'nullable|string|max:255',
                 'musician.instrument' => 'nullable|string|max:255',
+                'musician.instrument2' => 'nullable|string|max:255',
+                'musician.instrument3' => 'nullable|string|max:255',
                 'musician.bio' => 'nullable|string',
                 'musician.latitude' => 'nullable|numeric|between:-90,90',
                 'musician.longitude' => 'nullable|numeric|between:-180,180',
@@ -151,7 +155,11 @@ class SettingsController extends Controller
             $musician->last_name = $request->input('musician.last_name');
             $musician->stage_name = $request->input('musician.stage_name');
             $musician->genre = $request->input('musician.genre');
+            $musician->genre2 = $request->input('musician.genre2');
+            $musician->genre3 = $request->input('musician.genre3');
             $musician->instrument = $request->input('musician.instrument');
+            $musician->instrument2 = $request->input('musician.instrument2');
+            $musician->instrument3 = $request->input('musician.instrument3');
             $musician->bio = $request->input('musician.bio');
             $musician->latitude = $request->input('musician.latitude');
             $musician->longitude = $request->input('musician.longitude');

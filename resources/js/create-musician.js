@@ -1,5 +1,5 @@
  // File input enhancement
-        const fileInput = document.getElementById('profile_image');
+        const fileInput = document.getElementById('profile_picture');
         const fileLabel = document.getElementById('file-label');
         const fileText = document.getElementById('file-text');
 
@@ -12,6 +12,41 @@
                 fileText.textContent = 'Choose a photo';
                 fileLabel.classList.remove('has-file');
             }
+        });
+
+        // Genre and Instrument selection logic - prevent duplicates
+        const genreSelects = ['genre', 'genre2', 'genre3'];
+        const instrumentSelects = ['instrument', 'instrument2', 'instrument3'];
+        
+        function updateSelectOptions(selectIds) {
+            const selectedValues = selectIds.map(id => document.getElementById(id).value).filter(v => v);
+            
+            selectIds.forEach(id => {
+                const select = document.getElementById(id);
+                const currentValue = select.value;
+                const options = select.querySelectorAll('option');
+                
+                options.forEach(option => {
+                    if (option.value === '' || option.value === currentValue) {
+                        option.disabled = false;
+                        option.style.display = '';
+                    } else if (selectedValues.includes(option.value)) {
+                        option.disabled = true;
+                        option.style.display = 'none';
+                    } else {
+                        option.disabled = false;
+                        option.style.display = '';
+                    }
+                });
+            });
+        }
+        
+        genreSelects.forEach(id => {
+            document.getElementById(id).addEventListener('change', () => updateSelectOptions(genreSelects));
+        });
+        
+        instrumentSelects.forEach(id => {
+            document.getElementById(id).addEventListener('change', () => updateSelectOptions(instrumentSelects));
         });
 
         // Character counter for bio
