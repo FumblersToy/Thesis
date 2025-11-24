@@ -646,9 +646,24 @@ function initFeed() {
             <div class="relative">
                 ${mediaSection}
             </div>
-            <div class="p-6">
+            <div class="p-6 cursor-pointer hover:bg-gray-50 transition-colors post-content-clickable"
+                 data-post-id="${post.id}"
+                 data-image-url="${post.image_path}"
+                 data-image-url-2="${post.image_path_2 || ''}"
+                 data-image-url-3="${post.image_path_3 || ''}"
+                 data-media-type="${isVideo ? 'video' : 'image'}"
+                 data-user-name="${userName}"
+                 data-user-genre="${userGenre}"
+                 data-user-location="${userLocation}"
+                 data-user-type="${userType}"
+                 data-user-avatar="${userAvatar || ''}"
+                 data-description="${post.description || ''}"
+                 data-created-at="${createdAt}"
+                 data-like-count="${likeCountAttr}"
+                 data-comment-count="${commentCountAttr}"
+                 data-is-liked="${isLikedAttr}">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-4 no-modal-trigger">
                         ${avatarElement}
                         <div>
                             <h3 class="font-bold text-gray-800 text-lg">${userName}</h3>
@@ -656,7 +671,7 @@ function initFeed() {
                         </div>
                     </div>
                     ${post.is_owner ? `
-                        <button class="delete-post-btn text-red-500 hover:text-red-700 transition-colors" 
+                        <button class="delete-post-btn no-modal-trigger text-red-500 hover:text-red-700 transition-colors" 
                                 data-post-id="${post.id}" 
                                 title="Delete post">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -665,20 +680,7 @@ function initFeed() {
                         </button>
                     ` : ''}
                 </div>
-                <div class="${isVideo ? 'cursor-pointer hover:bg-gray-50 transition-colors rounded-lg p-2 -m-2 post-details-clickable' : ''}" 
-                     ${isVideo ? `data-post-id="${post.id}"
-                     data-image-url="${post.image_path}"
-                     data-media-type="video"
-                     data-user-name="${userName}"
-                     data-user-genre="${userGenre}"
-                     data-user-location="${userLocation}"
-                     data-user-type="${userType}"
-                     data-user-avatar="${userAvatar || ''}"
-                     data-description="${post.description || ''}"
-                     data-created-at="${createdAt}"
-                     data-like-count="${likeCountAttr}"
-                     data-comment-count="${commentCountAttr}"
-                     data-is-liked="${isLikedAttr}"` : ''}>
+                <div>
                     <p class="text-gray-700 mb-4 leading-relaxed">${post.description || 'No description'}</p>
                     <div class="flex justify-between items-center text-gray-500 text-sm">
                         <span>${formattedDate}</span>
