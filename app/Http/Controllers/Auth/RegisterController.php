@@ -30,27 +30,26 @@ class RegisterController extends Controller
 
         Log::info('[REGISTRATION] Validation passed', ['elapsed_ms' => round((microtime(true) - $startTime) * 1000)]);
 
-        // Generate verification token
-        $token = Str::random(64);
+        // Generate 6-digit verification code
+        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         // Store user data in session temporarily
         $request->session()->put('pending_registration', [
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'token' => $token,
-            'expires_at' => now()->addHours(24),
+            'code' => $code,
+            'expires_at' => now()->addMinutes(30),
         ]);
 
         Log::info('[REGISTRATION] Session stored', ['elapsed_ms' => round((microtime(true) - $startTime) * 1000)]);
 
         // Queue the email to be sent after the response
-        $verificationUrl = route('verification.verify', ['token' => $token]);
-        SendVerificationEmail::dispatch($request->email, $verificationUrl)
+        SendVerificationEmail::dispatch($request->email, $code)
             ->afterResponse();
 
         $totalTime = round((microtime(true) - $startTime) * 1000);
         Log::info('[REGISTRATION] Completed', ['total_ms' => $totalTime]);
 
-        return redirect()->route('verification.notice')->with('email', $request->email);
+        return redirect()->route('verification.code')->with('email', $request->email);
     }
 }

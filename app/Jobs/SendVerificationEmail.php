@@ -22,12 +22,12 @@ class SendVerificationEmail implements ShouldQueue
     public $timeout = 10; // 10 second timeout
 
     protected $email;
-    protected $verificationUrl;
+    protected $code;
 
-    public function __construct($email, $verificationUrl)
+    public function __construct($email, $code)
     {
         $this->email = $email;
-        $this->verificationUrl = $verificationUrl;
+        $this->code = $code;
     }
 
     public function handle(): void
@@ -42,13 +42,13 @@ class SendVerificationEmail implements ShouldQueue
         );
         
         $sendSmtpEmail = new \Brevo\Client\Model\SendSmtpEmail([
-            'subject' => 'Verify Your Bandmate Account',
+            'subject' => 'Your Bandmate Verification Code',
             'sender' => ['email' => 'kadmielchunks@gmail.com', 'name' => 'Bandmate'],
             'to' => [['email' => $this->email]],
             'textContent' => "Welcome to Bandmate!\n\n" .
-                "Please click the link below to verify your email address:\n\n" .
-                $this->verificationUrl . "\n\n" .
-                "This link will expire in 24 hours.\n\n" .
+                "Your verification code is:\n\n" .
+                $this->code . "\n\n" .
+                "This code will expire in 30 minutes.\n\n" .
                 "If you didn't create an account, please ignore this email.\n\n" .
                 "Best regards,\nThe Bandmate Team"
         ]);

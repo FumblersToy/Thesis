@@ -100,13 +100,18 @@ Route::get('/debug/test-email/{email}', function ($email) {
 Route::get('/register', [RegisterController::class, 'create'])->middleware('guest')->name('register');
 Route::post('/register', [RegisterController::class, 'store']);
 
-// Email Verification Routes
-Route::get('/email/verify', [EmailVerificationPromptController::class, '__invoke'])
+// Email Verification Routes (code-based)
+Route::get('/verify-code', [VerifyEmailController::class, 'showCodeForm'])
     ->middleware('guest')
-    ->name('verification.notice');
+    ->name('verification.code');
 
-Route::get('/verify-email/{token}', [VerifyEmailController::class, '__invoke'])
+Route::post('/verify-code', [VerifyEmailController::class, 'verifyCode'])
+    ->middleware('guest')
     ->name('verification.verify');
+
+Route::post('/verify-code/resend', [VerifyEmailController::class, 'resendCode'])
+    ->middleware('guest')
+    ->name('verification.resend');
 
 Route::get('/create', function () {
     return response()->view('create')
