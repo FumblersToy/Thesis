@@ -159,6 +159,8 @@ class PostController extends Controller
                         'id' => $post->id,
                         'description' => $post->description,
                         'image_path' => $post->image_path ? getImageUrl($post->image_path) : null,
+                        'image_path_2' => $post->image_path_2 ? getImageUrl($post->image_path_2) : null,
+                        'image_path_3' => $post->image_path_3 ? getImageUrl($post->image_path_3) : null,
                         'media_type' => $post->media_type,
                         'created_at' => $post->created_at->toDateTimeString(),
                         'user_type' => $userType,
