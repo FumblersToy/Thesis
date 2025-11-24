@@ -1,24 +1,36 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-UKQ1UnQs.css",
+    "file": "assets/app-9r5vM_ib.css",
     "src": "resources/css/app.css",
     "isEntry": true,
+    "name": "app",
     "names": [
       "app.css"
+    ]
+  },
+  "resources/css/auth.css": {
+    "file": "assets/auth-C_2LE6fL.css",
+    "src": "resources/css/auth.css",
+    "isEntry": true,
+    "name": "auth",
+    "names": [
+      "auth.css"
     ]
   },
   "resources/css/create-business.css": {
     "file": "assets/create-business-DlmER59C.css",
     "src": "resources/css/create-business.css",
     "isEntry": true,
+    "name": "create-business",
     "names": [
       "create-business.css"
     ]
   },
   "resources/css/create-musician.css": {
-    "file": "assets/create-musician-DQ7HTmjE.css",
+    "file": "assets/create-musician-B30z3TUE.css",
     "src": "resources/css/create-musician.css",
     "isEntry": true,
+    "name": "create-musician",
     "names": [
       "create-musician.css"
     ]
@@ -27,6 +39,7 @@
     "file": "assets/create-CO36t_2k.css",
     "src": "resources/css/create.css",
     "isEntry": true,
+    "name": "create",
     "names": [
       "create.css"
     ]
@@ -35,6 +48,7 @@
     "file": "assets/feed-Brfkpzr3.css",
     "src": "resources/css/feed.css",
     "isEntry": true,
+    "name": "feed",
     "names": [
       "feed.css"
     ]
@@ -43,6 +57,7 @@
     "file": "assets/login-CFy4I-Bg.css",
     "src": "resources/css/login.css",
     "isEntry": true,
+    "name": "login",
     "names": [
       "login.css"
     ]
@@ -51,6 +66,7 @@
     "file": "assets/register-3FHWR8WY.css",
     "src": "resources/css/register.css",
     "isEntry": true,
+    "name": "register",
     "names": [
       "register.css"
     ]
@@ -59,6 +75,7 @@
     "file": "assets/socket-Ca9ESUwZ.css",
     "src": "resources/css/socket.css",
     "isEntry": true,
+    "name": "socket",
     "names": [
       "socket.css"
     ]
@@ -67,6 +84,7 @@
     "file": "assets/welcome-CHHkq-M_.css",
     "src": "resources/css/welcome.css",
     "isEntry": true,
+    "name": "welcome",
     "names": [
       "welcome.css"
     ]
@@ -84,7 +102,7 @@
     "isEntry": true
   },
   "resources/js/create-musician.js": {
-    "file": "assets/create-musician-BRevj3Fr.js",
+    "file": "assets/create-musician-Dpxfu0y2.js",
     "name": "create-musician",
     "src": "resources/js/create-musician.js",
     "isEntry": true
@@ -96,19 +114,19 @@
     "isEntry": true
   },
   "resources/js/feed.js": {
-    "file": "assets/feed-CmMS-95I.js",
+    "file": "assets/feed-CD4CuRZW.js",
     "name": "feed",
     "src": "resources/js/feed.js",
     "isEntry": true
   },
   "resources/js/layout.js": {
-    "file": "assets/layout-CV0I59q4.js",
+    "file": "assets/layout-DY6yAlTr.js",
     "name": "layout",
     "src": "resources/js/layout.js",
     "isEntry": true
   },
   "resources/js/messages.js": {
-    "file": "assets/messages-CJMJAsEc.js",
+    "file": "assets/messages-Dj2Fno6L.js",
     "name": "messages",
     "src": "resources/js/messages.js",
     "isEntry": true
