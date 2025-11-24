@@ -348,6 +348,11 @@ Route::get('/api/notifications', [App\Http\Controllers\NotificationController::c
 Route::post('/api/notifications/{id}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->middleware('auth');
 Route::post('/api/notifications/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->middleware('auth');
 
+// Music routes (musicians only)
+Route::get('/music', [App\Http\Controllers\MusicController::class, 'index'])->middleware('auth')->name('music.index');
+Route::post('/music', [App\Http\Controllers\MusicController::class, 'store'])->middleware('auth')->name('music.store');
+Route::delete('/music/{id}', [App\Http\Controllers\MusicController::class, 'destroy'])->middleware('auth')->name('music.destroy');
+
 // Venue detail: redirect to user profile for business owner
 Route::get('/venue/{id}', function ($id) {
     $business = \App\Models\Business::findOrFail($id);

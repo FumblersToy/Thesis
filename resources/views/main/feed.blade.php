@@ -206,6 +206,13 @@
                                 <span id="notificationBadge" class="hidden absolute top-2 left-6 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
                             </button>
 
+                            @if($user->musician)
+                            <a href="{{ route('music.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
+                                <span class="text-lg">🎵</span>
+                                My Music
+                            </a>
+                            @endif
+
                             <a href="{{ route('settings.show') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
                                 <span class="text-lg">⚙️</span>
                                 Settings
@@ -1066,9 +1073,10 @@
                             const timeAgo = getTimeAgo(notif.created_at);
                             const icon = notif.type === 'like' ? '❤️' : '💬';
                             const bgColor = notif.read ? 'bg-white' : 'bg-blue-50';
+                            const postUrl = notif.post_id ? `/feed#post-${notif.post_id}` : '#';
                             
                             return `
-                                <div class="${bgColor} p-4 rounded-xl hover:shadow-md transition-all mb-3 border border-gray-100">
+                                <a href="${postUrl}" class="block ${bgColor} p-4 rounded-xl hover:shadow-md transition-all mb-3 border border-gray-100 cursor-pointer" onclick="markNotificationAsRead(${notif.id}, event)">
                                     <div class="flex items-start gap-3">
                                         <span class="text-2xl">${icon}</span>
                                         <div class="flex-1">
@@ -1076,7 +1084,7 @@
                                             <p class="text-gray-500 text-sm mt-1">${timeAgo}</p>
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             `;
                         }).join('');
                         
@@ -1123,6 +1131,28 @@
                 if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
                 if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
                 return date.toLocaleDateString();
+            }
+            
+            // Mark notification as read when clicked
+            window.markNotificationAsRead = async function(notificationId, event) {
+                try {
+                    await fetch(`/api/notifications/${notificationId}/read`, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    });
+                    
+                    // Close modal and refresh notifications
+                    notificationsModal.classList.add('hidden');
+                    notificationsModal.classList.remove('flex');
+                    
+                    // Update badge count
+                    setTimeout(() => loadNotifications(), 100);
+                } catch (error) {
+                    console.error('Error marking notification as read:', error);
+                }
             }
             
             // Load notification count on page load

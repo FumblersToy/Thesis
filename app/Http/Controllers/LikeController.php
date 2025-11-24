@@ -43,13 +43,24 @@ class LikeController extends Controller
                     $liker = Auth::user();
                     $likerName = $liker->musician->artist_name ?? $liker->business->business_name ?? 'Someone';
                     
-                    \App\Models\Notification::create([
-                        'user_id' => $post->user_id,
-                        'notifier_id' => $userId,
-                        'type' => 'like',
-                        'post_id' => $postId,
-                        'message' => "{$likerName} liked your post",
-                    ]);
+                    // Check if a like notification from this user for this post was created in the last 5 minutes
+                    $recentNotification = \App\Models\Notification::where('user_id', $post->user_id)
+                        ->where('notifier_id', $userId)
+                        ->where('type', 'like')
+                        ->where('post_id', $postId)
+                        ->where('created_at', '>', now()->subMinutes(5))
+                        ->first();
+                    
+                    // Only create notification if no recent one exists (cooldown)
+                    if (!$recentNotification) {
+                        \App\Models\Notification::create([
+                            'user_id' => $post->user_id,
+                            'notifier_id' => $userId,
+                            'type' => 'like',
+                            'post_id' => $postId,
+                            'message' => "{$likerName} liked your post",
+                        ]);
+                    }
                 }
             }
 
