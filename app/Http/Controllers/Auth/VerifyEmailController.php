@@ -49,27 +49,16 @@ class VerifyEmailController extends Controller
             return back()->withErrors(['code' => 'Invalid verification code. Please try again.']);
         }
 
-        Log::info('[VERIFICATION] Creating user', ['email' => $pendingData['email']]);
+        Log::info('[VERIFICATION] Code verified successfully', ['email' => $pendingData['email']]);
 
-        // Create the user now that email is verified
-        $user = User::create([
-            'email' => $pendingData['email'],
-            'password' => $pendingData['password'],
-            'account_type' => 'pending',
-            'email_verified_at' => now(),
-        ]);
+        // DON'T create user yet - keep data in session for profile creation
+        // Mark as verified in session
+        $pendingData['email_verified'] = true;
+        session()->put('pending_registration', $pendingData);
 
-        Log::info('[VERIFICATION] User created successfully', ['user_id' => $user->id]);
+        Log::info('[VERIFICATION] Email verified, redirecting to profile selection');
 
-        // Clear the pending registration
-        session()->forget('pending_registration');
-
-        // Log the user in
-        Auth::login($user);
-
-        Log::info('[VERIFICATION] User logged in, redirecting to create');
-
-        // Redirect to profile creation
+        // Redirect to profile creation (account type selection)
         return redirect()->route('create')->with('verified', true);
     }
 

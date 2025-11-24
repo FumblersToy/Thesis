@@ -112,21 +112,28 @@ Route::post('/verify-code/resend', [VerifyEmailController::class, 'resendCode'])
     ->name('verification.resend');
 
 Route::get('/create', function () {
+    // Check if user has verified email in session
+    $pendingData = session('pending_registration');
+    if (!$pendingData || !isset($pendingData['email_verified'])) {
+        return redirect()->route('register')->withErrors(['email' => 'Please complete email verification first.']);
+    }
+    
     return response()->view('create')
         ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
         ->header('Pragma', 'no-cache')
         ->header('Expires', '0');
-})->middleware('auth')->name('create');
+})->name('create');
 
+// Profile creation routes - no auth middleware since user doesn't exist yet
+Route::get('/create/musician', [App\Http\Controllers\Auth\MusicianController::class, 'showCreateForm'])->name('create.musician');
+Route::post('/musician', [App\Http\Controllers\Auth\MusicianController::class, 'createMusicianProfile'])->name('musician.store');
+Route::get('/create/business', [App\Http\Controllers\Auth\BusinessController::class, 'showCreateForm'])->name('create.business');
+Route::post('/business', [App\Http\Controllers\Auth\BusinessController::class, 'createBusinessProfile'])->name('business.store');
+// Accept POST to /create/business as well, in case of older forms
+Route::post('/create/business', [App\Http\Controllers\Auth\BusinessController::class, 'createBusinessProfile']);
 
+// Authenticated routes - require user to be logged in
 Route::middleware('auth')->group(function () {
-    Route::get('/create/musician', [App\Http\Controllers\Auth\MusicianController::class, 'showCreateForm'])->name('create.musician');
-    Route::post('/musician', [App\Http\Controllers\Auth\MusicianController::class, 'createMusicianProfile'])->name('musician.store');
-    Route::get('/create/business', [App\Http\Controllers\Auth\BusinessController::class, 'showCreateForm'])->name('create.business');
-    Route::post('/business', [App\Http\Controllers\Auth\BusinessController::class, 'createBusinessProfile'])->name('business.store');
-    // Accept POST to /create/business as well, in case of older forms
-    Route::post('/create/business', [App\Http\Controllers\Auth\BusinessController::class, 'createBusinessProfile']);
-    
     // Posts - Using PostController
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
