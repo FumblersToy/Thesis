@@ -609,7 +609,7 @@
                 
                 // Create modal content
                 const modal = document.createElement('div');
-                modal.className = 'bg-white rounded-2xl shadow-2xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-hidden transform scale-95 transition-transform duration-300';
+                modal.className = 'bg-white rounded-2xl shadow-2xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-y-auto lg:overflow-hidden transform scale-95 transition-transform duration-300';
                 
                 const userTypeEmoji = postData.userType === 'musician' ? '🎵' : 
                                      postData.userType === 'business' ? '🏢' : '👤';
@@ -662,15 +662,15 @@
                     ` : '';
                     
                     modal.innerHTML = `
-                        <div class="flex flex-col lg:flex-row h-full max-h-[90vh]">
+                        <div class="flex flex-col lg:flex-row lg:h-full lg:max-h-[90vh]">
                             <!-- Media Section with Navigation -->
-                            <div class="flex-1 bg-black flex items-center justify-center relative">
+                            <div class="flex-1 bg-black flex items-center justify-center relative min-h-[40vh] lg:min-h-0">
                                 ${mediaHtml}
                                 ${navigationHtml}
                             </div>
                             
                             <!-- Details Section -->
-                            <div class="w-full lg:w-96 bg-white flex flex-col max-h-[50vh] lg:max-h-full">
+                            <div class="w-full lg:w-96 bg-white flex flex-col lg:max-h-full">
                                 <!-- Header -->
                                 <div class="p-6 border-b border-gray-200">
                                     <div class="flex items-center gap-4 mb-4">
