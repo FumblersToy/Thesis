@@ -27,10 +27,10 @@
             <!-- Instructions -->
             <div class="mb-6 text-center">
                 <p class="text-gray-700 mb-4">
-                    Please check your email and click the verification link to complete your registration.
+                    Please check your email and click the verification link to continue.
                 </p>
                 <p class="text-sm text-gray-600">
-                    The link will expire in 24 hours. If you don't see the email, check your spam folder.
+                    The email should arrive within a few minutes. Don't forget to check your spam folder!
                 </p>
             </div>
 
