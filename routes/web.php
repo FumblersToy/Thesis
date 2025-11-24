@@ -168,33 +168,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('map');
 });
 
-// Debug route (remove after testing)
-// Debug route for images
-Route::get('/debug-images', function() {
-    $user = \Illuminate\Support\Facades\Auth::user();
-    if (!$user) {
-        return response()->json(['error' => 'Not authenticated']);
-    }
-    
-    $musician = \App\Models\Musician::where('user_id', $user->id)->first();
-    $business = \App\Models\Business::where('user_id', $user->id)->first();
-    
-    return response()->json([
-        'user_id' => $user->id,
-        'musician' => $musician ? [
-            'profile_picture' => $musician->profile_picture,
-            'profile_picture_public_id' => $musician->profile_picture_public_id,
-            'image_url' => $musician->profile_picture ? getImageUrl($musician->profile_picture) : null,
-        ] : null,
-        'business' => $business ? [
-            'profile_picture' => $business->profile_picture,
-            'profile_picture_public_id' => $business->profile_picture_public_id,
-            'image_url' => $business->profile_picture ? getImageUrl($business->profile_picture) : null,
-        ] : null,
-        'cloudinary_url' => env('CLOUDINARY_URL') ? 'Set' : 'Not Set',
-    ]);
-})->middleware('auth');
-
 // Test Cloudinary connection
 Route::get('/test-cloudinary', function() {
     try {
