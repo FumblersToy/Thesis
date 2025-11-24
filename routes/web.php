@@ -105,7 +105,7 @@ Route::get('/register', function () {
 })->middleware('guest')->name('register');
 
 Route::post('/register', 
-[RegisterController::class, 'register']);
+[RegisterController::class, 'store']);
 
 // Email Verification Routes
 Route::get('/email/verify', [EmailVerificationPromptController::class, '__invoke'])
