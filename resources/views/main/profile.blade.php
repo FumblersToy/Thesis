@@ -513,6 +513,9 @@
 }
 
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 PROFILE PAGE SCRIPT LOADED');
+            console.log('📍 DOMContentLoaded event fired');
+            
             // Profile dropdown functionality
             const profileButton = document.getElementById('profileButton');
             const profileDropdown = document.getElementById('profileDropdown');
