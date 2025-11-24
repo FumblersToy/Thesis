@@ -180,9 +180,9 @@ class PostController extends Controller
             $perPage = max(1, (int) $request->input('per_page', 12));
             $instruments = collect(explode(',', (string) $request->input('instruments', '')))->filter()->values();
             $venues = collect(explode(',', (string) $request->input('venues', '')))->filter()->values();
-            $sortBy = $request->input('sort_by', 'recent');
-            $userLat = $request->input('user_latitude');
-            $userLng = $request->input('user_longitude');
+            $sortBy = $request->input('sort_by', 'random');
+            $userLat = $request->input('latitude');
+            $userLng = $request->input('longitude');
             $maxDistance = $request->input('max_distance');
 
             $query = Post::query();
@@ -220,6 +220,8 @@ class PostController extends Controller
                 }
 
                 $query->orderBy('distance', 'asc');
+            } elseif ($sortBy === 'recent') {
+                $query->orderByDesc('created_at');
             } else {
                 // Random order for feed
                 $query->inRandomOrder();
@@ -236,13 +238,14 @@ class PostController extends Controller
                 $userName = $musician?->stage_name ?: ($business?->business_name ?: ($user->name ?? 'User'));
                 $userGenre = $musician?->instrument ?: ($business?->venue ?: '');
                 $userAvatarPath = $musician?->profile_picture ?: ($business?->profile_picture ?: null);
+                $userLocation = $musician?->location ?: ($business?->location ?: '');
 
                 $likeCount = \App\Models\Like::where('post_id', $post->id)->count();
                 $commentCount = \App\Models\Comment::where('post_id', $post->id)->count();
                 $isLiked = Auth::check() ? 
                     \App\Models\Like::where('post_id', $post->id)->where('user_id', Auth::id())->exists() : false;
 
-                return [
+                $postData = [
                     'id' => $post->id,
                     'description' => $post->description,
                     'image_path' => $post->image_path ? getImageUrl($post->image_path) : null,
@@ -251,6 +254,7 @@ class PostController extends Controller
                     'user_type' => $userType,
                     'user_name' => $userName,
                     'user_genre' => $userGenre,
+                    'user_location' => $userLocation,
                     'user_avatar' => $userAvatarPath ? getImageUrl($userAvatarPath) : null,
                     'user_id' => $post->user_id,
                     'is_owner' => $post->user_id === Auth::id(),
@@ -259,6 +263,13 @@ class PostController extends Controller
                     'comment_count' => $commentCount,
                     'is_liked' => $isLiked,
                 ];
+
+                // Add distance if it was calculated
+                if (isset($post->distance)) {
+                    $postData['distance'] = round($post->distance, 1);
+                }
+
+                return $postData;
             });
 
             return response()->json([

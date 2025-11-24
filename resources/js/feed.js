@@ -31,6 +31,8 @@ function initFeed() {
     let currentPage = 1;
     let loading = false;
     let userLocation = null;
+    let userLatitude = null;
+    let userLongitude = null;
 
     // Initialize the page early so posts are fetched before any later runtime errors
     try {
@@ -487,8 +489,18 @@ function initFeed() {
 
         const usingDistance = sortVal === 'distance' || (sortBySelect && sortBySelect.value === 'distance');
         if (userLocation && usingDistance) {
-            filters.user_latitude = userLocation.latitude;
-            filters.user_longitude = userLocation.longitude;
+            filters.latitude = userLocation.latitude;
+            filters.longitude = userLocation.longitude;
+
+            const maxDistanceEl = document.getElementById('maxDistance') || document.querySelector('#mobileFilters #maxDistance');
+            const maxDistance = maxDistanceEl ? maxDistanceEl.value : '';
+            if (maxDistance) {
+                filters.max_distance = maxDistance;
+            }
+        } else if (userLatitude && userLongitude && usingDistance) {
+            // Fallback to individual variables
+            filters.latitude = userLatitude;
+            filters.longitude = userLongitude;
 
             const maxDistanceEl = document.getElementById('maxDistance') || document.querySelector('#mobileFilters #maxDistance');
             const maxDistance = maxDistanceEl ? maxDistanceEl.value : '';
@@ -574,6 +586,12 @@ function initFeed() {
     const commentCountAttr = post.comment_count || post.comments_count || 0;
     const isLikedAttr = post.is_liked ? 'true' : 'false';
 
+    // Build user meta string with distance if available
+    let userMeta = [userGenre, userLocation].filter(Boolean).join(' · ');
+    if (post.distance !== undefined) {
+        userMeta += (userMeta ? ' · ' : '') + `${post.distance} km away`;
+    }
+
     const mediaSection = hasMedia ? (isVideo ? `
         <video class="post-image w-full h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity" 
                controls
@@ -623,7 +641,7 @@ function initFeed() {
                         ${avatarElement}
                         <div>
                             <h3 class="font-bold text-gray-800 text-lg">${userName}</h3>
-                            <p class="text-gray-600">${[userGenre, userLocation].filter(Boolean).join(' · ')}</p>
+                            <p class="text-gray-600">${userMeta}</p>
                         </div>
                     </div>
                     ${post.is_owner ? `

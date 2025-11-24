@@ -190,7 +190,6 @@
                                 <div>
                                     <p class="text-gray-800 font-semibold text-lg">{{ $displayName }}</p>
                                     <p class="text-gray-600">{{ $roleLabel }}</p>
-                                    <p class="text-gray-500 text-sm">{{ $user->email ?? '' }}</p>
                                 </div>
                             </div>
                         </div>
