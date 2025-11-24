@@ -221,7 +221,8 @@ class PostController extends Controller
 
                 $query->orderBy('distance', 'asc');
             } else {
-                $query->orderByDesc('created_at');
+                // Random order for feed
+                $query->inRandomOrder();
             }
 
             $paginator = $query->paginate($perPage);
