@@ -73,6 +73,10 @@ class SettingsController extends Controller
                 'musician.latitude' => 'nullable|numeric|between:-90,90',
                 'musician.longitude' => 'nullable|numeric|between:-180,180',
                 'musician.location_name' => 'nullable|string|max:255',
+                'musician.instagram_url' => 'nullable|url|max:255',
+                'musician.facebook_url' => 'nullable|url|max:255',
+                'musician.twitter_url' => 'nullable|url|max:255',
+                'musician.youtube_url' => 'nullable|url|max:255',
             ]);
 
             if ($request->hasFile('musician.profile_picture')) {
@@ -164,6 +168,10 @@ class SettingsController extends Controller
             $musician->location = $request->input('musician.location');
             $musician->latitude = $request->input('musician.latitude');
             $musician->longitude = $request->input('musician.longitude');
+            $musician->instagram_url = $request->input('musician.instagram_url');
+            $musician->facebook_url = $request->input('musician.facebook_url');
+            $musician->twitter_url = $request->input('musician.twitter_url');
+            $musician->youtube_url = $request->input('musician.youtube_url');
             $musician->save();
         }
 
@@ -181,6 +189,10 @@ class SettingsController extends Controller
                 'business.location_name' => 'nullable|string|max:255',
                 'business.address_latitude' => 'nullable|numeric|between:-90,90',
                 'business.address_longitude' => 'nullable|numeric|between:-180,180',
+                'business.instagram_url' => 'nullable|url|max:255',
+                'business.facebook_url' => 'nullable|url|max:255',
+                'business.twitter_url' => 'nullable|url|max:255',
+                'business.website_url' => 'nullable|url|max:255',
             ]);
 
             if ($request->hasFile('business.profile_picture')) {
@@ -268,6 +280,10 @@ class SettingsController extends Controller
             $business->longitude = $request->input('business.longitude');
             $business->address_latitude = $request->input('business.address_latitude');
             $business->address_longitude = $request->input('business.address_longitude');
+            $business->instagram_url = $request->input('business.instagram_url');
+            $business->facebook_url = $request->input('business.facebook_url');
+            $business->twitter_url = $request->input('business.twitter_url');
+            $business->website_url = $request->input('business.website_url');
             $business->save();
         }
 
