@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-9r5vM_ib.css",
+    "file": "assets/app-yMDIC_9l.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -45,7 +45,7 @@
     ]
   },
   "resources/css/feed.css": {
-    "file": "assets/feed-Brfkpzr3.css",
+    "file": "assets/feed-DGZTGq9Y.css",
     "src": "resources/css/feed.css",
     "isEntry": true,
     "name": "feed",
@@ -114,7 +114,7 @@
     "isEntry": true
   },
   "resources/js/feed.js": {
-    "file": "assets/feed-DbOkYV7N.js",
+    "file": "assets/feed-BcXAEPFq.js",
     "name": "feed",
     "src": "resources/js/feed.js",
     "isEntry": true
@@ -126,7 +126,7 @@
     "isEntry": true
   },
   "resources/js/messages.js": {
-    "file": "assets/messages-Dj2Fno6L.js",
+    "file": "assets/messages-CuHMScQ_.js",
     "name": "messages",
     "src": "resources/js/messages.js",
     "isEntry": true
