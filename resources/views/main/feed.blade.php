@@ -16,8 +16,8 @@
     <div class="flex min-h-screen relative z-10">
         <aside id="sidebar" class="w-80 glass-effect backdrop-blur-xl shadow-2xl hidden lg:flex lg:flex-col animate-slide-up gradient-bg fixed left-0 top-0 bottom-0">
             <div class="p-6 flex-shrink-0">
-                <h2 class="font-bold text-2xl mb-6 text-white flex items-center gap-3">
-                    <div class="w-8 h-8 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse-slow"></div>
+                <h2 class="font-bold text-2xl mb-6 text-gray-100 flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-purple-300 to-purple-200 rounded-full animate-pulse-slow"></div>
                     Filters
                 </h2>
             </div>
@@ -25,30 +25,30 @@
                 
                 <form id="filters" class="space-y-8">
                     <div class="animate-fade-in">
-                        <h3 class="font-semibold text-white/90 mb-4 text-lg">🎵 Instruments</h3>
+                        <h3 class="font-semibold text-gray-200 mb-4 text-lg">🎵 Instruments</h3>
                         <div class="space-y-3" id="instruments">
-                            <label class="flex items-center gap-3 text-white">
+                            <label class="flex items-center gap-3 text-gray-300">
                                 <input type="checkbox" class="form-checkbox"> Guitar
                             </label>
-                            <label class="flex items-center gap-3 text-white">
+                            <label class="flex items-center gap-3 text-gray-300">
                                 <input type="checkbox" class="form-checkbox"> Drums
                             </label>
-                            <label class="flex items-center gap-3 text-white">
+                            <label class="flex items-center gap-3 text-gray-300">
                                 <input type="checkbox" class="form-checkbox"> Piano
                             </label>
                         </div>
                     </div>
 
                     <div class="animate-fade-in" style="animation-delay: 0.1s">
-                        <h3 class="font-semibold text-white/90 mb-4 text-lg">🏢 Venues</h3>
+                        <h3 class="font-semibold text-gray-200 mb-4 text-lg">🏢 Venues</h3>
                         <div class="space-y-3" id="venues">
-                            <label class="flex items-center gap-3 text-white">
+                            <label class="flex items-center gap-3 text-gray-300">
                                 <input type="checkbox" class="form-checkbox"> Studio
                             </label>
-                            <label class="flex items-center gap-3 text-white">
+                            <label class="flex items-center gap-3 text-gray-300">
                                 <input type="checkbox" class="form-checkbox"> Club
                             </label>
-                            <label class="flex items-center gap-3 text-white">
+                            <label class="flex items-center gap-3 text-gray-300">
                                 <input type="checkbox" class="form-checkbox"> Theater
                             </label>
                         </div>
@@ -62,15 +62,15 @@
                             </button>
                             <div id="locationStatus" class="text-white/70 text-sm hidden"></div>
                             <div class="space-y-2">
-                                <label class="block text-white/80 text-sm">Sort by:</label>
-                                <select id="sortBy" class="w-full px-3 py-2 bg-white/20 text-white rounded-xl border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/30">
+                                <label class="block text-gray-300 text-sm">Sort by:</label>
+                                <select id="sortBy" class="w-full px-3 py-2 bg-white/10 text-gray-200 rounded-xl border border-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-300">
                                     <option value="recent" class="text-black">Most Recent</option>
                                     <option value="distance" class="text-black">Nearest First</option>
                                 </select>
                             </div>
                             <div id="distanceFilter" class="space-y-2 hidden">
-                                <label class="block text-white/80 text-sm">Within:</label>
-                                <select id="maxDistance" class="w-full px-3 py-2 bg-white/20 text-white rounded-xl border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/30">
+                                <label class="block text-gray-300 text-sm">Within:</label>
+                                <select id="maxDistance" class="w-full px-3 py-2 bg-white/10 text-gray-200 rounded-xl border border-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-300">
                                     <option value="" class="text-black">Any Distance</option>
                                     <option value="5" class="text-black">5 km</option>
                                     <option value="10" class="text-black">10 km</option>

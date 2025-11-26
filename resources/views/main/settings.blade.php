@@ -22,7 +22,7 @@
                     </svg>
                     <span class="text-gray-800 font-semibold">Back</span>
                 </a>
-                <h1 class="text-2xl font-bold text-white">Settings</h1>
+                <h1 class="text-2xl font-bold text-gray-100">Settings</h1>
             </div>
 
             @if (session('status'))
@@ -33,47 +33,47 @@
                 @csrf
 
                 <div>
-                    <h2 class="text-xl font-semibold text-white mb-4">Account</h2>
+                    <h2 class="text-xl font-semibold text-gray-100 mb-4">Account</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         @if ($musician)
                         <div>
-                            <label class="block text-white/80 mb-1">Stage Name</label>
-                            <input type="text" name="musician[stage_name]" value="{{ old('musician.stage_name', $musician->stage_name) }}" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <label class="block text-gray-300 mb-1">Stage Name</label>
+                            <input type="text" name="musician[stage_name]" value="{{ old('musician.stage_name', $musician->stage_name) }}" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-gray-500 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300">
                         </div>
                         @endif
                         <div>
-                            <label class="block text-white/80 mb-1">Email</label>
-                            <input type="email" name="email" value="{{ old('email', $user->email) }}" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <label class="block text-gray-300 mb-1">Email</label>
+                            <input type="email" name="email" value="{{ old('email', $user->email) }}" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-gray-500 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300">
                         </div>
                         <div>
-                            <label class="block text-white/80 mb-1">New Password</label>
-                            <input type="password" name="password" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <label class="block text-gray-300 mb-1">New Password</label>
+                            <input type="password" name="password" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-gray-500 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300">
                         </div>
                         <div>
-                            <label class="block text-white/80 mb-1">Confirm Password</label>
-                            <input type="password" name="password_confirmation" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30">
+                            <label class="block text-gray-300 mb-1">Confirm Password</label>
+                            <input type="password" name="password_confirmation" class="w-full px-4 py-3 rounded-2xl bg-white/10 border border-gray-500 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-300">
                         </div>
                     </div>
                 </div>
 
                 @if ($musician)
                 <div>
-                    <h2 class="text-xl font-semibold text-white mb-4">Musician Profile</h2>
+                    <h2 class="text-xl font-semibold text-gray-100 mb-4">Musician Profile</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
-                            <label class="block text-white/80 mb-2 text-center">Profile Picture</label>
+                            <label class="block text-gray-300 mb-2 text-center">Profile Picture</label>
                             <div class="flex items-center justify-center gap-4">
                                 @php
                                     $musicianAvatar = $musician->profile_picture ? getImageUrl($musician->profile_picture) : '/images/sample-profile.jpg';
                                 @endphp
-                                <img src="{{ $musicianAvatar }}" alt="Current avatar" class="w-20 h-20 rounded-full object-cover border-2 border-white/30 shadow">
+                                <img src="{{ $musicianAvatar }}" alt="Current avatar" class="w-20 h-20 rounded-full object-cover border-2 border-gray-500 shadow">
                                 <div>
                                     <input id="musician_profile_picture" type="file" name="musician[profile_picture]" accept="image/*" class="hidden">
-                                    <label for="musician_profile_picture" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg">
+                                    <label for="musician_profile_picture" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer bg-gradient-to-r from-purple-400 to-purple-300 text-gray-800 hover:from-purple-500 hover:to-purple-400 transition-all shadow-lg">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                         Change Photo
                                     </label>
-                                    <p class="text-xs text-white/60 mt-1">JPG, PNG up to 3MB.</p>
+                                    <p class="text-xs text-gray-400 mt-1">JPG, PNG up to 3MB.</p>
                                 </div>
                             </div>
                         </div>

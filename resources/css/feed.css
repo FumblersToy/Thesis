@@ -63,7 +63,7 @@
 }
 
 .gradient-text {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #9b87c5 0%, #7b6a9e 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -88,22 +88,22 @@
 }
 .glass-effect {
     backdrop-filter: blur(20px);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(42, 36, 56, 0.7);
+    border: 1px solid rgba(181, 176, 189, 0.2);
 }
 .glass-dark {
     backdrop-filter: blur(20px);
-    background: rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(26, 22, 37, 0.5);
+    border: 1px solid rgba(181, 176, 189, 0.1);
 }
 .gradient-bg {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1a1625 0%, #2d2438 100%);
 }
 .gradient-card {
-    background: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    background: linear-gradient(145deg, rgba(42,36,56,0.3) 0%, rgba(42,36,56,0.15) 100%);
 }
 .hover-glow:hover {
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 30px rgba(155, 135, 197, 0.3);
     transform: translateY(-2px);
 }
 .filter-chip {
@@ -111,25 +111,25 @@
 }
 .filter-chip:hover {
     transform: scale(1.05);
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: linear-gradient(135deg, #9b87c5, #7b6a9e);
 }
 .post-card {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .post-card:hover {
     transform: translateY(-8px) rotate(1deg);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 40px rgba(42,36,56,0.4);
 }
 .floating-elements::before {
     content: '';
     position: absolute;
     width: 200px;
     height: 200px;
-    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    background: linear-gradient(45deg, #9b87c5, #7b9ec7);
     border-radius: 50%;
     top: 10%;
     left: 80%;
-    opacity: 0.05;
+    opacity: 0.03;
     animation: float 4s ease-in-out infinite;
     z-index: -1;
 }
@@ -138,11 +138,11 @@
     position: absolute;
     width: 150px;
     height: 150px;
-    background: linear-gradient(45deg, #feca57, #48dbfb);
+    background: linear-gradient(45deg, #d98ba8, #9b87c5);
     border-radius: 50%;
     bottom: 20%;
     left: 10%;
-    opacity: 0.05;
+    opacity: 0.03;
     animation: float 4s ease-in-out infinite reverse;
     z-index: -1;
 }
@@ -169,25 +169,25 @@
     justify-content: center;
     gap: 12px;
     padding: 16px 24px;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
-    border: 2px dashed rgba(99, 102, 241, 0.4);
+    background: linear-gradient(135deg, rgba(155, 135, 197, 0.15), rgba(123, 106, 158, 0.15));
+    border: 2px dashed rgba(155, 135, 197, 0.4);
     border-radius: 16px;
-    color: #6366f1;
+    color: #9b87c5;
     font-weight: 600;
     transition: all 0.3s ease;
     min-height: 60px;
 }
 
 .custom-file-input:hover .custom-file-label {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
-    border-color: rgba(99, 102, 241, 0.6);
+    background: linear-gradient(135deg, rgba(155, 135, 197, 0.25), rgba(123, 106, 158, 0.25));
+    border-color: rgba(155, 135, 197, 0.6);
     transform: translateY(-2px);
 }
 
 .custom-file-input.has-file .custom-file-label {
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(59, 130, 246, 0.1));
-    border-color: rgba(34, 197, 94, 0.4);
-    color: #059669;
+    background: linear-gradient(135deg, rgba(123, 158, 199, 0.15), rgba(155, 135, 197, 0.15));
+    border-color: rgba(123, 158, 199, 0.4);
+    color: #7b9ec7;
 }
 
 .file-name {
@@ -197,15 +197,13 @@
     text-align: center;
 }
 
-.gradient-text {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-}
-
-@keyframes float {
+        .gradient-text {
+            background: linear-gradient(135deg, #9b87c5 0%, #7b6a9e 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }@keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
         }
@@ -223,19 +221,19 @@
         }
         .glass-effect {
             backdrop-filter: blur(20px);
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(42, 36, 56, 0.7);
+            border: 1px solid rgba(181, 176, 189, 0.2);
         }
         .glass-dark {
             backdrop-filter: blur(20px);
-            background: rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(26, 22, 37, 0.5);
+            border: 1px solid rgba(181, 176, 189, 0.1);
         }
         .gradient-card {
-            background: linear-gradient(145deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            background: linear-gradient(145deg, rgba(42,36,56,0.3) 0%, rgba(42,36,56,0.15) 100%);
         }
         .hover-glow:hover {
-            box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 0 30px rgba(155, 135, 197, 0.3);
             transform: translateY(-2px);
         }
         .filter-chip {
@@ -243,25 +241,25 @@
         }
         .filter-chip:hover {
             transform: scale(1.05);
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: linear-gradient(135deg, #9b87c5, #7b6a9e);
         }
         .post-card {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .post-card:hover {
             transform: translateY(-8px) rotate(1deg);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 40px rgba(42,36,56,0.4);
         }
         .floating-elements::before {
             content: '';
             position: absolute;
             width: 200px;
             height: 200px;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            background: linear-gradient(45deg, #9b87c5, #7b9ec7);
             border-radius: 50%;
             top: 10%;
             left: 80%;
-            opacity: 0.05;
+            opacity: 0.03;
             animation: float 4s ease-in-out infinite;
             z-index: -1;
         }
@@ -270,11 +268,11 @@
             position: absolute;
             width: 150px;
             height: 150px;
-            background: linear-gradient(45deg, #feca57, #48dbfb);
+            background: linear-gradient(45deg, #d98ba8, #9b87c5);
             border-radius: 50%;
             bottom: 20%;
             left: 10%;
-            opacity: 0.05;
+            opacity: 0.03;
             animation: float 4s ease-in-out infinite reverse;
             z-index: -1;
         }
@@ -301,25 +299,25 @@
             justify-content: center;
             gap: 12px;
             padding: 16px 24px;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
-            border: 2px dashed rgba(99, 102, 241, 0.4);
+            background: linear-gradient(135deg, rgba(155, 135, 197, 0.15), rgba(123, 106, 158, 0.15));
+            border: 2px dashed rgba(155, 135, 197, 0.4);
             border-radius: 16px;
-            color: #6366f1;
+            color: #9b87c5;
             font-weight: 600;
             transition: all 0.3s ease;
             min-height: 60px;
         }
         
         .custom-file-input:hover .custom-file-label {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
-            border-color: rgba(99, 102, 241, 0.6);
+            background: linear-gradient(135deg, rgba(155, 135, 197, 0.25), rgba(123, 106, 158, 0.25));
+            border-color: rgba(155, 135, 197, 0.6);
             transform: translateY(-2px);
         }
         
         .custom-file-input.has-file .custom-file-label {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(59, 130, 246, 0.1));
-            border-color: rgba(34, 197, 94, 0.4);
-            color: #059669;
+            background: linear-gradient(135deg, rgba(123, 158, 199, 0.15), rgba(155, 135, 197, 0.15));
+            border-color: rgba(123, 158, 199, 0.4);
+            color: #7b9ec7;
         }
         
         .file-name {
@@ -330,5 +328,5 @@
         }
 
         .button-bg {
-           background: linear-gradient(135deg, #4cd685 0%, #4081f0 100%); 
+           background: linear-gradient(135deg, #7b9ec7 0%, #9b87c5 100%); 
         }
