@@ -31,10 +31,10 @@
                                  alt="profile">
                             
                             <div class="hidden sm:block text-left">
-                                <p class="font-semibold" style="color: #4a4555;">
+                                <p class="font-semibold" style="color: #2d2838;">
                                     {{ Auth::user()->musician->artist_name ?? 'User' }}
                                 </p>
-                                <p class="text-sm" style="color: #b5b0bd;">Musician</p>
+                                <p class="text-sm" style="color: #6b6575;">Musician</p>
                             </div>
 
                             <svg class="w-5 h-5 transition-colors" style="color: #b5b0bd;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,37 +47,37 @@
                                 <div class="flex items-center gap-3">
                                     <img class="w-16 h-16 rounded-full object-cover border-2 border-gray-200" src="{{ Auth::user()->musician->profile_picture ?? 'https://via.placeholder.com/150' }}" alt="profile">
                                     <div>
-                                        <p class="font-semibold text-lg" style="color: #4a4555;">{{ Auth::user()->musician->artist_name ?? 'User' }}</p>
-                                        <p style="color: #b5b0bd;">Musician</p>
+                                        <p class="font-semibold text-lg" style="color: #2d2838;">{{ Auth::user()->musician->artist_name ?? 'User' }}</p>
+                                        <p style="color: #6b6575;">Musician</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="p-2">
-                                <a href="{{ route('profile.show', Auth::id()) }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors" style="color: #4a4555;">
+                                <a href="{{ route('profile.show', Auth::id()) }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors" style="color: #2d2838;">
                                     <span class="text-lg">👤</span>
                                     View Profile
                                 </a>
 
-                                <button id="notificationsBtn" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors relative" style="color: #4a4555;">
+                                <button id="notificationsBtn" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors relative" style="color: #2d2838;">
                                     <span class="text-lg">🔔</span>
                                     Notifications
                                     <span id="notificationBadge" class="hidden absolute top-2 left-6 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
                                 </button>
 
                                 @if(Auth::user()->musician)
-                                <a href="{{ route('music.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors" style="color: #4a4555;">
+                                <a href="{{ route('music.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors" style="color: #2d2838;">
                                     <span class="text-lg">🎵</span>
                                     My Music
                                 </a>
                                 @endif
 
-                                <a href="{{ route('settings.show') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors" style="color: #4a4555;">
+                                <a href="{{ route('settings.show') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors" style="color: #2d2838;">
                                     <span class="text-lg">⚙️</span>
                                     Settings
                                 </a>
                                 
-                                <a href="{{ route('messages.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors" style="color: #4a4555;">
+                                <a href="{{ route('messages.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors" style="color: #2d2838;">
                                     <span class="text-lg">💬</span>
                                     Messages
                                 </a>
@@ -102,15 +102,15 @@
         <div id="notificationsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
                 <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-                    <h2 class="text-2xl font-bold" style="color: #4a4555;">Notifications</h2>
-                    <button id="closeNotificationsModal" class="p-2 rounded-full hover:bg-gray-100" style="color: #b5b0bd;">
+                    <h2 class="text-2xl font-bold" style="color: #2d2838;">Notifications</h2>
+                    <button id="closeNotificationsModal" class="p-2 rounded-full hover:bg-gray-100" style="color: #6b6575;">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
                 <div id="notificationsContent" class="p-6 overflow-y-auto max-h-[calc(80vh-100px)]">
-                    <div class="text-center py-8" style="color: #b5b0bd;">
+                    <div class="text-center py-8" style="color: #6b6575;">
                         <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                         </svg>
@@ -124,22 +124,22 @@
         <!-- Main Content -->
         <div class="max-w-5xl mx-auto px-4 py-8">
             <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg p-8 mb-8">
-                <h2 class="text-3xl font-bold mb-6 flex items-center gap-3" style="color: #4a4555;">
+                <h2 class="text-3xl font-bold mb-6 flex items-center gap-3" style="color: #2d2838;">
                     🎵 My Music Library
                 </h2>
 
                 <!-- Upload Form -->
                 <div class="rounded-2xl p-6 mb-8 border" style="background: linear-gradient(to right, rgba(155, 135, 197, 0.1), rgba(123, 158, 199, 0.1)); border-color: #9b87c5;">
-                    <h3 class="text-xl font-semibold mb-4" style="color: #4a4555;">Upload New Track</h3>
+                    <h3 class="text-xl font-semibold mb-4" style="color: #2d2838;">Upload New Track</h3>
                     <form id="uploadMusicForm" enctype="multipart/form-data" class="space-y-4">
                         @csrf
                         <div>
-                            <label for="title" class="block font-medium mb-2" style="color: #4a4555;">Track Title</label>
+                            <label for="title" class="block font-medium mb-2" style="color: #2d2838;">Track Title</label>
                             <input type="text" id="title" name="title" required class="w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all" style="border-color: #d4cfe0; background: rgba(255, 255, 255, 0.9);" placeholder="Enter track title">
                         </div>
 
                         <div>
-                            <label for="audio" class="block font-medium mb-2" style="color: #4a4555;">Audio File (MP3, WAV, OGG, M4A - Max 20MB)</label>
+                            <label for="audio" class="block font-medium mb-2" style="color: #2d2838;">Audio File (MP3, WAV, OGG, M4A - Max 20MB)</label>
                             <input type="file" id="audio" name="audio" accept=".mp3,.wav,.ogg,.m4a" required class="w-full px-4 py-3 rounded-xl border transition-all" style="border-color: #d4cfe0; background: rgba(255, 255, 255, 0.9);">
                         </div>
 
@@ -152,7 +152,7 @@
                         <div class="bg-white rounded-full h-3 overflow-hidden">
                             <div id="progressBar" class="h-full transition-all duration-300" style="background: linear-gradient(to right, #9b87c5, #7b9ec7); width: 0%;"></div>
                         </div>
-                        <p class="text-center text-sm mt-2" style="color: #b5b0bd;">Uploading...</p>
+                        <p class="text-center text-sm mt-2" style="color: #6b6575;">Uploading...</p>
                     </div>
                 </div>
 
@@ -168,8 +168,8 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <h4 class="font-semibold text-lg" style="color: #4a4555;">{{ $track->title }}</h4>
-                                    <p class="text-sm" style="color: #b5b0bd;">{{ $track->created_at->format('M d, Y') }} • {{ $track->duration ? gmdate('i:s', $track->duration) : '--:--' }}</p>
+                                    <h4 class="font-semibold text-lg" style="color: #2d2838;">{{ $track->title }}</h4>
+                                    <p class="text-sm" style="color: #6b6575;">{{ $track->created_at->format('M d, Y') }} • {{ $track->duration ? gmdate('i:s', $track->duration) : '--:--' }}</p>
                                 </div>
                             </div>
 
@@ -188,7 +188,7 @@
                         </div>
                     </div>
                     @empty
-                    <div class="text-center py-12" style="color: #b5b0bd;">
+                    <div class="text-center py-12" style="color: #6b6575;">
                         <svg class="w-24 h-24 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                         </svg>
