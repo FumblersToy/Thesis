@@ -8,7 +8,7 @@
     @vite(['resources/css/app.css'])
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1625 0%, #2d2438 100%);
             min-height: 100vh;
         }
     </style>
@@ -31,13 +31,13 @@
                                  alt="profile">
                             
                             <div class="hidden sm:block text-left">
-                                <p class="text-gray-800 font-semibold">
+                                <p class="font-semibold" style="color: #4a4555;">
                                     {{ Auth::user()->musician->artist_name ?? 'User' }}
                                 </p>
-                                <p class="text-gray-600 text-sm">Musician</p>
+                                <p class="text-sm" style="color: #b5b0bd;">Musician</p>
                             </div>
 
-                            <svg class="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 transition-colors" style="color: #b5b0bd;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </button>
@@ -47,37 +47,37 @@
                                 <div class="flex items-center gap-3">
                                     <img class="w-16 h-16 rounded-full object-cover border-2 border-gray-200" src="{{ Auth::user()->musician->profile_picture ?? 'https://via.placeholder.com/150' }}" alt="profile">
                                     <div>
-                                        <p class="text-gray-800 font-semibold text-lg">{{ Auth::user()->musician->artist_name ?? 'User' }}</p>
-                                        <p class="text-gray-600">Musician</p>
+                                        <p class="font-semibold text-lg" style="color: #4a4555;">{{ Auth::user()->musician->artist_name ?? 'User' }}</p>
+                                        <p style="color: #b5b0bd;">Musician</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="p-2">
-                                <a href="{{ route('profile.show', Auth::id()) }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-black hover:text-gray-900">
+                                <a href="{{ route('profile.show', Auth::id()) }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors" style="color: #4a4555;">
                                     <span class="text-lg">👤</span>
                                     View Profile
                                 </a>
 
-                                <button id="notificationsBtn" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900 relative">
+                                <button id="notificationsBtn" class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors relative" style="color: #4a4555;">
                                     <span class="text-lg">🔔</span>
                                     Notifications
                                     <span id="notificationBadge" class="hidden absolute top-2 left-6 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
                                 </button>
 
                                 @if(Auth::user()->musician)
-                                <a href="{{ route('music.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
+                                <a href="{{ route('music.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors" style="color: #4a4555;">
                                     <span class="text-lg">🎵</span>
                                     My Music
                                 </a>
                                 @endif
 
-                                <a href="{{ route('settings.show') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
+                                <a href="{{ route('settings.show') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors" style="color: #4a4555;">
                                     <span class="text-lg">⚙️</span>
                                     Settings
                                 </a>
                                 
-                                <a href="{{ route('messages.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
+                                <a href="{{ route('messages.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors" style="color: #4a4555;">
                                     <span class="text-lg">💬</span>
                                     Messages
                                 </a>
@@ -102,15 +102,15 @@
         <div id="notificationsModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
             <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
                 <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-                    <h2 class="text-2xl font-bold text-gray-800">Notifications</h2>
-                    <button id="closeNotificationsModal" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
+                    <h2 class="text-2xl font-bold" style="color: #4a4555;">Notifications</h2>
+                    <button id="closeNotificationsModal" class="p-2 rounded-full hover:bg-gray-100" style="color: #b5b0bd;">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
                 <div id="notificationsContent" class="p-6 overflow-y-auto max-h-[calc(80vh-100px)]">
-                    <div class="text-center py-8 text-gray-500">
+                    <div class="text-center py-8" style="color: #b5b0bd;">
                         <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                         </svg>
@@ -124,35 +124,35 @@
         <!-- Main Content -->
         <div class="max-w-5xl mx-auto px-4 py-8">
             <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg p-8 mb-8">
-                <h2 class="text-3xl font-bold mb-6 text-gray-800 flex items-center gap-3">
+                <h2 class="text-3xl font-bold mb-6 flex items-center gap-3" style="color: #4a4555;">
                     🎵 My Music Library
                 </h2>
 
                 <!-- Upload Form -->
-                <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-6 mb-8 border border-purple-200">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Upload New Track</h3>
+                <div class="rounded-2xl p-6 mb-8 border" style="background: linear-gradient(to right, rgba(155, 135, 197, 0.1), rgba(123, 158, 199, 0.1)); border-color: #9b87c5;">
+                    <h3 class="text-xl font-semibold mb-4" style="color: #4a4555;">Upload New Track</h3>
                     <form id="uploadMusicForm" enctype="multipart/form-data" class="space-y-4">
                         @csrf
                         <div>
-                            <label for="title" class="block text-gray-700 font-medium mb-2">Track Title</label>
-                            <input type="text" id="title" name="title" required class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all" placeholder="Enter track title">
+                            <label for="title" class="block font-medium mb-2" style="color: #4a4555;">Track Title</label>
+                            <input type="text" id="title" name="title" required class="w-full px-4 py-3 rounded-xl border focus:ring-2 transition-all" style="border-color: #d4cfe0; background: rgba(255, 255, 255, 0.9);" placeholder="Enter track title">
                         </div>
 
                         <div>
-                            <label for="audio" class="block text-gray-700 font-medium mb-2">Audio File (MP3, WAV, OGG, M4A - Max 20MB)</label>
-                            <input type="file" id="audio" name="audio" accept=".mp3,.wav,.ogg,.m4a" required class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-purple-500 transition-all">
+                            <label for="audio" class="block font-medium mb-2" style="color: #4a4555;">Audio File (MP3, WAV, OGG, M4A - Max 20MB)</label>
+                            <input type="file" id="audio" name="audio" accept=".mp3,.wav,.ogg,.m4a" required class="w-full px-4 py-3 rounded-xl border transition-all" style="border-color: #d4cfe0; background: rgba(255, 255, 255, 0.9);">
                         </div>
 
-                        <button type="submit" id="uploadBtn" class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl">
+                        <button type="submit" id="uploadBtn" class="w-full text-white px-6 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl" style="background: linear-gradient(to right, #9b87c5, #7b9ec7);">
                             Upload Track
                         </button>
                     </form>
 
                     <div id="uploadProgress" class="hidden mt-4">
                         <div class="bg-white rounded-full h-3 overflow-hidden">
-                            <div id="progressBar" class="bg-gradient-to-r from-purple-600 to-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
+                            <div id="progressBar" class="h-full transition-all duration-300" style="background: linear-gradient(to right, #9b87c5, #7b9ec7); width: 0%;"></div>
                         </div>
-                        <p class="text-center text-sm text-gray-600 mt-2">Uploading...</p>
+                        <p class="text-center text-sm mt-2" style="color: #b5b0bd;">Uploading...</p>
                     </div>
                 </div>
 
@@ -162,14 +162,14 @@
                     <div class="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition-all border border-gray-200" data-track-id="{{ $track->id }}">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-4 flex-1">
-                                <div class="w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background: linear-gradient(to right, #9b87c5, #7b9ec7);">
                                     <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path>
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <h4 class="font-semibold text-gray-800 text-lg">{{ $track->title }}</h4>
-                                    <p class="text-sm text-gray-500">{{ $track->created_at->format('M d, Y') }} • {{ $track->duration ? gmdate('i:s', $track->duration) : '--:--' }}</p>
+                                    <h4 class="font-semibold text-lg" style="color: #4a4555;">{{ $track->title }}</h4>
+                                    <p class="text-sm" style="color: #b5b0bd;">{{ $track->created_at->format('M d, Y') }} • {{ $track->duration ? gmdate('i:s', $track->duration) : '--:--' }}</p>
                                 </div>
                             </div>
 
@@ -188,7 +188,7 @@
                         </div>
                     </div>
                     @empty
-                    <div class="text-center py-12 text-gray-500">
+                    <div class="text-center py-12" style="color: #b5b0bd;">
                         <svg class="w-24 h-24 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
                         </svg>

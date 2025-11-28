@@ -8,7 +8,7 @@
     @vite(['resources/css/app.css', 'resources/css/welcome.css', 'resources/js/app.js'])
     <title>Bandmate | Welcome</title>
 </head>
-<body class="min-h-screen bg-white">
+<body class="min-h-screen" style="background: linear-gradient(135deg, #1a1625 0%, #2d2438 100%);">
     <!-- Floating music notes background -->
     <div class="music-notes">
         <div class="music-note">♪</div>
@@ -17,7 +17,7 @@
         <div class="music-note">♬</div>
     </div>
 
-    <header class="w-full h-16 flex items-center justify-between bg-white px-6 border-b border-gray-100">
+    <header class="w-full h-16 flex items-center justify-between bg-black/20 backdrop-blur-xl px-6 border-b border-white/10">
         <img src="/assets/logo_black.png" class="h-10 md:hidden">
         <img src="/assets/logo_both.png" class="h-10 hidden md:block">
         <div class="flex items-center space-x-3">
@@ -30,12 +30,12 @@
         </div>
     </header>
 
-    <section class="w-full min-h-screen bg-off-white flex flex-col items-center justify-center px-6 py-20">
+    <section class="w-full min-h-screen flex flex-col items-center justify-center px-6 py-20">
         <div class="max-w-4xl mx-auto text-center">
-            <h1 class="hero-title mb-6">
+            <h1 class="hero-title mb-6" style="color: #e8e6eb;">
                 Where Music Meets Connection
             </h1>
-            <p class="hero-subtitle mx-auto mb-12">
+            <p class="hero-subtitle mx-auto mb-12" style="color: #b5b0bd;">
                 Find the perfect talent, connect with passionate performers, and create events that leave lasting memories. Join thousands of musicians building their careers together.
             </p>
             
@@ -62,8 +62,8 @@
                             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Connect</h3>
-                    <p class="text-gray-600">Network with talented musicians and discover new opportunities in your area and beyond</p>
+                    <h3 class="text-xl font-semibold mb-3" style="color: #d4cfe0;">Connect</h3>
+                    <p style="color: #b5b0bd;">Network with talented musicians and discover new opportunities in your area and beyond</p>
                 </div>
                 
                 <div class="feature-card">
@@ -72,8 +72,8 @@
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Collaborate</h3>
-                    <p class="text-gray-600">Work together on projects and create something amazing that showcases your combined talents</p>
+                    <h3 class="text-xl font-semibold mb-3" style="color: #d4cfe0;">Collaborate</h3>
+                    <p style="color: #b5b0bd;">Work together on projects and create something amazing that showcases your combined talents</p>
                 </div>
                 
                 <div class="feature-card">
@@ -84,8 +84,8 @@
                             <circle cx="18" cy="16" r="3"></circle>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Perform</h3>
-                    <p class="text-gray-600">Showcase your talent and share your music with the world through events and performances</p>
+                    <h3 class="text-xl font-semibold mb-3" style="color: #d4cfe0;">Perform</h3>
+                    <p style="color: #b5b0bd;">Showcase your talent and share your music with the world through events and performances</p>
                 </div>
             </div>
         </div>
