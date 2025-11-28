@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $musician->artist_name ?? 'Musician' }}'s Music - Bandmate</title>
+    <title>{{ $musician->stage_name ?? 'Musician' }}'s Music - Bandmate</title>
     @vite(['resources/css/app.css'])
     <style>
         body {
@@ -41,9 +41,9 @@
                 <div class="flex items-center gap-6">
                     <img class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-xl" 
                          src="{{ $musician->profile_picture ?? 'https://via.placeholder.com/150' }}" 
-                         alt="{{ $musician->artist_name }}">
+                         alt="{{ $musician->stage_name }}">
                     <div>
-                        <h1 class="text-4xl font-bold mb-2" style="color: #e8e6eb;">{{ $musician->artist_name ?? 'Musician' }}'s Music</h1>
+                        <h1 class="text-4xl font-bold mb-2" style="color: #e8e6eb;">{{ $musician->stage_name ?? 'Musician' }}'s Music</h1>
                         <p class="text-lg" style="color: #b5b0bd;">{{ $musician->genre ?? 'Music Collection' }}</p>
                     </div>
                 </div>
