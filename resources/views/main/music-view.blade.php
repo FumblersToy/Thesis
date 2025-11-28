@@ -8,7 +8,7 @@
     @vite(['resources/css/app.css'])
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1625 0%, #2d2438 100%);
             min-height: 100vh;
         }
     </style>
@@ -24,7 +24,7 @@
                         <img src="{{ asset('assets/logo_both.png') }}" alt="Bandmate Logo" class="h-12 hidden md:block cursor-pointer hover:opacity-90 transition-opacity">
                     </a>
 
-                    <a href="{{ route('profile.show', $profileUser->id) }}" class="flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-xl px-6 py-3 rounded-full transition-all duration-300 text-white font-medium">
+                    <a href="{{ route('profile.show', $profileUser->id) }}" class="flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-xl px-6 py-3 rounded-full transition-all duration-300 font-medium" style="color: #e8e6eb;">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                         </svg>
@@ -43,21 +43,21 @@
                          src="{{ $musician->profile_picture ?? 'https://via.placeholder.com/150' }}" 
                          alt="{{ $musician->artist_name }}">
                     <div>
-                        <h1 class="text-4xl font-bold text-white mb-2">{{ $musician->artist_name ?? 'Musician' }}'s Music</h1>
-                        <p class="text-white/80 text-lg">{{ $musician->genre ?? 'Music Collection' }}</p>
+                        <h1 class="text-4xl font-bold mb-2" style="color: #e8e6eb;">{{ $musician->artist_name ?? 'Musician' }}'s Music</h1>
+                        <p class="text-lg" style="color: #b5b0bd;">{{ $musician->genre ?? 'Music Collection' }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- Music Library -->
             <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
-                <h2 class="text-2xl font-bold text-white mb-6">Music Library</h2>
+                <h2 class="text-2xl font-bold mb-6" style="color: #e8e6eb;">Music Library</h2>
                 
                 @if($musicTracks->isEmpty())
                     <div class="text-center py-16">
                         <div class="text-6xl mb-4">🎵</div>
-                        <p class="text-white/70 text-xl">No music tracks yet</p>
-                        <p class="text-white/50 mt-2">This musician hasn't uploaded any music yet</p>
+                        <p class="text-xl" style="color: #b5b0bd;">No music tracks yet</p>
+                        <p class="mt-2" style="color: #8a8595;">This musician hasn't uploaded any music yet</p>
                     </div>
                 @else
                     <div class="space-y-4">
@@ -65,16 +65,16 @@
                             <div class="bg-white/10 backdrop-blur-xl rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 border border-white/10">
                                 <div class="flex items-center gap-4">
                                     <div class="flex-shrink-0">
-                                        <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-400 rounded-xl flex items-center justify-center">
+                                        <div class="w-16 h-16 rounded-xl flex items-center justify-center" style="background: linear-gradient(to bottom right, #9b87c5, #d98ba8);">
                                             <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
                                                 <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"/>
                                             </svg>
                                         </div>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <h3 class="text-white font-semibold text-lg truncate">{{ $track->title }}</h3>
-                                        <p class="text-white/70 text-sm">{{ $track->duration ? gmdate("i:s", $track->duration) : 'Unknown duration' }}</p>
-                                        <p class="text-white/50 text-xs mt-1">Uploaded {{ $track->created_at->diffForHumans() }}</p>
+                                        <h3 class="font-semibold text-lg truncate" style="color: #e8e6eb;">{{ $track->title }}</h3>
+                                        <p class="text-sm" style="color: #b5b0bd;">{{ $track->duration ? gmdate("i:s", $track->duration) : 'Unknown duration' }}</p>
+                                        <p class="text-xs mt-1" style="color: #8a8595;">Uploaded {{ $track->created_at->diffForHumans() }}</p>
                                     </div>
                                     <div class="flex-shrink-0">
                                         <audio controls class="h-10" style="max-width: 300px;">
