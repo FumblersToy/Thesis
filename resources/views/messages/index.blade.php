@@ -19,21 +19,28 @@
         <!-- Main Content -->
         <section class="flex-1 p-6 lg:p-8 flex flex-col">
             <!-- Header with Logo and User Profile -->
-            <div class="flex justify-between items-center mb-8 animate-fade-in">
+            <div class="flex justify-between items-center mb-4 md:mb-8 animate-fade-in">
                 <!-- Logo and Back Button -->
-                <div class="flex items-center gap-4">
-                    <a href="{{ route('feed') }}" class="flex items-center gap-3 bg-white/80 backdrop-blur-xl p-3 rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 border border-gray-200">
+                <div class="flex items-center gap-2 md:gap-4">
+                    <!-- Mobile Menu Toggle -->
+                    <button id="mobileSidebarToggle" class="lg:hidden flex items-center justify-center w-10 h-10 bg-white/80 backdrop-blur-xl rounded-xl hover:bg-white/90 shadow-lg transition-all duration-300 border border-gray-200">
                         <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    
+                    <a href="{{ route('feed') }}" class="flex items-center gap-2 md:gap-3 bg-white/80 backdrop-blur-xl p-2 md:p-3 rounded-xl md:rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 border border-gray-200">
+                        <svg class="w-5 h-5 md:w-6 md:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                         </svg>
-                        <span class="text-gray-800 font-semibold">Back to Feed</span>
+                        <span class="hidden sm:inline text-gray-800 font-semibold">Back to Feed</span>
                     </a>
                     
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse-slow flex items-center justify-center">
-                            <span class="text-white font-bold text-lg">💬</span>
+                    <div class="flex items-center gap-2 md:gap-3">
+                        <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full animate-pulse-slow flex items-center justify-center">
+                            <span class="text-white font-bold text-base md:text-lg">💬</span>
                         </div>
-                        <h1 class="text-2xl font-bold text-white">Messages</h1>
+                        <h1 class="text-xl md:text-2xl font-bold text-white">Messages</h1>
                     </div>
                 </div>
                 
@@ -55,19 +62,19 @@
                     }
                 @endphp
                 <div class="relative">
-                    <button id="profileButton" class="flex items-center gap-3 bg-white/80 backdrop-blur-xl p-4 rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 group border border-gray-200">
-                        <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                    <button id="profileButton" class="flex items-center gap-2 md:gap-3 bg-white/80 backdrop-blur-xl p-2 md:p-4 rounded-xl md:rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 group border border-gray-200">
+                        <img class="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-gray-200"
                              src="{{ $profileImage }}"
                              alt="profile">
                         
-                        <div class="hidden sm:block text-left">
+                        <div class="hidden md:block text-left">
                             <p class="text-gray-800 font-semibold">
                                 {{ $displayName }}
                             </p>
                             <p class="text-gray-600 text-sm">{{ $roleLabel }}</p>
                         </div>
 
-                        <svg class="w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="hidden md:block w-5 h-5 text-gray-500 group-hover:text-gray-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </button>
@@ -122,26 +129,33 @@
             </div>
 
             <!-- Messages Container -->
-            <div class="flex-1 glass-effect backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-                <div class="flex h-full">
+            <div class="flex-1 glass-effect backdrop-blur-xl rounded-2xl md:rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="flex h-full relative">
                     <!-- Conversations Sidebar -->
-                    <div class="w-1/3 bg-white/10 backdrop-blur-xl border-r border-white/20 flex flex-col">
+                    <div id="conversationsSidebar" class="absolute lg:relative inset-y-0 left-0 w-full lg:w-1/3 bg-white/10 backdrop-blur-xl border-r border-white/20 flex flex-col z-20 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
                         <!-- Sidebar Header -->
-                        <div class="p-6 border-b border-white/20">
+                        <div class="p-4 md:p-6 border-b border-white/20">
                             <div class="flex items-center justify-between mb-4">
-                                <h2 class="text-xl font-bold text-white">Conversations</h2>
-                                <button id="newMessageBtn" class="p-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover-glow">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                    </svg>
-                                </button>
+                                <h2 class="text-lg md:text-xl font-bold text-white">Conversations</h2>
+                                <div class="flex items-center gap-2">
+                                    <button id="newMessageBtn" class="p-2 md:p-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl md:rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover-glow">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        </svg>
+                                    </button>
+                                    <button id="closeSidebarBtn" class="lg:hidden p-2 bg-white/20 text-white rounded-xl hover:bg-white/30 transition-all">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                             
                             <!-- Search -->
                             <div class="relative">
                                 <input type="text" id="searchUsers" placeholder="Search users..." 
-                                       class="w-full px-4 py-3 border border-white/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 bg-white/10 backdrop-blur-xl placeholder-white/70 text-white">
-                                <div id="searchResults" class="absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg mt-1 hidden z-10">
+                                       class="w-full px-4 py-2 md:py-3 text-sm md:text-base border border-white/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 bg-white/10 backdrop-blur-xl placeholder-white/70 text-white">
+                                <div id="searchResults" class="absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border border-white/20 rounded-xl md:rounded-2xl shadow-lg mt-1 hidden z-10 max-h-60 overflow-y-auto">
                                     <!-- Search results will be populated here -->
                                 </div>
                             </div>
@@ -156,45 +170,50 @@
                     <!-- Chat Area -->
                     <div class="flex-1 flex flex-col bg-white/5 backdrop-blur-xl">
                         <!-- Chat Header -->
-                        <div id="chatHeader" class="p-6 border-b border-white/20 bg-white/10 backdrop-blur-xl hidden">
-                            <div class="flex items-center gap-4">
-                                <div id="chatUserAvatar" class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
+                        <div id="chatHeader" class="p-4 md:p-6 border-b border-white/20 bg-white/10 backdrop-blur-xl hidden">
+                            <div class="flex items-center gap-3 md:gap-4">
+                                <button id="backToConversations" class="lg:hidden p-2 text-white hover:bg-white/20 rounded-xl transition-all">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                    </svg>
+                                </button>
+                                <div id="chatUserAvatar" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold flex-shrink-0">
                                     <!-- Avatar will be populated here -->
                                 </div>
-                                <div>
-                                    <h3 id="chatUserName" class="text-lg font-semibold text-white">User Name</h3>
-                                    <p id="chatUserStatus" class="text-sm text-white/70">Online</p>
+                                <div class="flex-1 min-w-0">
+                                    <h3 id="chatUserName" class="text-base md:text-lg font-semibold text-white truncate">User Name</h3>
+                                    <p id="chatUserStatus" class="text-xs md:text-sm text-white/70">Online</p>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Messages Area -->
-                        <div id="messagesArea" class="flex-1 overflow-y-auto p-6 hidden">
-                            <div id="messagesContainer" class="space-y-4">
+                        <div id="messagesArea" class="flex-1 overflow-y-auto p-3 md:p-6 hidden">
+                            <div id="messagesContainer" class="space-y-3 md:space-y-4">
                                 <!-- Messages will be populated here -->
                             </div>
                         </div>
 
                         <!-- Message Input -->
-                        <div id="messageInput" class="p-6 border-t border-white/20 bg-white/10 backdrop-blur-xl hidden">
-                            <div class="flex gap-4">
+                        <div id="messageInput" class="p-3 md:p-6 border-t border-white/20 bg-white/10 backdrop-blur-xl hidden">
+                            <div class="flex gap-2 md:gap-4">
                                 <input type="text" id="messageText" placeholder="Type a message..." 
-                                       class="flex-1 px-4 py-3 border border-white/20 rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 bg-white/10 backdrop-blur-xl placeholder-white/70 text-white">
-                                <button id="sendMessageBtn" class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover-glow font-semibold">
+                                       class="flex-1 px-3 md:px-4 py-2 md:py-3 text-sm md:text-base border border-white/20 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 bg-white/10 backdrop-blur-xl placeholder-white/70 text-white">
+                                <button id="sendMessageBtn" class="px-4 md:px-6 py-2 md:py-3 text-sm md:text-base bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl md:rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover-glow font-semibold">
                                     Send
                                 </button>
                             </div>
                         </div>
 
                         <!-- Empty State -->
-                        <div id="emptyState" class="flex-1 flex items-center justify-center p-6">
-                            <div class="text-center text-white/70">
-                                <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
-                                    <span class="text-4xl">💬</span>
+                        <div id="emptyState" class="flex-1 flex items-center justify-center p-4 md:p-6">
+                            <div class="text-center text-white/70 max-w-md">
+                                <div class="w-16 h-16 md:w-24 md:h-24 mx-auto mb-4 md:mb-6 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+                                    <span class="text-2xl md:text-4xl">💬</span>
                                 </div>
-                                <h3 class="text-2xl font-bold mb-2 text-white">Start a Conversation</h3>
-                                <p class="text-lg mb-6">Select a conversation from the sidebar or search for a user to begin messaging.</p>
-                                <button id="startNewChatBtn" class="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover-glow font-semibold text-lg">
+                                <h3 class="text-xl md:text-2xl font-bold mb-2 text-white">Start a Conversation</h3>
+                                <p class="text-sm md:text-lg mb-4 md:mb-6">Select a conversation from the sidebar or search for a user to begin messaging.</p>
+                                <button id="startNewChatBtn" class="px-6 md:px-8 py-3 md:py-4 text-sm md:text-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl md:rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg hover-glow font-semibold">
                                     Start New Chat
                                 </button>
                             </div>
@@ -235,6 +254,42 @@
             document.addEventListener('click', function(e) {
                 if (!profileButton.contains(e.target) && !profileDropdown.contains(e.target)) {
                     profileDropdown.classList.add('hidden');
+                }
+            });
+
+            // Mobile sidebar toggle
+            const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
+            const conversationsSidebar = document.getElementById('conversationsSidebar');
+            const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+            const backToConversations = document.getElementById('backToConversations');
+            
+            if (mobileSidebarToggle) {
+                mobileSidebarToggle.addEventListener('click', function() {
+                    conversationsSidebar.classList.remove('-translate-x-full');
+                });
+            }
+            
+            if (closeSidebarBtn) {
+                closeSidebarBtn.addEventListener('click', function() {
+                    conversationsSidebar.classList.add('-translate-x-full');
+                });
+            }
+            
+            if (backToConversations) {
+                backToConversations.addEventListener('click', function() {
+                    conversationsSidebar.classList.remove('-translate-x-full');
+                    // Hide chat area on mobile
+                    document.getElementById('chatHeader').classList.add('hidden');
+                    document.getElementById('messagesArea').classList.add('hidden');
+                    document.getElementById('messageInput').classList.add('hidden');
+                    document.getElementById('emptyState').classList.remove('hidden');
+                });
+            }
+
+            // Close sidebar when selecting a conversation on mobile
+            window.addEventListener('conversationSelected', function() {
+                if (window.innerWidth < 1024) {
+                    conversationsSidebar.classList.add('-translate-x-full');
                 }
             });
 
