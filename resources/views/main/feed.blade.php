@@ -1664,16 +1664,20 @@
             
             container.appendChild(toast);
             
-            // Slide in
+            // Slide in with safety check
             setTimeout(() => {
-                toast.classList.remove('translate-x-full');
+                if (toast && toast.classList) {
+                    toast.classList.remove('translate-x-full');
+                }
             }, 10);
             
-            // Auto remove after 5 seconds
+            // Auto remove after 5 seconds with safety checks
             setTimeout(() => {
-                toast.classList.add('translate-x-full');
+                if (toast && toast.classList) {
+                    toast.classList.add('translate-x-full');
+                }
                 setTimeout(() => {
-                    if (container.contains(toast)) {
+                    if (toast && container && container.contains(toast)) {
                         container.removeChild(toast);
                     }
                 }, 300);
