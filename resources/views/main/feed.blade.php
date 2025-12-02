@@ -761,9 +761,13 @@
                     
                     // Schedule the actual submission after the progress completes
                     uploadAbortController.submitTimeout = setTimeout(async () => {
+                        console.log('=== SUBMIT TIMEOUT FIRED ===');
+                        console.log('uploadAbortController exists:', !!uploadAbortController);
+                        console.log('uploadAbortController.cancelled:', uploadAbortController ? uploadAbortController.cancelled : 'N/A');
+                        
                         // Check one final time if cancelled
-                        if (uploadAbortController.cancelled) {
-                            console.log('Upload cancelled before submission');
+                        if (uploadAbortController && uploadAbortController.cancelled) {
+                            console.log('✓ Upload was cancelled - ABORTING submission');
                             if (uploadAbortController.progressInterval) {
                                 clearInterval(uploadAbortController.progressInterval);
                             }
@@ -772,7 +776,7 @@
                             return;
                         }
                         
-                        console.log('Progress complete, now submitting to server...');
+                        console.log('✓ Not cancelled - PROCEEDING with submission');
                         
                         // Now actually submit to server
                         const xhr = new XMLHttpRequest();
@@ -892,13 +896,20 @@
                     console.log('=== CANCEL BUTTON CLICKED ===');
                     
                     if (!uploadAbortController) {
-                        console.error('No abort controller found!');
+                        console.error('❌ No abort controller found!');
                         return;
                     }
                     
+                    console.log('Before cancel - Controller state:', {
+                        cancelled: uploadAbortController.cancelled,
+                        hasSubmitTimeout: !!uploadAbortController.submitTimeout,
+                        hasProgressInterval: !!uploadAbortController.progressInterval,
+                        hasXhr: !!uploadAbortController.xhr
+                    });
+                    
                     // Mark as cancelled - this prevents the delayed submission from happening
                     uploadAbortController.cancel();
-                    console.log('Upload cancelled by user');
+                    console.log('✓ cancel() called - cancelled flag now:', uploadAbortController.cancelled);
                     
                     // Reset UI
                     resetUploadUI();
