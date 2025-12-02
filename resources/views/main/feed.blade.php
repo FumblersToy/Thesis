@@ -693,12 +693,16 @@
                     
                     // Prevent multiple submissions
                     if (uploadAbortController) {
+                        console.log('Already uploading, ignoring submit');
                         return;
                     }
                     
-                    // Create new AbortController
-                    uploadAbortController = new AbortController();
-                    const signal = uploadAbortController.signal;
+                    // Create new AbortController with cancellation flag
+                    uploadAbortController = {
+                        controller: new AbortController(),
+                        cancelled: false
+                    };
+                    const signal = uploadAbortController.controller.signal;
                     
                     // Create FormData
                     const formData = new FormData(this);
@@ -710,12 +714,11 @@
                     cancelPostBtn.classList.remove('hidden');
                     
                     // Simulate progress for 3 seconds BEFORE sending request
-                    let progress = 0;
                     const startTime = Date.now();
                     const delayDuration = 3000; // 3 second delay
                     
                     const progressInterval = setInterval(() => {
-                        if (signal.aborted) {
+                        if (uploadAbortController.cancelled || signal.aborted) {
                             clearInterval(progressInterval);
                             return;
                         }
@@ -729,19 +732,18 @@
                     // Wait for delay period
                     await new Promise(resolve => setTimeout(resolve, delayDuration));
                     
-                    // Check if cancelled during delay
-                    if (signal.aborted) {
-                        clearInterval(progressInterval);
+                    clearInterval(progressInterval);
+                    
+                    // Check if cancelled during delay using BOTH flag and signal
+                    if (uploadAbortController.cancelled || signal.aborted) {
                         console.log('Upload cancelled before sending request');
                         resetUploadUI();
                         uploadAbortController = null;
-                        return; // Don't show toast here - cancel button already showed it
+                        return;
                     }
                     
-                    clearInterval(progressInterval);
-                    
-                    // Double-check not cancelled right before sending
-                    if (signal.aborted) {
+                    // Triple-check not cancelled right before sending
+                    if (!uploadAbortController || uploadAbortController.cancelled) {
                         console.log('Upload cancelled right before fetch');
                         resetUploadUI();
                         uploadAbortController = null;
@@ -753,6 +755,7 @@
                         progressBar.style.width = '100%';
                         progressPercentage.textContent = '100%';
                         
+                        console.log('SENDING REQUEST TO SERVER');
                         const response = await fetch('{{ route("posts.store") }}', {
                             method: 'POST',
                             headers: {
@@ -787,10 +790,10 @@
                         }
                     } catch (error) {
                         if (error.name === 'AbortError') {
-                            console.log('Upload cancelled by user during fetch');
+                            console.log('Fetch aborted');
                             resetUploadUI();
                             uploadAbortController = null;
-                            return; // Don't show toast - cancel button already showed it
+                            return;
                         }
                         console.error('Upload error:', error);
                         alert('Upload failed: ' + error.message);
@@ -807,11 +810,19 @@
                     e.stopPropagation();
                     
                     if (!uploadAbortController) {
+                        console.log('No upload to cancel');
                         return;
                     }
                     
                     console.log('Cancel button clicked - aborting upload');
-                    uploadAbortController.abort();
+                    
+                    // Set cancellation flag FIRST
+                    uploadAbortController.cancelled = true;
+                    
+                    // Then abort the controller
+                    uploadAbortController.controller.abort();
+                    
+                    // Reset UI
                     resetUploadUI();
                     uploadAbortController = null;
                     
