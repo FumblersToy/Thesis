@@ -734,9 +734,6 @@
                     // Create FormData
                     const formData = new FormData(this);
                     
-                    let progressInterval = null;
-                    let submitTimeout = null;
-                    
                     // Show progress bar and cancel button
                     uploadProgress.classList.remove('hidden');
                     submitPostBtn.disabled = true;
@@ -750,7 +747,7 @@
                     
                     uploadAbortController.progressInterval = setInterval(() => {
                         if (uploadAbortController.cancelled) {
-                            clearInterval(progressInterval);
+                            clearInterval(uploadAbortController.progressInterval);
                             return;
                         }
                         
