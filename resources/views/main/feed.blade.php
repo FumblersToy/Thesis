@@ -11,7 +11,8 @@
 <body class="min-h-screen relative overflow-x-hidden gradient-bg">
     <div class="floating-elements fixed inset-0 pointer-events-none"></div>
     
-    
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed top-20 right-4 z-[60] space-y-2" style="max-width: 350px;"></div>
     
     <div class="flex min-h-screen relative z-10">
         <aside id="sidebar" class="w-80 glass-effect backdrop-blur-xl shadow-2xl hidden lg:flex lg:flex-col animate-slide-up gradient-bg fixed left-0 top-0 bottom-0">
@@ -934,6 +935,11 @@
                             postElement.setAttribute('data-like-count', data.like_count);
                             postElement.setAttribute('data-is-liked', data.liked ? 'true' : 'false');
                         }
+                        
+                        // Emit socket event for real-time notification
+                        if (window.socketManager && data.post_owner_id) {
+                            window.socketManager.emitPostLike(postId, data.like_count, data.liked, data.post_owner_id);
+                        }
                     }
                 } catch (error) {
                     console.error('Error toggling like:', error);
@@ -976,6 +982,15 @@
                             if (postElement) {
                                 postElement.setAttribute('data-comment-count', newCount);
                             }
+                        }
+                        
+                        // Emit socket event for real-time notification
+                        if (window.socketManager && data.post_owner_id) {
+                            window.socketManager.emitNewComment({
+                                postId: postId,
+                                content: data.comment.content,
+                                postOwnerId: data.post_owner_id
+                            });
                         }
                     }
                 } catch (error) {
@@ -1239,7 +1254,76 @@
             
             // Load notification count on page load
             loadNotifications();
+            
+            // Set up periodic refresh as fallback (every 30 seconds)
+            setInterval(() => {
+                loadNotifications();
+            }, 30000);
         });
+        
+        // Global function for socket.js to update notification count
+        window.updateNotificationCount = async function() {
+            try {
+                const response = await fetch('/api/notifications', {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.unread_count !== undefined) {
+                    updateNotificationBadges(data.unread_count);
+                }
+            } catch (error) {
+                console.error('Error updating notification count:', error);
+            }
+        };
+        
+        // Global function to show toast notifications
+        window.showNotificationToast = function(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            
+            const toast = document.createElement('div');
+            toast.className = `transform transition-all duration-300 translate-x-full`;
+            
+            const bgColor = type === 'like' ? 'bg-gradient-to-r from-red-500 to-pink-500' : 
+                           type === 'comment' ? 'bg-gradient-to-r from-blue-500 to-purple-500' : 
+                           'bg-gradient-to-r from-gray-700 to-gray-800';
+            
+            const icon = type === 'like' ? '❤️' : type === 'comment' ? '💬' : '🔔';
+            
+            toast.innerHTML = `
+                <div class="${bgColor} text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 min-w-[300px]">
+                    <span class="text-2xl">${icon}</span>
+                    <p class="flex-1 text-sm font-medium">${message}</p>
+                    <button onclick="this.closest('div').parentElement.remove()" class="text-white/80 hover:text-white">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Slide in
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full');
+            }, 10);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                toast.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (container.contains(toast)) {
+                        container.removeChild(toast);
+                    }
+                }, 300);
+            }, 5000);
+        };
     </script>
 
     @vite(['resources/js/app.js', 'resources/js/feed.js', 'resources/js/socket.js'])

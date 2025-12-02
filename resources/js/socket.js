@@ -105,6 +105,10 @@ class SocketManager {
         this.socket.on('message_read_confirmation', (data) => {
             this.handleMessageReadConfirmation(data);
         });
+
+        this.socket.on('notification_received', (data) => {
+            this.handleNotificationReceived(data);
+        });
     }
 
     // Emit events
@@ -114,19 +118,23 @@ class SocketManager {
         }
     }
 
-    emitPostLike(postId, likeCount, liked) {
+    emitPostLike(postId, likeCount, liked, postOwnerId = null) {
         if (this.socket && this.isConnected) {
             this.socket.emit('post_liked', {
                 postId,
                 likeCount,
-                liked
+                liked,
+                postOwnerId
             });
         }
     }
 
     emitNewComment(commentData) {
         if (this.socket && this.isConnected) {
-            this.socket.emit('new_comment', commentData);
+            this.socket.emit('new_comment', {
+                ...commentData,
+                postOwnerId: commentData.postOwnerId || null
+            });
         }
     }
 
@@ -302,6 +310,22 @@ class SocketManager {
         // Update message status in UI
         if (typeof window.updateMessageStatus === 'function') {
             window.updateMessageStatus(data.message_id, 'read');
+        }
+    }
+
+    handleNotificationReceived(data) {
+        console.log('Notification received:', data);
+        
+        // Show notification toast
+        if (typeof window.showNotificationToast === 'function') {
+            window.showNotificationToast(data.message, data.type);
+        } else {
+            this.showNotification(data.message, data.type === 'like' ? 'success' : 'info');
+        }
+        
+        // Update notification badge count
+        if (typeof window.updateNotificationCount === 'function') {
+            window.updateNotificationCount();
         }
     }
 

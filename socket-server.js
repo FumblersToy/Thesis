@@ -77,6 +77,21 @@ io.on('connection', (socket) => {
             liked: data.liked,
             user: connectedUsers.get(socket.id)
         });
+        
+        // Send notification to post owner
+        if (data.postOwnerId) {
+            const postOwner = Array.from(connectedUsers.values())
+                .find(user => user.id == data.postOwnerId);
+            
+            if (postOwner && postOwner.socketId !== socket.id) {
+                io.to(postOwner.socketId).emit('notification_received', {
+                    type: 'like',
+                    message: `${connectedUsers.get(socket.id)?.name || 'Someone'} liked your post`,
+                    post_id: data.postId,
+                    created_at: new Date().toISOString()
+                });
+            }
+        }
     });
 
     // Handle new comments
@@ -88,6 +103,21 @@ io.on('connection', (socket) => {
             comment: commentData,
             author: connectedUsers.get(socket.id)
         });
+        
+        // Send notification to post owner
+        if (commentData.postOwnerId) {
+            const postOwner = Array.from(connectedUsers.values())
+                .find(user => user.id == commentData.postOwnerId);
+            
+            if (postOwner && postOwner.socketId !== socket.id) {
+                io.to(postOwner.socketId).emit('notification_received', {
+                    type: 'comment',
+                    message: `${connectedUsers.get(socket.id)?.name || 'Someone'} commented on your post`,
+                    post_id: commentData.postId,
+                    created_at: new Date().toISOString()
+                });
+            }
+        }
     });
 
     // Handle follow notifications

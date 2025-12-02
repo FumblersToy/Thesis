@@ -72,6 +72,7 @@ class LikeController extends Controller
                     'success' => true,
                     'liked' => $liked,
                     'like_count' => $likeCount,
+                    'post_owner_id' => $post->user_id,
                 ]);
             }
 

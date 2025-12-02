@@ -70,6 +70,7 @@ class CommentController extends Controller
                         'user_name' => $displayName,
                         'user_avatar' => $avatar,
                     ],
+                    'post_owner_id' => $post->user_id,
                 ], 201);
             }
 
