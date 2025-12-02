@@ -926,13 +926,15 @@
             
             // Reset upload UI helper function
             function resetUploadUI() {
-                uploadProgress.classList.add('hidden');
-                progressBar.style.width = '0%';
-                progressPercentage.textContent = '0%';
-                submitPostBtn.disabled = false;
-                submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                cancelPostBtn.classList.add('hidden');
-                uploadAbortController = null;
+                if (uploadProgress) uploadProgress.classList.add('hidden');
+                if (progressBar) progressBar.style.width = '0%';
+                if (progressPercentage) progressPercentage.textContent = '0%';
+                if (submitPostBtn) {
+                    submitPostBtn.disabled = false;
+                    submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+                if (cancelPostBtn) cancelPostBtn.classList.add('hidden');
+                // Don't set uploadAbortController to null here - let the caller do it
             }
             
             // Delegate clicks on images and post content to open modal
