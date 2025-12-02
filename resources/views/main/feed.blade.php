@@ -873,11 +873,24 @@
                                 console.log('XHR aborted');
                             });
                             
+                            // One more check right before sending
+                            if (uploadAbortController && uploadAbortController.cancelled) {
+                                console.log('❌ CANCELLED - Aborting right before send');
+                                if (uploadAbortController.progressInterval) {
+                                    clearInterval(uploadAbortController.progressInterval);
+                                }
+                                resetUploadUI();
+                                uploadAbortController = null;
+                                return;
+                            }
+                            
                             // Send the request
+                            console.log('📤 SENDING XHR REQUEST TO SERVER NOW');
                             xhr.open('POST', '{{ route("posts.store") }}');
                             xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
                             xhr.setRequestHeader('Accept', 'application/json');
                             xhr.send(formData);
+                            console.log('📤 XHR REQUEST SENT');
                             
                         } catch (error) {
                             if (uploadAbortController && uploadAbortController.progressInterval) {
