@@ -776,7 +776,17 @@
                                 filesList.classList.add('hidden');
                                 filesList.innerHTML = '';
                                 clearFilesBtn.classList.add('hidden');
-                                resetUploadUI();
+                                
+                                // Reset upload UI inline
+                                if (uploadProgress) uploadProgress.classList.add('hidden');
+                                if (progressBar) progressBar.style.width = '0%';
+                                if (progressPercentage) progressPercentage.textContent = '0%';
+                                if (submitPostBtn) {
+                                    submitPostBtn.disabled = false;
+                                    submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                }
+                                if (cancelPostBtn) cancelPostBtn.classList.add('hidden');
+                                
                                 uploadAbortController = null;
                                 
                                 if (window.showNotificationToast) {
@@ -791,13 +801,29 @@
                     } catch (error) {
                         if (error.name === 'AbortError') {
                             console.log('Fetch aborted');
-                            resetUploadUI();
+                            // Reset UI inline
+                            if (uploadProgress) uploadProgress.classList.add('hidden');
+                            if (progressBar) progressBar.style.width = '0%';
+                            if (progressPercentage) progressPercentage.textContent = '0%';
+                            if (submitPostBtn) {
+                                submitPostBtn.disabled = false;
+                                submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                            }
+                            if (cancelPostBtn) cancelPostBtn.classList.add('hidden');
                             uploadAbortController = null;
                             return;
                         }
                         console.error('Upload error:', error);
                         alert('Upload failed: ' + error.message);
-                        resetUploadUI();
+                        // Reset UI inline
+                        if (uploadProgress) uploadProgress.classList.add('hidden');
+                        if (progressBar) progressBar.style.width = '0%';
+                        if (progressPercentage) progressPercentage.textContent = '0%';
+                        if (submitPostBtn) {
+                            submitPostBtn.disabled = false;
+                            submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
+                        if (cancelPostBtn) cancelPostBtn.classList.add('hidden');
                         uploadAbortController = null;
                     }
                 });
