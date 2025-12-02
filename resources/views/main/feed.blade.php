@@ -274,21 +274,43 @@
                 </h2>
                 <form id="createPostForm" class="space-y-6" enctype="multipart/form-data" action="{{ route('posts.store') }}" method="POST">
                     @csrf
-                    <label for="image" class="block text-gray-700 font-medium mb-3 text-lg">📷 Upload Images/Videos (Up to 3)</label>
-                    <div class="custom-file-input">
-                        <input type="file" name="images[]" id="image" accept="image/*,video/*" multiple>
-                        <label for="image" class="custom-file-label cursor-pointer">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                            </svg>
-                            <span id="fileText">Choose up to 3 images or drag them here</span>
-                        </label>
-                        
-                        <span id="fileName" class="text-sm text-gray-600 hidden"></span>
+                    <div>
+                        <label for="image" class="block text-gray-700 font-medium mb-2 text-lg">📷 Upload Images/Videos (Up to 3)</label>
+                        <p class="text-sm text-gray-500 mb-3">Maximum file size: <span class="font-semibold text-gray-700">50 MB</span> per file</p>
+                        <div class="custom-file-input">
+                            <input type="file" name="images[]" id="image" accept="image/*,video/*" multiple>
+                            <label for="image" class="custom-file-label cursor-pointer">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                <span id="fileText">Choose up to 3 images or drag them here</span>
+                            </label>
+                            
+                            <div id="filesList" class="mt-3 space-y-2 hidden"></div>
+                            
+                            <button type="button" id="clearFilesBtn" class="hidden mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium">
+                                🗑️ Clear All Files
+                            </button>
+                        </div>
                     </div>
                     <label class="block text-gray-700 font-medium mb-3 text-lg" for="description">Description</label>
                     <textarea name="description" id="description" class="w-full border-2 border-gray-400 rounded p-3 resize-none overflow-hidden" placeholder="Write your description here..." rows="4"></textarea>
-                    <button class="px-6 py-2 button-bg rounded text-white font-bold" type="submit">Post</button>
+                    
+                    <!-- Upload Progress Bar -->
+                    <div id="uploadProgress" class="hidden space-y-2">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-700 font-medium">Uploading...</span>
+                            <span id="progressPercentage" class="text-gray-600">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div id="progressBar" class="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button id="submitPostBtn" class="px-6 py-2 button-bg rounded text-white font-bold hover:opacity-90 transition-opacity" type="submit">Post</button>
+                        <button id="cancelPostBtn" class="hidden px-6 py-2 bg-gray-500 rounded text-white font-bold hover:bg-gray-600 transition-colors" type="button">Cancel Upload</button>
+                    </div>
                 </form>
             </div>
 
@@ -530,6 +552,255 @@
     <!-- Modal functionality for feed page -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // File upload handling with size display and preview
+            const fileInput = document.getElementById('image');
+            const fileText = document.getElementById('fileText');
+            const filesList = document.getElementById('filesList');
+            const clearFilesBtn = document.getElementById('clearFilesBtn');
+            const createPostForm = document.getElementById('createPostForm');
+            const uploadProgress = document.getElementById('uploadProgress');
+            const progressBar = document.getElementById('progressBar');
+            const progressPercentage = document.getElementById('progressPercentage');
+            const submitPostBtn = document.getElementById('submitPostBtn');
+            const cancelPostBtn = document.getElementById('cancelPostBtn');
+            const maxFileSize = 50 * 1024 * 1024; // 50 MB in bytes
+            let uploadAbortController = null;
+            
+            // Clear files button
+            if (clearFilesBtn && fileInput) {
+                clearFilesBtn.addEventListener('click', function() {
+                    fileInput.value = '';
+                    fileText.textContent = 'Choose up to 3 images or drag them here';
+                    filesList.classList.add('hidden');
+                    filesList.innerHTML = '';
+                    clearFilesBtn.classList.add('hidden');
+                });
+            }
+            
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    const files = Array.from(e.target.files);
+                    
+                    if (files.length === 0) {
+                        fileText.textContent = 'Choose up to 3 images or drag them here';
+                        filesList.classList.add('hidden');
+                        filesList.innerHTML = '';
+                        clearFilesBtn.classList.add('hidden');
+                        return;
+                    }
+                    
+                    // Show clear button
+                    clearFilesBtn.classList.remove('hidden');
+                    
+                    // Limit to 3 files
+                    const limitedFiles = files.slice(0, 3);
+                    
+                    // Update text
+                    fileText.textContent = `${limitedFiles.length} file${limitedFiles.length > 1 ? 's' : ''} selected`;
+                    
+                    // Display file list with sizes and previews
+                    filesList.innerHTML = '';
+                    filesList.classList.remove('hidden');
+                    
+                    let hasOversizedFile = false;
+                    
+                    limitedFiles.forEach((file, index) => {
+                        const fileSize = file.size;
+                        const fileSizeMB = (fileSize / (1024 * 1024)).toFixed(2);
+                        const isOversized = fileSize > maxFileSize;
+                        
+                        if (isOversized) hasOversizedFile = true;
+                        
+                        const fileItem = document.createElement('div');
+                        fileItem.className = `flex items-center gap-3 p-3 rounded-lg ${isOversized ? 'bg-red-50 border border-red-200' : 'bg-gray-50 border border-gray-200'}`;
+                        
+                        const fileType = file.type.startsWith('video/') ? '🎥' : '📷';
+                        const sizeClass = isOversized ? 'text-red-600 font-semibold' : 'text-gray-600';
+                        const warningIcon = isOversized ? '<span class="text-red-500 ml-2">⚠️ Too large!</span>' : '';
+                        
+                        // Create preview thumbnail
+                        const previewContainer = document.createElement('div');
+                        previewContainer.className = 'flex-shrink-0 w-16 h-16 bg-gray-200 rounded-lg overflow-hidden relative';
+                        
+                        if (file.type.startsWith('image/')) {
+                            // Image preview
+                            const img = document.createElement('img');
+                            img.className = 'w-full h-full object-cover';
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                img.src = e.target.result;
+                            };
+                            reader.readAsDataURL(file);
+                            previewContainer.appendChild(img);
+                        } else if (file.type.startsWith('video/')) {
+                            // Video preview with play icon
+                            const video = document.createElement('video');
+                            video.className = 'w-full h-full object-cover';
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                video.src = e.target.result;
+                                video.currentTime = 1; // Show first frame
+                            };
+                            reader.readAsDataURL(file);
+                            
+                            // Add play icon overlay
+                            const playIcon = document.createElement('div');
+                            playIcon.className = 'absolute inset-0 flex items-center justify-center bg-black/30';
+                            playIcon.innerHTML = '<svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path></svg>';
+                            
+                            previewContainer.appendChild(video);
+                            previewContainer.appendChild(playIcon);
+                        }
+                        
+                        // Create info section
+                        const infoDiv = document.createElement('div');
+                        infoDiv.className = 'flex-1 min-w-0';
+                        infoDiv.innerHTML = `
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xl">${fileType}</span>
+                                <span class="text-sm text-gray-700 truncate font-medium">${file.name}</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="text-xs ${sizeClass}">${fileSizeMB} MB</span>
+                                ${warningIcon}
+                            </div>
+                        `;
+                        
+                        fileItem.appendChild(previewContainer);
+                        fileItem.appendChild(infoDiv);
+                        filesList.appendChild(fileItem);
+                    });
+                    
+                    // Show warning if any file is too large
+                    if (hasOversizedFile) {
+                        const warningDiv = document.createElement('div');
+                        warningDiv.className = 'p-3 bg-red-100 border border-red-300 rounded-lg text-red-700 text-sm mt-2';
+                        warningDiv.innerHTML = `
+                            <strong>⚠️ File size error:</strong> Some files exceed the 50 MB limit. Please choose smaller files.
+                        `;
+                        filesList.appendChild(warningDiv);
+                    }
+                });
+            }
+            
+            // Handle form submission with progress
+            if (createPostForm) {
+                createPostForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    // Create FormData
+                    const formData = new FormData(this);
+                    
+                    // Show progress bar and cancel button
+                    uploadProgress.classList.remove('hidden');
+                    submitPostBtn.disabled = true;
+                    submitPostBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    cancelPostBtn.classList.remove('hidden');
+                    
+                    // Create abort controller
+                    uploadAbortController = new AbortController();
+                    
+                    try {
+                        const xhr = new XMLHttpRequest();
+                        
+                        // Track upload progress
+                        xhr.upload.addEventListener('progress', function(e) {
+                            if (e.lengthComputable) {
+                                const percentComplete = Math.round((e.loaded / e.total) * 100);
+                                progressBar.style.width = percentComplete + '%';
+                                progressPercentage.textContent = percentComplete + '%';
+                            }
+                        });
+                        
+                        // Handle completion
+                        xhr.addEventListener('load', function() {
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                const response = JSON.parse(xhr.responseText);
+                                
+                                if (response.success) {
+                                    // Success - show completion
+                                    progressBar.style.width = '100%';
+                                    progressPercentage.textContent = '100%';
+                                    
+                                    // Reset form after short delay
+                                    setTimeout(() => {
+                                        createPostForm.reset();
+                                        fileInput.value = '';
+                                        fileText.textContent = 'Choose up to 3 images or drag them here';
+                                        filesList.classList.add('hidden');
+                                        filesList.innerHTML = '';
+                                        clearFilesBtn.classList.add('hidden');
+                                        uploadProgress.classList.add('hidden');
+                                        progressBar.style.width = '0%';
+                                        progressPercentage.textContent = '0%';
+                                        submitPostBtn.disabled = false;
+                                        submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                        cancelPostBtn.classList.add('hidden');
+                                        
+                                        // Show success message
+                                        if (window.showNotificationToast) {
+                                            window.showNotificationToast('Post created successfully! 🎉', 'info');
+                                        }
+                                        
+                                        // Reload posts
+                                        window.location.reload();
+                                    }, 1000);
+                                } else {
+                                    throw new Error(response.message || 'Upload failed');
+                                }
+                            } else {
+                                throw new Error('Upload failed with status ' + xhr.status);
+                            }
+                        });
+                        
+                        // Handle errors
+                        xhr.addEventListener('error', function() {
+                            alert('Upload failed. Please try again.');
+                            resetUploadUI();
+                        });
+                        
+                        xhr.addEventListener('abort', function() {
+                            alert('Upload cancelled.');
+                            resetUploadUI();
+                        });
+                        
+                        // Send request
+                        xhr.open('POST', '{{ route("posts.store") }}');
+                        xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+                        xhr.setRequestHeader('Accept', 'application/json');
+                        xhr.send(formData);
+                        
+                        // Store xhr for cancellation
+                        uploadAbortController.xhr = xhr;
+                        
+                    } catch (error) {
+                        console.error('Upload error:', error);
+                        alert('Upload failed: ' + error.message);
+                        resetUploadUI();
+                    }
+                });
+            }
+            
+            // Cancel upload button
+            if (cancelPostBtn) {
+                cancelPostBtn.addEventListener('click', function() {
+                    if (uploadAbortController && uploadAbortController.xhr) {
+                        uploadAbortController.xhr.abort();
+                    }
+                });
+            }
+            
+            // Reset upload UI helper function
+            function resetUploadUI() {
+                uploadProgress.classList.add('hidden');
+                progressBar.style.width = '0%';
+                progressPercentage.textContent = '0%';
+                submitPostBtn.disabled = false;
+                submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                cancelPostBtn.classList.add('hidden');
+                uploadAbortController = null;
+            }
+            
             // Delegate clicks on images and post content to open modal
             document.addEventListener('click', function(e) {
                 // Don't open modal if clicking delete button

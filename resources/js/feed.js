@@ -183,19 +183,41 @@ function initFeed() {
     if (fileInput) {
         fileInput.addEventListener('change', function(e) {
             const fileCount = e.target.files.length;
+            const maxFileSize = 50 * 1024 * 1024; // 50 MB
+            
             if (fileCount > 0) {
                 if (fileCount > 3) {
                     alert('You can only upload up to 3 files');
                     e.target.value = '';
-                    fileName.classList.add('hidden');
+                    if (fileName) fileName.classList.add('hidden');
                     fileText.textContent = 'Choose up to 3 images/videos or drag them here';
                     return;
                 }
-                fileName.textContent = `${fileCount} file${fileCount > 1 ? 's' : ''} selected`;
-                fileName.classList.remove('hidden');
+                
+                // Check file sizes
+                let oversizedFiles = [];
+                Array.from(e.target.files).forEach((file, index) => {
+                    if (file.size > maxFileSize) {
+                        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                        oversizedFiles.push(`${file.name} (${sizeMB} MB)`);
+                    }
+                });
+                
+                if (oversizedFiles.length > 0) {
+                    alert(`The following files exceed the 50 MB limit:\n\n${oversizedFiles.join('\n')}\n\nPlease choose smaller files.`);
+                    e.target.value = '';
+                    if (fileName) fileName.classList.add('hidden');
+                    fileText.textContent = 'Choose up to 3 images/videos or drag them here';
+                    return;
+                }
+                
+                if (fileName) {
+                    fileName.textContent = `${fileCount} file${fileCount > 1 ? 's' : ''} selected`;
+                    fileName.classList.remove('hidden');
+                }
                 fileText.textContent = `${fileCount} file${fileCount > 1 ? 's' : ''} selected`;
             } else {
-                fileName.classList.add('hidden');
+                if (fileName) fileName.classList.add('hidden');
                 fileText.textContent = 'Choose up to 3 images/videos or drag them here';
             }
         });
