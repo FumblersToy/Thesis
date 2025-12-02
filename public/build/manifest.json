@@ -1,6 +1,6 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-yMDIC_9l.css",
+    "file": "assets/app-CnXuOUcE.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
@@ -114,7 +114,7 @@
     "isEntry": true
   },
   "resources/js/feed.js": {
-    "file": "assets/feed-BcXAEPFq.js",
+    "file": "assets/feed-v8OdBHF3.js",
     "name": "feed",
     "src": "resources/js/feed.js",
     "isEntry": true
@@ -132,7 +132,7 @@
     "isEntry": true
   },
   "resources/js/socket.js": {
-    "file": "assets/socket-JrXd-oCs.js",
+    "file": "assets/socket-MNE1WU0v.js",
     "name": "socket",
     "src": "resources/js/socket.js",
     "isEntry": true

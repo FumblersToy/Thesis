@@ -739,14 +739,20 @@ function initFeed() {
         
         // Slide in
         setTimeout(() => {
-            notification.classList.remove('translate-x-full');
+            if (notification && notification.classList) {
+                notification.classList.remove('translate-x-full');
+            }
         }, 100);
         
         // Remove after 3 seconds
         setTimeout(() => {
-            notification.classList.add('translate-x-full');
+            if (notification && notification.classList) {
+                notification.classList.add('translate-x-full');
+            }
             setTimeout(() => {
-                document.body.removeChild(notification);
+                if (notification && document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
             }, 300);
         }, 3000);
     }
