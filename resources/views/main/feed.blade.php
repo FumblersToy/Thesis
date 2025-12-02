@@ -718,7 +718,8 @@
                     const delayDuration = 3000; // 3 second delay
                     
                     const progressInterval = setInterval(() => {
-                        if (uploadAbortController.cancelled || signal.aborted) {
+                        // Check if uploadAbortController still exists before accessing properties
+                        if (!uploadAbortController || uploadAbortController.cancelled || signal.aborted) {
                             clearInterval(progressInterval);
                             return;
                         }
@@ -735,17 +736,16 @@
                     clearInterval(progressInterval);
                     
                     // Check if cancelled during delay using BOTH flag and signal
-                    if (uploadAbortController.cancelled || signal.aborted) {
+                    if (!uploadAbortController || uploadAbortController.cancelled || signal.aborted) {
                         console.log('Upload cancelled before sending request');
-                        resetUploadUI();
-                        uploadAbortController = null;
-                        return;
-                    }
-                    
-                    // Triple-check not cancelled right before sending
-                    if (!uploadAbortController || uploadAbortController.cancelled) {
-                        console.log('Upload cancelled right before fetch');
-                        resetUploadUI();
+                        if (uploadProgress) uploadProgress.classList.add('hidden');
+                        if (progressBar) progressBar.style.width = '0%';
+                        if (progressPercentage) progressPercentage.textContent = '0%';
+                        if (submitPostBtn) {
+                            submitPostBtn.disabled = false;
+                            submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
+                        if (cancelPostBtn) cancelPostBtn.classList.add('hidden');
                         uploadAbortController = null;
                         return;
                     }
@@ -822,8 +822,17 @@
                     // Then abort the controller
                     uploadAbortController.controller.abort();
                     
-                    // Reset UI
-                    resetUploadUI();
+                    // Reset UI without using resetUploadUI to avoid race condition
+                    if (uploadProgress) uploadProgress.classList.add('hidden');
+                    if (progressBar) progressBar.style.width = '0%';
+                    if (progressPercentage) progressPercentage.textContent = '0%';
+                    if (submitPostBtn) {
+                        submitPostBtn.disabled = false;
+                        submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                    if (cancelPostBtn) cancelPostBtn.classList.add('hidden');
+                    
+                    // Set to null AFTER resetting UI
                     uploadAbortController = null;
                     
                     // Show toast only once here
