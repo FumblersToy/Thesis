@@ -702,7 +702,17 @@
                     let uploadCancelled = false;
                     let progressInterval = null;
                     const xhr = new XMLHttpRequest();
-                    uploadAbortController = { xhr: xhr };
+                    uploadAbortController = { 
+                        xhr: xhr,
+                        cancelled: false,
+                        cancel: function() {
+                            this.cancelled = true;
+                            uploadCancelled = true;
+                            if (this.xhr && this.xhr.readyState !== 4) {
+                                this.xhr.abort();
+                            }
+                        }
+                    };
                     
                     // Simulate slower progress for better UX (minimum 3.5 seconds)
                     let simulatedProgress = 0;
@@ -746,8 +756,10 @@
                         xhr.addEventListener('load', function() {
                             if (progressInterval) clearInterval(progressInterval);
                             
-                            if (uploadCancelled) {
+                            // Check if upload was cancelled before processing response
+                            if (uploadCancelled || (uploadAbortController && uploadAbortController.cancelled)) {
                                 console.log('Upload was cancelled, ignoring response');
+                                resetUploadUI();
                                 return;
                             }
                             
@@ -808,11 +820,6 @@
                             if (progressInterval) clearInterval(progressInterval);
                             uploadCancelled = true;
                             console.log('XHR aborted successfully');
-                            if (window.showNotificationToast) {
-                                window.showNotificationToast('Upload cancelled', 'info');
-                            } else {
-                                alert('Upload cancelled.');
-                            }
                             resetUploadUI();
                         });
                         
@@ -839,14 +846,17 @@
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    if (uploadAbortController && uploadAbortController.xhr) {
-                        console.log('Aborting upload request...');
-                        try {
-                            uploadAbortController.xhr.abort();
-                            uploadAbortController = null;
-                        } catch (abortError) {
-                            console.error('Error aborting upload:', abortError);
+                    if (uploadAbortController) {
+                        console.log('Cancelling upload via cancel button...');
+                        uploadAbortController.cancel();
+                        
+                        // Show cancellation message
+                        if (window.showNotificationToast) {
+                            window.showNotificationToast('Upload cancelled', 'info');
                         }
+                        
+                        // Reset UI immediately
+                        resetUploadUI();
                     }
                 });
             }
