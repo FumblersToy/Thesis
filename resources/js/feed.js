@@ -190,7 +190,7 @@ function initFeed() {
                     alert('You can only upload up to 3 files');
                     e.target.value = '';
                     if (fileName) fileName.classList.add('hidden');
-                    fileText.textContent = 'Choose up to 3 images/videos or drag them here';
+                    if (fileText) fileText.textContent = 'Choose up to 3 images/videos or drag them here';
                     return;
                 }
                 
@@ -207,7 +207,7 @@ function initFeed() {
                     alert(`The following files exceed the 50 MB limit:\n\n${oversizedFiles.join('\n')}\n\nPlease choose smaller files.`);
                     e.target.value = '';
                     if (fileName) fileName.classList.add('hidden');
-                    fileText.textContent = 'Choose up to 3 images/videos or drag them here';
+                    if (fileText) fileText.textContent = 'Choose up to 3 images/videos or drag them here';
                     return;
                 }
                 
@@ -215,42 +215,44 @@ function initFeed() {
                     fileName.textContent = `${fileCount} file${fileCount > 1 ? 's' : ''} selected`;
                     fileName.classList.remove('hidden');
                 }
-                fileText.textContent = `${fileCount} file${fileCount > 1 ? 's' : ''} selected`;
+                if (fileText) fileText.textContent = `${fileCount} file${fileCount > 1 ? 's' : ''} selected`;
             } else {
                 if (fileName) fileName.classList.add('hidden');
-                fileText.textContent = 'Choose up to 3 images/videos or drag them here';
+                if (fileText) fileText.textContent = 'Choose up to 3 images/videos or drag them here';
             }
         });
 
         // Drag and drop functionality
         const customFileInput = document.querySelector('.custom-file-input');
         
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            customFileInput.addEventListener(eventName, preventDefaults, false);
-        });
+        if (customFileInput) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                customFileInput.addEventListener(eventName, preventDefaults, false);
+            });
 
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                customFileInput.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                customFileInput.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                customFileInput.classList.add('border-purple-400', 'bg-purple-50');
+            }
+
+            function unhighlight(e) {
+                customFileInput.classList.remove('border-purple-400', 'bg-purple-50');
+            }
+
+            customFileInput.addEventListener('drop', handleDrop, false);
         }
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            customFileInput.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            customFileInput.addEventListener(eventName, unhighlight, false);
-        });
-
-        function highlight(e) {
-            customFileInput.classList.add('border-purple-400', 'bg-purple-50');
-        }
-
-        function unhighlight(e) {
-            customFileInput.classList.remove('border-purple-400', 'bg-purple-50');
-        }
-
-        customFileInput.addEventListener('drop', handleDrop, false);
 
         function handleDrop(e) {
             const dt = e.dataTransfer;
@@ -259,9 +261,13 @@ function initFeed() {
             if (files.length > 0) {
                 fileInput.files = files;
                 const file = files[0];
-                fileName.textContent = file.name;
-                fileName.classList.remove('hidden');
-                fileText.textContent = 'File selected';
+                if (fileName) {
+                    fileName.textContent = file.name;
+                    fileName.classList.remove('hidden');
+                }
+                if (fileText) {
+                    fileText.textContent = 'File selected';
+                }
             }
         }
     }
@@ -294,8 +300,8 @@ function initFeed() {
                 if (data.success) {
                     showNotification('Post created successfully!', 'success');
                     this.reset();
-                    fileName.classList.add('hidden');
-                    fileText.textContent = 'Choose an image or drag it here';
+                    if (fileName) fileName.classList.add('hidden');
+                    if (fileText) fileText.textContent = 'Choose an image or drag it here';
                     
                     // Add new post to the grid
                     prependPostToGrid(data.post);
