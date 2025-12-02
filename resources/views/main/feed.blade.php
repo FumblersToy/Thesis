@@ -765,15 +765,20 @@
                         console.log('uploadAbortController exists:', !!uploadAbortController);
                         console.log('uploadAbortController.cancelled:', uploadAbortController ? uploadAbortController.cancelled : 'N/A');
                         
-                        // Check one final time if cancelled
-                        if (uploadAbortController && uploadAbortController.cancelled) {
-                            console.log('✓ Upload was cancelled - ABORTING submission');
-                            if (uploadAbortController.progressInterval) {
-                                clearInterval(uploadAbortController.progressInterval);
+                        // Check one final time if cancelled - use try-catch to handle any race conditions
+                        try {
+                            if (!uploadAbortController || uploadAbortController.cancelled === true) {
+                                console.log('✓ Upload was cancelled - ABORTING submission');
+                                if (uploadAbortController && uploadAbortController.progressInterval) {
+                                    clearInterval(uploadAbortController.progressInterval);
+                                }
+                                resetUploadUI();
+                                uploadAbortController = null;
+                                return;
                             }
-                            resetUploadUI();
-                            uploadAbortController = null;
-                            return;
+                        } catch (e) {
+                            console.error('Error checking cancellation:', e);
+                            return; // Abort on any error
                         }
                         
                         console.log('✓ Not cancelled - PROCEEDING with submission');
