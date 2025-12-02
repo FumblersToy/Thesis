@@ -781,9 +781,34 @@
                                     const response = JSON.parse(xhr.responseText);
                                     
                                     if (response.success) {
-                                        // Only process if not cancelled
+                                        // Store post ID in case we need to cancel it
+                                        if (response.post && response.post.id) {
+                                            if (uploadAbortController) {
+                                                uploadAbortController.postId = response.post.id;
+                                            }
+                                        }
+                                        
+                                        // Check again if cancelled (user might have clicked during response parsing)
                                         if (uploadAbortController && uploadAbortController.cancelled) {
-                                            console.log('Success response but upload was cancelled');
+                                            console.log('Success response but upload was cancelled - sending cancel request');
+                                            
+                                            // Send cancellation request to server to delete the post
+                                            if (response.post && response.post.id) {
+                                                fetch('/posts/cancel', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                                    },
+                                                    body: JSON.stringify({ post_id: response.post.id })
+                                                }).then(cancelResponse => cancelResponse.json())
+                                                  .then(cancelData => {
+                                                      console.log('Post cancellation result:', cancelData);
+                                                  })
+                                                  .catch(err => {
+                                                      console.error('Failed to cancel post:', err);
+                                                  });
+                                            }
                                             return;
                                         }
                                         
@@ -880,6 +905,25 @@
                     
                     if (uploadAbortController) {
                         uploadAbortController.cancel();
+                        
+                        // If we already have a post ID (upload completed but not yet reloaded), cancel it immediately
+                        if (uploadAbortController.postId) {
+                            console.log('Post already created, sending immediate cancellation for post:', uploadAbortController.postId);
+                            fetch('/posts/cancel', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                },
+                                body: JSON.stringify({ post_id: uploadAbortController.postId })
+                            }).then(response => response.json())
+                              .then(data => {
+                                  console.log('Immediate post cancellation result:', data);
+                              })
+                              .catch(err => {
+                                  console.error('Failed to cancel post immediately:', err);
+                              });
+                        }
                         
                         // Reset UI and clean up
                         resetUploadUI();

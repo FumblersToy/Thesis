@@ -136,6 +136,7 @@ Route::post('/create/business', [App\Http\Controllers\Auth\BusinessController::c
 Route::middleware('auth')->group(function () {
     // Posts - Using PostController
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::post('/posts/cancel', [PostController::class, 'cancelUpload'])->name('posts.cancel');
     Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
     
     // Likes

@@ -363,6 +363,88 @@ class PostController extends Controller
         }
     }
 
+    public function cancelUpload(Request $request)
+    {
+        try {
+            $postId = $request->input('post_id');
+            
+            if (!$postId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No post ID provided'
+                ], 400);
+            }
+            
+            $post = Post::find($postId);
+            
+            if (!$post) {
+                // Post doesn't exist yet or was already deleted
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Post cancellation recorded'
+                ]);
+            }
+            
+            // Only allow post owner to cancel
+            if ($post->user_id !== Auth::id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 403);
+            }
+            
+            // Check if post was created very recently (within last 10 seconds)
+            $createdAt = $post->created_at;
+            $now = now();
+            $secondsAgo = $now->diffInSeconds($createdAt);
+            
+            if ($secondsAgo > 10) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Post is too old to cancel'
+                ], 400);
+            }
+            
+            // Delete media from Cloudinary
+            $publicIds = array_filter([
+                $post->image_public_id,
+                $post->image_public_id_2,
+                $post->image_public_id_3
+            ]);
+            
+            foreach ($publicIds as $publicId) {
+                try {
+                    $resourceType = $post->media_type === 'video' ? 'video' : 'image';
+                    Cloudinary::destroy($publicId, ['resource_type' => $resourceType]);
+                    Log::info('Cloudinary media deleted during cancellation', ['public_id' => $publicId]);
+                } catch (Exception $e) {
+                    Log::error('Cloudinary delete error during cancellation: ' . $e->getMessage());
+                }
+            }
+            
+            // Delete the post
+            $post->delete();
+            
+            Log::info('Post cancelled and deleted', [
+                'post_id' => $postId,
+                'user_id' => Auth::id(),
+                'seconds_after_creation' => $secondsAgo
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Post cancelled successfully'
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error cancelling post: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel post'
+            ], 500);
+        }
+    }
+
     public function destroy(Request $request, $id)
     {
         $post = Post::findOrFail($id);
