@@ -169,9 +169,12 @@
                 @endphp
                 <div class="relative ml-6">
                     <button id="profileButton" class="flex items-center gap-3 bg-white/80 backdrop-blur-xl p-4 rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 group border border-gray-200">
-                        <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
-                             src="{{ $profileImage }}"
-                             alt="profile">
+                        <div class="relative">
+                            <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                                 src="{{ $profileImage }}"
+                                 alt="profile">
+                            <span id="profileNotificationBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">0</span>
+                        </div>
                         
                         <div class="hidden sm:block text-left">
                             <p class="text-gray-800 font-semibold">
@@ -220,9 +223,10 @@
                                 Settings
                             </a>
                             
-                            <a href="{{ route('messages.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
+                            <a href="{{ route('messages.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900 relative">
                                 <span class="text-lg">💬</span>
                                 Messages
+                                <span id="messagesBadge" class="hidden absolute top-2 left-6 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
                             </a>
 
                             <div class="border-t border-gray-200 my-2"></div>
@@ -1115,13 +1119,8 @@
                         
                         content.innerHTML = notificationsHtml;
                         
-                        // Update badge
-                        if (data.unread_count > 0) {
-                            notificationBadge.textContent = data.unread_count;
-                            notificationBadge.classList.remove('hidden');
-                        } else {
-                            notificationBadge.classList.add('hidden');
-                        }
+                        // Update all badges
+                        updateNotificationBadges(data.unread_count || 0);
                     } else {
                         content.innerHTML = `
                             <div class="text-center py-8 text-gray-500">
@@ -1132,6 +1131,7 @@
                                 <p class="text-sm">When someone likes or comments on your posts, you'll see it here</p>
                             </div>
                         `;
+                        updateNotificationBadges(0);
                     }
                 } catch (error) {
                     console.error('Error loading notifications:', error);
@@ -1143,6 +1143,25 @@
                             </button>
                         </div>
                     `;
+                }
+            }
+            
+            function updateNotificationBadges(count) {
+                const notificationBadge = document.getElementById('notificationBadge');
+                const profileNotificationBadge = document.getElementById('profileNotificationBadge');
+                
+                if (count > 0) {
+                    if (notificationBadge) {
+                        notificationBadge.textContent = count;
+                        notificationBadge.classList.remove('hidden');
+                    }
+                    if (profileNotificationBadge) {
+                        profileNotificationBadge.textContent = count;
+                        profileNotificationBadge.classList.remove('hidden');
+                    }
+                } else {
+                    if (notificationBadge) notificationBadge.classList.add('hidden');
+                    if (profileNotificationBadge) profileNotificationBadge.classList.add('hidden');
                 }
             }
             
