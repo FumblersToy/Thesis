@@ -287,11 +287,11 @@
                             </label>
                             
                             <div id="filesList" class="mt-3 space-y-2 hidden"></div>
-                            
-                            <button type="button" id="clearFilesBtn" class="hidden mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium">
-                                🗑️ Clear All Files
-                            </button>
                         </div>
+                        
+                        <button type="button" id="clearFilesBtn" class="hidden mt-3 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm font-medium">
+                            🗑️ Clear All Files
+                        </button>
                     </div>
                     <label class="block text-gray-700 font-medium mb-3 text-lg" for="description">Description</label>
                     <textarea name="description" id="description" class="w-full border-2 border-gray-400 rounded p-3 resize-none overflow-hidden" placeholder="Write your description here..." rows="4"></textarea>
@@ -700,33 +700,37 @@
                     cancelPostBtn.classList.remove('hidden');
                     
                     let uploadCancelled = false;
+                    let progressInterval = null;
                     const xhr = new XMLHttpRequest();
                     uploadAbortController = { xhr: xhr };
                     
-                    try {
-                        // Simulate slower progress for better UX (minimum 2 seconds)
-                        let simulatedProgress = 0;
-                        const progressInterval = setInterval(() => {
-                            if (uploadCancelled) {
-                                clearInterval(progressInterval);
-                                return;
-                            }
-                            
-                            // Slow down progress near the end
-                            if (simulatedProgress < 30) {
-                                simulatedProgress += 2;
-                            } else if (simulatedProgress < 60) {
-                                simulatedProgress += 1.5;
-                            } else if (simulatedProgress < 90) {
-                                simulatedProgress += 1;
-                            } else if (simulatedProgress < 95) {
-                                simulatedProgress += 0.5;
-                            }
-                            
-                            progressBar.style.width = simulatedProgress + '%';
-                            progressPercentage.textContent = Math.round(simulatedProgress) + '%';
-                        }, 100);
+                    // Simulate slower progress for better UX (minimum 3.5 seconds)
+                    let simulatedProgress = 0;
+                    const startTime = Date.now();
+                    const minDuration = 3500; // 3.5 seconds
+                    
+                    progressInterval = setInterval(() => {
+                        if (uploadCancelled) {
+                            clearInterval(progressInterval);
+                            return;
+                        }
                         
+                        const elapsed = Date.now() - startTime;
+                        const minProgress = Math.min((elapsed / minDuration) * 95, 95); // Cap at 95% until complete
+                        
+                        // Gradually increase simulated progress
+                        if (simulatedProgress < minProgress) {
+                            simulatedProgress = minProgress;
+                        } else if (simulatedProgress < 95) {
+                            // Very slow incremental progress
+                            simulatedProgress += 0.3;
+                        }
+                        
+                        progressBar.style.width = simulatedProgress + '%';
+                        progressPercentage.textContent = Math.round(simulatedProgress) + '%';
+                    }, 50);
+                    
+                    try {
                         // Track actual upload progress
                         xhr.upload.addEventListener('progress', function(e) {
                             if (e.lengthComputable && !uploadCancelled) {
@@ -734,51 +738,57 @@
                                 // Only update if actual progress is higher than simulated
                                 if (actualProgress > simulatedProgress) {
                                     simulatedProgress = actualProgress;
-                                    progressBar.style.width = actualProgress + '%';
-                                    progressPercentage.textContent = actualProgress + '%';
                                 }
                             }
                         });
                         
                         // Handle completion
                         xhr.addEventListener('load', function() {
-                            clearInterval(progressInterval);
+                            if (progressInterval) clearInterval(progressInterval);
                             
-                            if (uploadCancelled) return;
+                            if (uploadCancelled) {
+                                console.log('Upload was cancelled, ignoring response');
+                                return;
+                            }
                             
                             if (xhr.status >= 200 && xhr.status < 300) {
-                                const response = JSON.parse(xhr.responseText);
-                                
-                                if (response.success) {
-                                    // Success - show completion
-                                    progressBar.style.width = '100%';
-                                    progressPercentage.textContent = '100%';
+                                try {
+                                    const response = JSON.parse(xhr.responseText);
                                     
-                                    // Reset form after short delay
-                                    setTimeout(() => {
-                                        createPostForm.reset();
-                                        fileInput.value = '';
-                                        fileText.textContent = 'Choose up to 3 images or drag them here';
-                                        filesList.classList.add('hidden');
-                                        filesList.innerHTML = '';
-                                        clearFilesBtn.classList.add('hidden');
-                                        uploadProgress.classList.add('hidden');
-                                        progressBar.style.width = '0%';
-                                        progressPercentage.textContent = '0%';
-                                        submitPostBtn.disabled = false;
-                                        submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                                        cancelPostBtn.classList.add('hidden');
+                                    if (response.success) {
+                                        // Success - show completion
+                                        progressBar.style.width = '100%';
+                                        progressPercentage.textContent = '100%';
                                         
-                                        // Show success message
-                                        if (window.showNotificationToast) {
-                                            window.showNotificationToast('Post created successfully! 🎉', 'info');
-                                        }
-                                        
-                                        // Reload posts
-                                        window.location.reload();
-                                    }, 1000);
-                                } else {
-                                    throw new Error(response.message || 'Upload failed');
+                                        // Reset form after short delay
+                                        setTimeout(() => {
+                                            createPostForm.reset();
+                                            fileInput.value = '';
+                                            fileText.textContent = 'Choose up to 3 images or drag them here';
+                                            filesList.classList.add('hidden');
+                                            filesList.innerHTML = '';
+                                            clearFilesBtn.classList.add('hidden');
+                                            uploadProgress.classList.add('hidden');
+                                            progressBar.style.width = '0%';
+                                            progressPercentage.textContent = '0%';
+                                            submitPostBtn.disabled = false;
+                                            submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                            cancelPostBtn.classList.add('hidden');
+                                            
+                                            // Show success message
+                                            if (window.showNotificationToast) {
+                                                window.showNotificationToast('Post created successfully! 🎉', 'info');
+                                            }
+                                            
+                                            // Reload posts
+                                            window.location.reload();
+                                        }, 1000);
+                                    } else {
+                                        throw new Error(response.message || 'Upload failed');
+                                    }
+                                } catch (parseError) {
+                                    console.error('Error parsing response:', parseError);
+                                    throw new Error('Invalid server response');
                                 }
                             } else {
                                 throw new Error('Upload failed with status ' + xhr.status);
@@ -787,7 +797,7 @@
                         
                         // Handle errors
                         xhr.addEventListener('error', function() {
-                            clearInterval(progressInterval);
+                            if (progressInterval) clearInterval(progressInterval);
                             if (!uploadCancelled) {
                                 alert('Upload failed. Please try again.');
                                 resetUploadUI();
@@ -795,8 +805,9 @@
                         });
                         
                         xhr.addEventListener('abort', function() {
-                            clearInterval(progressInterval);
+                            if (progressInterval) clearInterval(progressInterval);
                             uploadCancelled = true;
+                            console.log('XHR aborted successfully');
                             if (window.showNotificationToast) {
                                 window.showNotificationToast('Upload cancelled', 'info');
                             } else {
@@ -812,9 +823,12 @@
                         xhr.send(formData);
                         
                     } catch (error) {
+                        if (progressInterval) clearInterval(progressInterval);
                         console.error('Upload error:', error);
-                        alert('Upload failed: ' + error.message);
-                        resetUploadUI();
+                        if (!uploadCancelled) {
+                            alert('Upload failed: ' + error.message);
+                            resetUploadUI();
+                        }
                     }
                 });
             }
@@ -826,9 +840,13 @@
                     e.stopPropagation();
                     
                     if (uploadAbortController && uploadAbortController.xhr) {
-                        console.log('Cancelling upload...');
-                        uploadAbortController.xhr.abort();
-                        uploadAbortController = null;
+                        console.log('Aborting upload request...');
+                        try {
+                            uploadAbortController.xhr.abort();
+                            uploadAbortController = null;
+                        } catch (abortError) {
+                            console.error('Error aborting upload:', abortError);
+                        }
                     }
                 });
             }
