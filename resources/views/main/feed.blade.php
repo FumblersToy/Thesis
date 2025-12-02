@@ -568,7 +568,9 @@
             
             // Clear files button
             if (clearFilesBtn && fileInput) {
-                clearFilesBtn.addEventListener('click', function() {
+                clearFilesBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     fileInput.value = '';
                     fileText.textContent = 'Choose up to 3 images or drag them here';
                     filesList.classList.add('hidden');
@@ -697,23 +699,53 @@
                     submitPostBtn.classList.add('opacity-50', 'cursor-not-allowed');
                     cancelPostBtn.classList.remove('hidden');
                     
-                    // Create abort controller
-                    uploadAbortController = new AbortController();
+                    let uploadCancelled = false;
+                    const xhr = new XMLHttpRequest();
+                    uploadAbortController = { xhr: xhr };
                     
                     try {
-                        const xhr = new XMLHttpRequest();
+                        // Simulate slower progress for better UX (minimum 2 seconds)
+                        let simulatedProgress = 0;
+                        const progressInterval = setInterval(() => {
+                            if (uploadCancelled) {
+                                clearInterval(progressInterval);
+                                return;
+                            }
+                            
+                            // Slow down progress near the end
+                            if (simulatedProgress < 30) {
+                                simulatedProgress += 2;
+                            } else if (simulatedProgress < 60) {
+                                simulatedProgress += 1.5;
+                            } else if (simulatedProgress < 90) {
+                                simulatedProgress += 1;
+                            } else if (simulatedProgress < 95) {
+                                simulatedProgress += 0.5;
+                            }
+                            
+                            progressBar.style.width = simulatedProgress + '%';
+                            progressPercentage.textContent = Math.round(simulatedProgress) + '%';
+                        }, 100);
                         
-                        // Track upload progress
+                        // Track actual upload progress
                         xhr.upload.addEventListener('progress', function(e) {
-                            if (e.lengthComputable) {
-                                const percentComplete = Math.round((e.loaded / e.total) * 100);
-                                progressBar.style.width = percentComplete + '%';
-                                progressPercentage.textContent = percentComplete + '%';
+                            if (e.lengthComputable && !uploadCancelled) {
+                                const actualProgress = Math.round((e.loaded / e.total) * 100);
+                                // Only update if actual progress is higher than simulated
+                                if (actualProgress > simulatedProgress) {
+                                    simulatedProgress = actualProgress;
+                                    progressBar.style.width = actualProgress + '%';
+                                    progressPercentage.textContent = actualProgress + '%';
+                                }
                             }
                         });
                         
                         // Handle completion
                         xhr.addEventListener('load', function() {
+                            clearInterval(progressInterval);
+                            
+                            if (uploadCancelled) return;
+                            
                             if (xhr.status >= 200 && xhr.status < 300) {
                                 const response = JSON.parse(xhr.responseText);
                                 
@@ -755,12 +787,21 @@
                         
                         // Handle errors
                         xhr.addEventListener('error', function() {
-                            alert('Upload failed. Please try again.');
-                            resetUploadUI();
+                            clearInterval(progressInterval);
+                            if (!uploadCancelled) {
+                                alert('Upload failed. Please try again.');
+                                resetUploadUI();
+                            }
                         });
                         
                         xhr.addEventListener('abort', function() {
-                            alert('Upload cancelled.');
+                            clearInterval(progressInterval);
+                            uploadCancelled = true;
+                            if (window.showNotificationToast) {
+                                window.showNotificationToast('Upload cancelled', 'info');
+                            } else {
+                                alert('Upload cancelled.');
+                            }
                             resetUploadUI();
                         });
                         
@@ -769,9 +810,6 @@
                         xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
                         xhr.setRequestHeader('Accept', 'application/json');
                         xhr.send(formData);
-                        
-                        // Store xhr for cancellation
-                        uploadAbortController.xhr = xhr;
                         
                     } catch (error) {
                         console.error('Upload error:', error);
@@ -783,9 +821,14 @@
             
             // Cancel upload button
             if (cancelPostBtn) {
-                cancelPostBtn.addEventListener('click', function() {
+                cancelPostBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
                     if (uploadAbortController && uploadAbortController.xhr) {
+                        console.log('Cancelling upload...');
                         uploadAbortController.xhr.abort();
+                        uploadAbortController = null;
                     }
                 });
             }
