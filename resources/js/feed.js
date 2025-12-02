@@ -273,50 +273,8 @@ function initFeed() {
     }
 
     // Create post form submission
-    if (createPostForm) {
-        createPostForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            
-            try {
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Posting...';
-                
-                const formData = new FormData(this);
-                
-                const response = await fetch('/posts', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showNotification('Post created successfully!', 'success');
-                    this.reset();
-                    if (fileName) fileName.classList.add('hidden');
-                    if (fileText) fileText.textContent = 'Choose an image or drag it here';
-                    
-                    // Add new post to the grid
-                    prependPostToGrid(data.post);
-                } else {
-                    showNotification(data.message || 'Error creating post', 'error');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showNotification('Network error. Please try again.', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-            }
-        });
-    }
+    // NOTE: Form submission is handled in feed.blade.php with AbortController support
+    // Do not add another submit listener here as it would conflict
 
     // Apply filters with loading state
     if (applyFiltersBtn) {
