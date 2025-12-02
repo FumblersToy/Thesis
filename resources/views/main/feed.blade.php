@@ -272,7 +272,7 @@
                 <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
                     Create a Post
                 </h2>
-                <form id="createPostForm" class="space-y-6" enctype="multipart/form-data" action="{{ route('posts.store') }}" method="POST">
+                <form id="createPostForm" class="space-y-6" enctype="multipart/form-data">
                     @csrf
                     <div>
                         <label for="image" class="block text-gray-700 font-medium mb-2 text-lg">📷 Upload Images/Videos (Up to 3)</label>
