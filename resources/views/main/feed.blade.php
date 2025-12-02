@@ -704,8 +704,8 @@
                     };
                     const signal = uploadAbortController.controller.signal;
                     
-                    // Create FormData
-                    const formData = new FormData(this);
+                    // DON'T create FormData yet - wait until after delay
+                    // This prevents the browser from starting the upload early
                     
                     // Show progress bar and cancel button
                     uploadProgress.classList.remove('hidden');
@@ -759,7 +759,9 @@
                             uploadAbortController = null;
                             return;
                         }
-                    
+                        
+                        // NOW create FormData only after delay completed successfully
+                        const formData = new FormData(this);
                         // Now send the actual request
                         progressBar.style.width = '100%';
                         progressPercentage.textContent = '100%';
