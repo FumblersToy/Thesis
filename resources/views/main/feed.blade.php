@@ -709,21 +709,45 @@
                     submitPostBtn.classList.add('opacity-50', 'cursor-not-allowed');
                     cancelPostBtn.classList.remove('hidden');
                     
-                    // Simulate progress
+                    // Simulate progress for 3 seconds BEFORE sending request
                     let progress = 0;
+                    const startTime = Date.now();
+                    const delayDuration = 3000; // 3 second delay
+                    
                     const progressInterval = setInterval(() => {
                         if (signal.aborted) {
                             clearInterval(progressInterval);
                             return;
                         }
-                        progress += 2;
-                        if (progress <= 100) {
-                            progressBar.style.width = progress + '%';
-                            progressPercentage.textContent = progress + '%';
-                        }
+                        
+                        const elapsed = Date.now() - startTime;
+                        const percent = Math.min((elapsed / delayDuration) * 95, 95);
+                        progressBar.style.width = percent + '%';
+                        progressPercentage.textContent = Math.round(percent) + '%';
                     }, 50);
                     
+                    // Wait for delay period
+                    await new Promise(resolve => setTimeout(resolve, delayDuration));
+                    
+                    // Check if cancelled during delay
+                    if (signal.aborted) {
+                        clearInterval(progressInterval);
+                        console.log('Upload cancelled before sending request');
+                        resetUploadUI();
+                        uploadAbortController = null;
+                        if (window.showNotificationToast) {
+                            window.showNotificationToast('Upload cancelled', 'info');
+                        }
+                        return;
+                    }
+                    
+                    clearInterval(progressInterval);
+                    
+                    // Now send the actual request
                     try {
+                        progressBar.style.width = '100%';
+                        progressPercentage.textContent = '100%';
+                        
                         const response = await fetch('{{ route("posts.store") }}', {
                             method: 'POST',
                             headers: {
@@ -733,10 +757,6 @@
                             body: formData,
                             signal: signal
                         });
-                        
-                        clearInterval(progressInterval);
-                        progressBar.style.width = '100%';
-                        progressPercentage.textContent = '100%';
                         
                         const data = await response.json();
                         
@@ -761,7 +781,6 @@
                             throw new Error(data.message || 'Upload failed');
                         }
                     } catch (error) {
-                        clearInterval(progressInterval);
                         if (error.name === 'AbortError') {
                             console.log('Upload cancelled by user');
                             resetUploadUI();
