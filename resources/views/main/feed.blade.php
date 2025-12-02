@@ -701,9 +701,25 @@
                         cancelled: false,
                         xhr: null,
                         postId: null,
+                        submitTimeout: null,
+                        progressInterval: null,
                         cancel: function() {
                             console.log('Cancelling upload...');
                             this.cancelled = true;
+                            
+                            // Clear the timeout that would submit the post
+                            if (this.submitTimeout) {
+                                clearTimeout(this.submitTimeout);
+                                console.log('Cleared submit timeout');
+                            }
+                            
+                            // Clear progress interval
+                            if (this.progressInterval) {
+                                clearInterval(this.progressInterval);
+                                console.log('Cleared progress interval');
+                            }
+                            
+                            // Abort XHR if it exists
                             if (this.xhr) {
                                 try {
                                     this.xhr.abort();
@@ -732,7 +748,7 @@
                     const startTime = Date.now();
                     const minDuration = 3500; // 3.5 seconds delay before actual submission
                     
-                    progressInterval = setInterval(() => {
+                    uploadAbortController.progressInterval = setInterval(() => {
                         if (uploadAbortController.cancelled) {
                             clearInterval(progressInterval);
                             return;
@@ -747,11 +763,13 @@
                     }, 50);
                     
                     // Schedule the actual submission after the progress completes
-                    submitTimeout = setTimeout(async () => {
+                    uploadAbortController.submitTimeout = setTimeout(async () => {
                         // Check one final time if cancelled
                         if (uploadAbortController.cancelled) {
                             console.log('Upload cancelled before submission');
-                            clearInterval(progressInterval);
+                            if (uploadAbortController.progressInterval) {
+                                clearInterval(uploadAbortController.progressInterval);
+                            }
                             resetUploadUI();
                             uploadAbortController = null;
                             return;
@@ -775,7 +793,9 @@
                             
                             // Handle completion
                             xhr.addEventListener('load', function() {
-                                if (progressInterval) clearInterval(progressInterval);
+                                if (uploadAbortController && uploadAbortController.progressInterval) {
+                                    clearInterval(uploadAbortController.progressInterval);
+                                }
                                 
                                 if (xhr.status >= 200 && xhr.status < 300) {
                                     try {
@@ -830,7 +850,9 @@
                             
                             // Handle errors
                             xhr.addEventListener('error', function() {
-                                if (progressInterval) clearInterval(progressInterval);
+                                if (uploadAbortController && uploadAbortController.progressInterval) {
+                                    clearInterval(uploadAbortController.progressInterval);
+                                }
                                 console.log('XHR error event');
                                 alert('Upload failed. Please try again.');
                                 resetUploadUI();
@@ -839,7 +861,9 @@
                             
                             // Handle abort
                             xhr.addEventListener('abort', function() {
-                                if (progressInterval) clearInterval(progressInterval);
+                                if (uploadAbortController && uploadAbortController.progressInterval) {
+                                    clearInterval(uploadAbortController.progressInterval);
+                                }
                                 console.log('XHR aborted');
                             });
                             
@@ -850,7 +874,9 @@
                             xhr.send(formData);
                             
                         } catch (error) {
-                            if (progressInterval) clearInterval(progressInterval);
+                            if (uploadAbortController && uploadAbortController.progressInterval) {
+                                clearInterval(uploadAbortController.progressInterval);
+                            }
                             console.error('Upload error:', error);
                             alert('Upload failed: ' + error.message);
                             resetUploadUI();
