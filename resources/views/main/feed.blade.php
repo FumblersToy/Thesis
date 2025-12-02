@@ -713,45 +713,54 @@
                     submitPostBtn.classList.add('opacity-50', 'cursor-not-allowed');
                     cancelPostBtn.classList.remove('hidden');
                     
-                    // Simulate progress for 3 seconds BEFORE sending request
-                    const startTime = Date.now();
-                    const delayDuration = 3000; // 3 second delay
+                    try {
+                        // Simulate progress for 3 seconds BEFORE sending request
+                        const startTime = Date.now();
+                        const delayDuration = 3000; // 3 second delay
+                        
+                        const progressInterval = setInterval(() => {
+                            // Check if uploadAbortController still exists before accessing properties
+                            if (!uploadAbortController || uploadAbortController.cancelled || signal.aborted) {
+                                clearInterval(progressInterval);
+                                return;
+                            }
+                            
+                            const elapsed = Date.now() - startTime;
+                            const percent = Math.min((elapsed / delayDuration) * 95, 95);
+                            progressBar.style.width = percent + '%';
+                            progressPercentage.textContent = Math.round(percent) + '%';
+                        }, 50);
+                        
+                        // Wait for delay period with cancellation support
+                        await new Promise((resolve, reject) => {
+                            const timeoutId = setTimeout(resolve, delayDuration);
+                            
+                            // Listen for abort signal
+                            signal.addEventListener('abort', () => {
+                                clearTimeout(timeoutId);
+                                clearInterval(progressInterval);
+                                reject(new DOMException('Upload cancelled', 'AbortError'));
+                            });
+                        });
+                        
+                        clearInterval(progressInterval);
                     
-                    const progressInterval = setInterval(() => {
-                        // Check if uploadAbortController still exists before accessing properties
+                        // Check if cancelled during delay using BOTH flag and signal
                         if (!uploadAbortController || uploadAbortController.cancelled || signal.aborted) {
-                            clearInterval(progressInterval);
+                            console.log('Upload cancelled before sending request');
+                            if (uploadProgress) uploadProgress.classList.add('hidden');
+                            if (progressBar) progressBar.style.width = '0%';
+                            if (progressPercentage) progressPercentage.textContent = '0%';
+                            if (submitPostBtn) {
+                                submitPostBtn.disabled = false;
+                                submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                            }
+                            if (cancelPostBtn) cancelPostBtn.classList.add('hidden');
+                            uploadAbortController = null;
                             return;
                         }
-                        
-                        const elapsed = Date.now() - startTime;
-                        const percent = Math.min((elapsed / delayDuration) * 95, 95);
-                        progressBar.style.width = percent + '%';
-                        progressPercentage.textContent = Math.round(percent) + '%';
-                    }, 50);
                     
-                    // Wait for delay period
-                    await new Promise(resolve => setTimeout(resolve, delayDuration));
-                    
-                    clearInterval(progressInterval);
-                    
-                    // Check if cancelled during delay using BOTH flag and signal
-                    if (!uploadAbortController || uploadAbortController.cancelled || signal.aborted) {
-                        console.log('Upload cancelled before sending request');
-                        if (uploadProgress) uploadProgress.classList.add('hidden');
-                        if (progressBar) progressBar.style.width = '0%';
-                        if (progressPercentage) progressPercentage.textContent = '0%';
-                        if (submitPostBtn) {
-                            submitPostBtn.disabled = false;
-                            submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                        }
-                        if (cancelPostBtn) cancelPostBtn.classList.add('hidden');
-                        uploadAbortController = null;
-                        return;
-                    }
-                    
-                    // Now send the actual request
-                    try {
+                        // Now send the actual request
                         progressBar.style.width = '100%';
                         progressPercentage.textContent = '100%';
                         
