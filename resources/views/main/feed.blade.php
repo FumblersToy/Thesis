@@ -735,13 +735,18 @@
                         console.log('Upload cancelled before sending request');
                         resetUploadUI();
                         uploadAbortController = null;
-                        if (window.showNotificationToast) {
-                            window.showNotificationToast('Upload cancelled', 'info');
-                        }
-                        return;
+                        return; // Don't show toast here - cancel button already showed it
                     }
                     
                     clearInterval(progressInterval);
+                    
+                    // Double-check not cancelled right before sending
+                    if (signal.aborted) {
+                        console.log('Upload cancelled right before fetch');
+                        resetUploadUI();
+                        uploadAbortController = null;
+                        return;
+                    }
                     
                     // Now send the actual request
                     try {
@@ -782,13 +787,10 @@
                         }
                     } catch (error) {
                         if (error.name === 'AbortError') {
-                            console.log('Upload cancelled by user');
+                            console.log('Upload cancelled by user during fetch');
                             resetUploadUI();
                             uploadAbortController = null;
-                            if (window.showNotificationToast) {
-                                window.showNotificationToast('Upload cancelled', 'info');
-                            }
-                            return;
+                            return; // Don't show toast - cancel button already showed it
                         }
                         console.error('Upload error:', error);
                         alert('Upload failed: ' + error.message);
@@ -804,13 +806,16 @@
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    if (uploadAbortController) {
-                        uploadAbortController.abort();
-                        uploadAbortController = null;
+                    if (!uploadAbortController) {
+                        return;
                     }
                     
+                    console.log('Cancel button clicked - aborting upload');
+                    uploadAbortController.abort();
                     resetUploadUI();
+                    uploadAbortController = null;
                     
+                    // Show toast only once here
                     if (window.showNotificationToast) {
                         window.showNotificationToast('Upload cancelled', 'info');
                     }
