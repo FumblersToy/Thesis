@@ -718,182 +718,145 @@
                     // Create FormData
                     const formData = new FormData(this);
                     
+                    let progressInterval = null;
+                    let submitTimeout = null;
+                    
                     // Show progress bar and cancel button
                     uploadProgress.classList.remove('hidden');
                     submitPostBtn.disabled = true;
                     submitPostBtn.classList.add('opacity-50', 'cursor-not-allowed');
                     cancelPostBtn.classList.remove('hidden');
                     
-                    let uploadCancelled = false;
-                    let progressInterval = null;
-                    
-                    const xhr = new XMLHttpRequest();
-                    uploadAbortController.xhr = xhr;
-                    
-                    // Simulate slower progress for better UX (minimum 3.5 seconds)
+                    // Simulate progress for 3.5 seconds BEFORE actually submitting
                     let simulatedProgress = 0;
                     const startTime = Date.now();
-                    const minDuration = 3500; // 3.5 seconds
+                    const minDuration = 3500; // 3.5 seconds delay before actual submission
                     
                     progressInterval = setInterval(() => {
-                        if (uploadCancelled) {
+                        if (uploadAbortController.cancelled) {
                             clearInterval(progressInterval);
                             return;
                         }
                         
                         const elapsed = Date.now() - startTime;
-                        const minProgress = Math.min((elapsed / minDuration) * 95, 95); // Cap at 95% until complete
+                        const progressPercent = Math.min((elapsed / minDuration) * 100, 100);
                         
-                        // Gradually increase simulated progress
-                        if (simulatedProgress < minProgress) {
-                            simulatedProgress = minProgress;
-                        } else if (simulatedProgress < 95) {
-                            // Very slow incremental progress
-                            simulatedProgress += 0.3;
-                        }
-                        
+                        simulatedProgress = progressPercent;
                         progressBar.style.width = simulatedProgress + '%';
                         progressPercentage.textContent = Math.round(simulatedProgress) + '%';
                     }, 50);
                     
-                    try {
-                        // Track actual upload progress
-                        xhr.upload.addEventListener('progress', function(e) {
-                            if (e.lengthComputable && !uploadCancelled) {
-                                const actualProgress = Math.round((e.loaded / e.total) * 100);
-                                // Only update if actual progress is higher than simulated
-                                if (actualProgress > simulatedProgress) {
-                                    simulatedProgress = actualProgress;
-                                }
-                            }
-                        });
+                    // Schedule the actual submission after the progress completes
+                    submitTimeout = setTimeout(async () => {
+                        // Check one final time if cancelled
+                        if (uploadAbortController.cancelled) {
+                            console.log('Upload cancelled before submission');
+                            clearInterval(progressInterval);
+                            resetUploadUI();
+                            uploadAbortController = null;
+                            return;
+                        }
                         
-                        // Handle completion
-                        xhr.addEventListener('load', function() {
-                            if (progressInterval) clearInterval(progressInterval);
+                        console.log('Progress complete, now submitting to server...');
+                        
+                        // Now actually submit to server
+                        const xhr = new XMLHttpRequest();
+                        uploadAbortController.xhr = xhr;
+                        
+                        try {
+                            // Track actual upload progress
+                            xhr.upload.addEventListener('progress', function(e) {
+                                if (e.lengthComputable) {
+                                    // Keep at 100% during actual upload
+                                    progressBar.style.width = '100%';
+                                    progressPercentage.textContent = '100%';
+                                }
+                            });
                             
-                            // Check if upload was cancelled - exit immediately
-                            if (!uploadAbortController || uploadAbortController.cancelled) {
-                                console.log('Load event: Upload was cancelled, not processing response');
-                                resetUploadUI();
-                                return;
-                            }
-                            
-                            if (xhr.status >= 200 && xhr.status < 300) {
-                                try {
-                                    const response = JSON.parse(xhr.responseText);
-                                    
-                                    if (response.success) {
-                                        // Store post ID in case we need to cancel it
-                                        if (response.post && response.post.id && uploadAbortController) {
-                                            uploadAbortController.postId = response.post.id;
-                                        }
+                            // Handle completion
+                            xhr.addEventListener('load', function() {
+                                if (progressInterval) clearInterval(progressInterval);
+                                
+                                if (xhr.status >= 200 && xhr.status < 300) {
+                                    try {
+                                        const response = JSON.parse(xhr.responseText);
                                         
-                                        // Double-check if cancelled during response parsing
-                                        if (uploadAbortController.cancelled) {
-                                            console.log('Upload was cancelled after post creation - deleting post');
+                                        if (response.success) {
+                                            console.log('Post created successfully!');
                                             
-                                            if (response.post && response.post.id) {
-                                                fetch('/posts/cancel', {
-                                                    method: 'POST',
-                                                    headers: {
-                                                        'Content-Type': 'application/json',
-                                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                                    },
-                                                    body: JSON.stringify({ post_id: response.post.id })
-                                                }).then(cancelResponse => cancelResponse.json())
-                                                  .then(cancelData => {
-                                                      console.log('Post deleted after cancellation:', cancelData);
-                                                  })
-                                                  .catch(err => {
-                                                      console.error('Failed to delete cancelled post:', err);
-                                                  });
-                                            }
+                                            // Success - show completion
+                                            progressBar.style.width = '100%';
+                                            progressPercentage.textContent = '100%';
                                             
-                                            resetUploadUI();
-                                            return;
-                                        }
-                                        
-                                        // Success - show completion
-                                        progressBar.style.width = '100%';
-                                        progressPercentage.textContent = '100%';
-                                        
-                                        // Reset form after short delay
-                                        setTimeout(() => {
-                                            createPostForm.reset();
-                                            fileInput.value = '';
-                                            fileText.textContent = 'Choose up to 3 images or drag them here';
-                                            filesList.classList.add('hidden');
-                                            filesList.innerHTML = '';
-                                            clearFilesBtn.classList.add('hidden');
-                                            uploadProgress.classList.add('hidden');
-                                            progressBar.style.width = '0%';
-                                            progressPercentage.textContent = '0%';
-                                            submitPostBtn.disabled = false;
-                                            submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                                            cancelPostBtn.classList.add('hidden');
-                                            uploadAbortController = null;
-                                            
-                                            // Show success message
-                                            if (window.showNotificationToast) {
-                                                window.showNotificationToast('Post created successfully! 🎉', 'info');
-                                            }
-                                            
-                                            // Reload posts
-                                            window.location.reload();
-                                        }, 1000);
-                                    } else {
-                                        if (!uploadAbortController || !uploadAbortController.cancelled) {
+                                            // Reset form after short delay
+                                            setTimeout(() => {
+                                                createPostForm.reset();
+                                                fileInput.value = '';
+                                                fileText.textContent = 'Choose up to 3 images or drag them here';
+                                                filesList.classList.add('hidden');
+                                                filesList.innerHTML = '';
+                                                clearFilesBtn.classList.add('hidden');
+                                                uploadProgress.classList.add('hidden');
+                                                progressBar.style.width = '0%';
+                                                progressPercentage.textContent = '0%';
+                                                submitPostBtn.disabled = false;
+                                                submitPostBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                                                cancelPostBtn.classList.add('hidden');
+                                                uploadAbortController = null;
+                                                
+                                                // Show success message
+                                                if (window.showNotificationToast) {
+                                                    window.showNotificationToast('Post created successfully! 🎉', 'info');
+                                                }
+                                                
+                                                // Reload posts
+                                                window.location.reload();
+                                            }, 1000);
+                                        } else {
                                             throw new Error(response.message || 'Upload failed');
                                         }
-                                    }
-                                } catch (parseError) {
-                                    console.error('Error parsing response:', parseError);
-                                    if (!uploadAbortController || !uploadAbortController.cancelled) {
+                                    } catch (parseError) {
+                                        console.error('Error parsing response:', parseError);
                                         alert('Upload failed: Invalid server response');
                                         resetUploadUI();
+                                        uploadAbortController = null;
                                     }
-                                }
-                            } else {
-                                if (!uploadAbortController || !uploadAbortController.cancelled) {
+                                } else {
                                     alert('Upload failed with status ' + xhr.status);
                                     resetUploadUI();
+                                    uploadAbortController = null;
                                 }
-                            }
-                        });
-                        
-                        // Handle errors
-                        xhr.addEventListener('error', function() {
-                            if (progressInterval) clearInterval(progressInterval);
-                            console.log('XHR error event, cancelled:', uploadAbortController ? uploadAbortController.cancelled : 'no controller');
+                            });
                             
-                            // Only show error if not cancelled
-                            if (!uploadAbortController || !uploadAbortController.cancelled) {
+                            // Handle errors
+                            xhr.addEventListener('error', function() {
+                                if (progressInterval) clearInterval(progressInterval);
+                                console.log('XHR error event');
                                 alert('Upload failed. Please try again.');
-                            }
-                            resetUploadUI();
-                        });
-                        
-                        xhr.addEventListener('abort', function() {
+                                resetUploadUI();
+                                uploadAbortController = null;
+                            });
+                            
+                            // Handle abort
+                            xhr.addEventListener('abort', function() {
+                                if (progressInterval) clearInterval(progressInterval);
+                                console.log('XHR aborted');
+                            });
+                            
+                            // Send the request
+                            xhr.open('POST', '{{ route("posts.store") }}');
+                            xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+                            xhr.setRequestHeader('Accept', 'application/json');
+                            xhr.send(formData);
+                            
+                        } catch (error) {
                             if (progressInterval) clearInterval(progressInterval);
-                            console.log('XHR abort event fired');
-                            // Don't show any message or reset UI here - cancel button handles it
-                        });
-                        
-                        // Open and send request immediately
-                        xhr.open('POST', '{{ route("posts.store") }}');
-                        xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-                        xhr.setRequestHeader('Accept', 'application/json');
-                        xhr.send(formData);
-                        
-                    } catch (error) {
-                        if (progressInterval) clearInterval(progressInterval);
-                        console.error('Upload error:', error);
-                        if (!uploadCancelled) {
+                            console.error('Upload error:', error);
                             alert('Upload failed: ' + error.message);
                             resetUploadUI();
+                            uploadAbortController = null;
                         }
-                    }
+                    }, minDuration); // Submit after 3.5 seconds
                 });
             }
             
@@ -903,42 +866,27 @@
                     e.preventDefault();
                     e.stopPropagation();
                     
-                    console.log('Cancel button clicked');
+                    console.log('=== CANCEL BUTTON CLICKED ===');
                     
-                    if (uploadAbortController) {
-                        uploadAbortController.cancel();
-                        
-                        // If we already have a post ID (upload completed but not yet reloaded), cancel it immediately
-                        if (uploadAbortController.postId) {
-                            console.log('Post already created, sending immediate cancellation for post:', uploadAbortController.postId);
-                            fetch('/posts/cancel', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                                },
-                                body: JSON.stringify({ post_id: uploadAbortController.postId })
-                            }).then(response => response.json())
-                              .then(data => {
-                                  console.log('Immediate post cancellation result:', data);
-                              })
-                              .catch(err => {
-                                  console.error('Failed to cancel post immediately:', err);
-                              });
-                        }
-                        
-                        // Reset UI and clean up
-                        resetUploadUI();
-                        
-                        // Show cancellation message after a brief delay
-                        setTimeout(() => {
-                            if (window.showNotificationToast) {
-                                window.showNotificationToast('Upload cancelled', 'info');
-                            }
-                        }, 150);
-                        
-                        uploadAbortController = null;
+                    if (!uploadAbortController) {
+                        console.error('No abort controller found!');
+                        return;
                     }
+                    
+                    // Mark as cancelled - this prevents the delayed submission from happening
+                    uploadAbortController.cancel();
+                    console.log('Upload cancelled by user');
+                    
+                    // Reset UI
+                    resetUploadUI();
+                    
+                    // Show cancellation message
+                    setTimeout(() => {
+                        if (window.showNotificationToast) {
+                            window.showNotificationToast('Upload cancelled', 'info');
+                        }
+                        uploadAbortController = null;
+                    }, 200);
                 });
             }
             
