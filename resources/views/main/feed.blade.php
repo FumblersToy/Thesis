@@ -689,12 +689,23 @@
             if (createPostForm) {
                 createPostForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
+                    e.stopPropagation();
                     
-                    // Prevent multiple submissions
-                    if (uploadAbortController && uploadAbortController.xhr) {
-                        console.log('Upload already in progress, ignoring submission');
-                        return;
+                    console.log('📝 FORM SUBMIT EVENT - Checking if upload in progress...');
+                    
+                    // Prevent multiple submissions - check both xhr and submitTimeout
+                    if (uploadAbortController) {
+                        if (uploadAbortController.xhr) {
+                            console.log('⚠️ Upload already in progress (XHR exists), ignoring submission');
+                            return;
+                        }
+                        if (uploadAbortController.submitTimeout) {
+                            console.log('⚠️ Upload already scheduled (timeout exists), ignoring submission');
+                            return;
+                        }
                     }
+                    
+                    console.log('✓ No upload in progress, proceeding with new submission');
                     
                     // Initialize new upload controller
                     uploadAbortController = {
