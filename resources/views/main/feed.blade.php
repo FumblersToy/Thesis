@@ -690,8 +690,30 @@
                 createPostForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
                     
-                    // Reset any previous upload controller
-                    uploadAbortController = null;
+                    // Prevent multiple submissions
+                    if (uploadAbortController && uploadAbortController.xhr) {
+                        console.log('Upload already in progress, ignoring submission');
+                        return;
+                    }
+                    
+                    // Initialize new upload controller
+                    uploadAbortController = {
+                        cancelled: false,
+                        xhr: null,
+                        postId: null,
+                        cancel: function() {
+                            console.log('Cancelling upload...');
+                            this.cancelled = true;
+                            if (this.xhr) {
+                                try {
+                                    this.xhr.abort();
+                                    console.log('XHR aborted');
+                                } catch (e) {
+                                    console.error('Error aborting:', e);
+                                }
+                            }
+                        }
+                    };
                     
                     // Create FormData
                     const formData = new FormData(this);
@@ -704,25 +726,6 @@
                     
                     let uploadCancelled = false;
                     let progressInterval = null;
-                    
-                    // Create abort controller before opening XHR
-                    uploadAbortController = { 
-                        cancelled: false,
-                        xhr: null,
-                        cancel: function() {
-                            console.log('Cancelling upload...');
-                            this.cancelled = true;
-                            uploadCancelled = true;
-                            if (this.xhr) {
-                                try {
-                                    this.xhr.abort();
-                                    console.log('XHR aborted');
-                                } catch (e) {
-                                    console.error('Error aborting:', e);
-                                }
-                            }
-                        }
-                    };
                     
                     const xhr = new XMLHttpRequest();
                     uploadAbortController.xhr = xhr;
@@ -769,10 +772,10 @@
                         xhr.addEventListener('load', function() {
                             if (progressInterval) clearInterval(progressInterval);
                             
-                            // Check if upload was cancelled
-                            if (uploadAbortController && uploadAbortController.cancelled) {
+                            // Check if upload was cancelled - exit immediately
+                            if (!uploadAbortController || uploadAbortController.cancelled) {
                                 console.log('Load event: Upload was cancelled, not processing response');
-                                // Don't reload page or show success
+                                resetUploadUI();
                                 return;
                             }
                             
@@ -782,17 +785,14 @@
                                     
                                     if (response.success) {
                                         // Store post ID in case we need to cancel it
-                                        if (response.post && response.post.id) {
-                                            if (uploadAbortController) {
-                                                uploadAbortController.postId = response.post.id;
-                                            }
+                                        if (response.post && response.post.id && uploadAbortController) {
+                                            uploadAbortController.postId = response.post.id;
                                         }
                                         
-                                        // Check again if cancelled (user might have clicked during response parsing)
-                                        if (uploadAbortController && uploadAbortController.cancelled) {
-                                            console.log('Success response but upload was cancelled - sending cancel request');
+                                        // Double-check if cancelled during response parsing
+                                        if (uploadAbortController.cancelled) {
+                                            console.log('Upload was cancelled after post creation - deleting post');
                                             
-                                            // Send cancellation request to server to delete the post
                                             if (response.post && response.post.id) {
                                                 fetch('/posts/cancel', {
                                                     method: 'POST',
@@ -803,12 +803,14 @@
                                                     body: JSON.stringify({ post_id: response.post.id })
                                                 }).then(cancelResponse => cancelResponse.json())
                                                   .then(cancelData => {
-                                                      console.log('Post cancellation result:', cancelData);
+                                                      console.log('Post deleted after cancellation:', cancelData);
                                                   })
                                                   .catch(err => {
-                                                      console.error('Failed to cancel post:', err);
+                                                      console.error('Failed to delete cancelled post:', err);
                                                   });
                                             }
+                                            
+                                            resetUploadUI();
                                             return;
                                         }
                                         
