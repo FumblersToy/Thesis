@@ -1487,11 +1487,35 @@
                     if (data.notifications && data.notifications.length > 0) {
                         const notificationsHtml = data.notifications.map(notif => {
                             const timeAgo = getTimeAgo(notif.created_at);
-                            const icon = notif.type === 'like' ? '❤️' : '💬';
-                            const bgColor = notif.read ? 'bg-white' : 'bg-blue-50';
+                            let icon = '💬';
+                            let bgColor = notif.read ? 'bg-white' : 'bg-blue-50';
+                            let clickHandler = '';
+                            
+                            // Determine icon and click handler based on notification type
+                            if (notif.type === 'like') {
+                                icon = '❤️';
+                                clickHandler = `onclick="openNotificationPost(${notif.post_id}, ${notif.id})"`;
+                            } else if (notif.type === 'comment') {
+                                icon = '💬';
+                                clickHandler = `onclick="openNotificationPost(${notif.post_id}, ${notif.id})"`;
+                            } else if (notif.type === 'post_deleted') {
+                                icon = '🗑️';
+                                bgColor = notif.read ? 'bg-white' : 'bg-red-50';
+                                clickHandler = `onclick="window.location.href='{{ route('posts.deleted') }}'"`;
+                            } else if (notif.type === 'appeal_approved') {
+                                icon = '✅';
+                                bgColor = notif.read ? 'bg-white' : 'bg-green-50';
+                                clickHandler = `onclick="window.location.href='{{ route('feed') }}'"`;
+                            } else if (notif.type === 'appeal_denied') {
+                                icon = '❌';
+                                bgColor = notif.read ? 'bg-white' : 'bg-red-50';
+                                clickHandler = `onclick="window.location.href='{{ route('posts.deleted') }}'"`;
+                            } else {
+                                clickHandler = notif.post_id ? `onclick="openNotificationPost(${notif.post_id}, ${notif.id})"` : '';
+                            }
                             
                             return `
-                                <div class="${bgColor} p-4 rounded-xl hover:shadow-md transition-all mb-3 border border-gray-100 cursor-pointer" onclick="openNotificationPost(${notif.post_id}, ${notif.id})">
+                                <div class="${bgColor} p-4 rounded-xl hover:shadow-md transition-all mb-3 border border-gray-100 cursor-pointer" ${clickHandler}>
                                     <div class="flex items-start gap-3">
                                         <span class="text-2xl">${icon}</span>
                                         <div class="flex-1">
