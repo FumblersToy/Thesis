@@ -8,7 +8,7 @@ use App\Models\Post;
 use App\Models\Musician;
 use App\Models\Business;
 use App\Models\Message;
-use App\Notifications\PostDeleted;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -80,7 +80,7 @@ class DashboardController extends Controller
         $post->delete(); // This performs the soft delete
         
         // Create notification using custom Notification model
-        \App\Models\Notification::create([
+        Notification::create([
             'user_id' => $user->id,
             'notifier_id' => auth('admin')->id(),
             'type' => 'post_deleted',
@@ -300,7 +300,7 @@ class DashboardController extends Controller
             $post->save();
 
             // Create notification using custom Notification model
-            \App\Models\Notification::create([
+            Notification::create([
                 'user_id' => $post->user_id,
                 'notifier_id' => auth('admin')->id(),
                 'type' => 'appeal_approved',
@@ -318,7 +318,7 @@ class DashboardController extends Controller
                 $message .= ' Admin response: ' . $request->response;
             }
             
-            \App\Models\Notification::create([
+            Notification::create([
                 'user_id' => $post->user_id,
                 'notifier_id' => auth('admin')->id(),
                 'type' => 'appeal_denied',
