@@ -65,8 +65,12 @@ class DashboardController extends Controller
         ]);
 
         try {
+            Log::info('Starting post deletion', ['post_id' => $postId, 'admin_id' => auth('admin')->id()]);
+            
             $post = Post::findOrFail($postId);
             $user = $post->user;
+            
+            Log::info('Post found, user:', ['user_id' => $user->id, 'post_id' => $post->id]);
             
             // Soft delete with reason
             $post->deletion_reason = $request->reason;
@@ -74,8 +78,10 @@ class DashboardController extends Controller
             $post->save();
             $post->delete();
             
+            Log::info('Post soft deleted, creating notification');
+            
             // Create notification
-            Notification::create([
+            $notification = Notification::create([
                 'user_id' => $user->id,
                 'notifier_id' => auth('admin')->id(),
                 'type' => 'post_deleted',
@@ -83,13 +89,15 @@ class DashboardController extends Controller
                 'message' => 'Your post has been removed by an admin. Reason: ' . $request->reason,
                 'read' => false,
             ]);
+            
+            Log::info('Notification created', ['notification_id' => $notification->id]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Post deleted successfully. User has been notified.'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error deleting post', ['error' => $e->getMessage()]);
+            Log::error('Error deleting post', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while deleting the post.'
