@@ -375,14 +375,7 @@
         }
 
         async function deletePost(postId) {
-            const reason = prompt('Please provide a reason for deleting this post (required for user notification):');
-            
-            if (!reason || reason.trim() === '') {
-                alert('A reason is required to delete the post.');
-                return;
-            }
-
-            if (!confirm('Are you sure you want to delete this post? The user will be notified and can appeal within 15 days.')) {
+            if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
                 return;
             }
 
@@ -393,8 +386,7 @@
                         'X-CSRF-TOKEN': csrfToken,
                         'Accept': 'application/json',
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ reason: reason.trim() })
+                    }
                 });
 
                 const data = await response.json();

@@ -32,12 +32,6 @@
                     <span class="ml-2 text-xl font-semibold text-gray-800">Admin Dashboard</span>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="{{ route('admin.appeals') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-                        </svg>
-                        View Appeals
-                    </a>
                     <span class="text-gray-600">{{ auth('admin')->user()->name }}</span>
                     <form method="POST" action="{{ route('admin.logout') }}" class="inline" id="logoutForm">
                         @csrf

@@ -58,56 +58,44 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact('users', 'stats'));
     }
 
-    public function deletePost(Request $request, $postId)
+    public function deletePost($postId)
     {
         try {
-            Log::info('Delete post request received', ['post_id' => $postId, 'reason' => $request->input('reason')]);
-            
-            // Get reason from request (supports both JSON and form data)
-            $reason = $request->input('reason') ?? $request->reason;
-            
-            if (!$reason || empty(trim($reason))) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Deletion reason is required.'
-                ], 400);
-            }
-
             $post = Post::findOrFail($postId);
-            $user = $post->user;
-        
-        // Soft delete the post with reason
-        $post->deletion_reason = trim($reason);
-        $post->deleted_by = auth('admin')->id();
-        $post->save();
-        $post->delete(); // This performs the soft delete
-        
-        // Create notification using custom Notification model
-        Notification::create([
-            'user_id' => $user->id,
-            'notifier_id' => auth('admin')->id(),
-            'type' => 'post_deleted',
-            'post_id' => $post->id,
-            'message' => 'Your post has been removed by an admin. Reason: ' . trim($reason),
-            'read' => false,
-        ]);
-
-        Log::info('Post deleted successfully', ['post_id' => $post->id, 'user_id' => $user->id]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Post deleted successfully. User has been notified and has 15 days to appeal.'
-        ]);
+            
+            // Delete image from Cloudinary if it exists
+            if ($post->image_path) {
+                try {
+                    $cloudinary = new Cloudinary([
+                        'cloud' => [
+                            'cloud_name' => config('cloudinary.cloud_name'),
+                            'api_key' => config('cloudinary.api_key'),
+                            'api_secret' => config('cloudinary.api_secret'),
+                        ],
+                    ]);
+                    
+                    $publicId = pathinfo($post->image_path, PATHINFO_FILENAME);
+                    $cloudinary->uploadApi()->destroy($publicId);
+                } catch (Exception $e) {
+                    Log::warning('Failed to delete image from Cloudinary', ['error' => $e->getMessage()]);
+                }
+            }
+            
+            // Hard delete the post
+            $post->delete();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Post deleted successfully.'
+            ]);
         } catch (\Exception $e) {
-            Log::error('Error deleting post', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            Log::error('Error deleting post', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred: ' . $e->getMessage()
+                'message' => 'An error occurred while deleting the post.'
             ], 500);
         }
-    }
-
-    public function userPosts($userId)
+    }    public function userPosts($userId)
     {
         $user = User::with(['musician', 'business'])->findOrFail($userId);
         $posts = Post::where('user_id', $userId)
@@ -272,77 +260,5 @@ class DashboardController extends Controller
             });
 
         return view('admin.user-conversations', compact('user', 'conversations'));
-    }
-
-    /**
-     * View all post deletion appeals
-     */
-    public function appeals()
-    {
-        $appeals = Post::onlyTrashed()
-            ->where('appeal_status', 'pending')
-            ->with(['user.musician', 'user.business', 'deletedBy'])
-            ->orderByDesc('appeal_at')
-            ->get();
-
-        return view('admin.appeals', compact('appeals'));
-    }
-
-    /**
-     * Respond to a post deletion appeal
-     */
-    public function respondToAppeal(Request $request, $postId)
-    {
-        $request->validate([
-            'decision' => 'required|in:approved,denied',
-            'response' => 'nullable|string|max:500'
-        ]);
-
-        $post = Post::onlyTrashed()
-            ->where('id', $postId)
-            ->where('appeal_status', 'pending')
-            ->firstOrFail();
-
-        if ($request->decision === 'approved') {
-            // Restore the post
-            $post->restore();
-            $post->appeal_status = 'approved';
-            $post->deletion_reason = null;
-            $post->deleted_by = null;
-            $post->save();
-
-            // Create notification using custom Notification model
-            Notification::create([
-                'user_id' => $post->user_id,
-                'notifier_id' => auth('admin')->id(),
-                'type' => 'appeal_approved',
-                'post_id' => $post->id,
-                'message' => 'Your appeal has been approved! Your post has been restored.',
-                'read' => false,
-            ]);
-        } else {
-            $post->appeal_status = 'denied';
-            $post->save();
-
-            // Create notification using custom Notification model
-            $message = 'Your appeal has been denied.';
-            if ($request->response) {
-                $message .= ' Admin response: ' . $request->response;
-            }
-            
-            Notification::create([
-                'user_id' => $post->user_id,
-                'notifier_id' => auth('admin')->id(),
-                'type' => 'appeal_denied',
-                'post_id' => $post->id,
-                'message' => $message,
-                'read' => false,
-            ]);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Appeal ' . $request->decision . ' successfully.'
-        ]);
     }
 }
