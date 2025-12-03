@@ -364,13 +364,14 @@
                 return;
             }
 
+            const postIdToDelete = currentPostId; // Store before closing modal
             closeDeleteModal();
             
-            console.log('Sending DELETE request for post:', currentPostId);
+            console.log('Sending DELETE request for post:', postIdToDelete);
             console.log('Reason:', reason);
 
             try {
-                const response = await fetch(`/admin/posts/${currentPostId}`, {
+                const response = await fetch(`/admin/posts/${postIdToDelete}`, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
