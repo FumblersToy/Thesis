@@ -60,18 +60,21 @@ class DashboardController extends Controller
 
     public function deletePost(Request $request, $postId)
     {
-        // Get reason from request (supports both JSON and form data)
-        $reason = $request->input('reason') ?? $request->reason;
-        
-        if (!$reason || empty(trim($reason))) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Deletion reason is required.'
-            ], 400);
-        }
+        try {
+            Log::info('Delete post request received', ['post_id' => $postId, 'reason' => $request->input('reason')]);
+            
+            // Get reason from request (supports both JSON and form data)
+            $reason = $request->input('reason') ?? $request->reason;
+            
+            if (!$reason || empty(trim($reason))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Deletion reason is required.'
+                ], 400);
+            }
 
-        $post = Post::findOrFail($postId);
-        $user = $post->user;
+            $post = Post::findOrFail($postId);
+            $user = $post->user;
         
         // Soft delete the post with reason
         $post->deletion_reason = trim($reason);
@@ -89,10 +92,19 @@ class DashboardController extends Controller
             'read' => false,
         ]);
 
+        Log::info('Post deleted successfully', ['post_id' => $post->id, 'user_id' => $user->id]);
+
         return response()->json([
             'success' => true,
             'message' => 'Post deleted successfully. User has been notified and has 15 days to appeal.'
         ]);
+        } catch (\Exception $e) {
+            Log::error('Error deleting post', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function userPosts($userId)
