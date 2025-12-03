@@ -125,11 +125,11 @@
                             
                             <button onclick="toggleMessages('conversation-{{ $loop->index }}')" 
                                     class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
-                                View Messages
+                                <span class="toggle-text">Hide Messages</span>
                             </button>
                         </div>
                         
-                        <div id="conversation-{{ $loop->index }}" class="hidden mt-4 ml-16 space-y-3">
+                        <div id="conversation-{{ $loop->index }}" class="mt-4 ml-16 space-y-3">
                             @foreach($messages as $message)
                             @php
                                 $isFromUser = $message->sender_id == $user->id;
@@ -190,10 +190,15 @@
     <script>
         function toggleMessages(conversationId) {
             const element = document.getElementById(conversationId);
+            const button = event.target.closest('button');
+            const toggleText = button.querySelector('.toggle-text');
+            
             if (element.classList.contains('hidden')) {
                 element.classList.remove('hidden');
+                if (toggleText) toggleText.textContent = 'Hide Messages';
             } else {
                 element.classList.add('hidden');
+                if (toggleText) toggleText.textContent = 'View Messages';
             }
         }
     </script>

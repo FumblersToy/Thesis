@@ -78,10 +78,13 @@ class MessageController extends Controller
             ], 400);
         }
 
+        // Filter profanity from message content
+        $filteredContent = filterProfanity($request->content);
+
         $message = Message::create([
             'sender_id' => Auth::id(),
             'receiver_id' => $request->receiver_id,
-            'content' => $request->content,
+            'content' => $filteredContent,
         ]);
 
         // Load relationships
