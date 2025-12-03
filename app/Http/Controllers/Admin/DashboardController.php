@@ -60,21 +60,27 @@ class DashboardController extends Controller
 
     public function deletePost(Request $request, $postId)
     {
-        $request->validate([
-            'reason' => 'required|string|max:500'
-        ]);
+        // Get reason from request (supports both JSON and form data)
+        $reason = $request->input('reason') ?? $request->reason;
+        
+        if (!$reason || empty(trim($reason))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Deletion reason is required.'
+            ], 400);
+        }
 
         $post = Post::findOrFail($postId);
         $user = $post->user;
         
         // Soft delete the post with reason
-        $post->deletion_reason = $request->reason;
+        $post->deletion_reason = trim($reason);
         $post->deleted_by = auth('admin')->id();
         $post->save();
         $post->delete(); // This performs the soft delete
         
         // Send notification to the user
-        $user->notify(new PostDeleted($post->id, $request->reason, now()));
+        $user->notify(new PostDeleted($post->id, trim($reason), now()));
 
         return response()->json([
             'success' => true,
