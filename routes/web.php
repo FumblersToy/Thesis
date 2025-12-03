@@ -197,8 +197,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         })->name('dashboard');
         Route::get('/users/{user}/posts', [App\Http\Controllers\Admin\DashboardController::class, 'userPosts'])->name('user.posts');
         Route::get('/users/{user}/conversations', [App\Http\Controllers\Admin\DashboardController::class, 'userConversations'])->name('user.conversations');
-        Route::get('/appeals', [App\Http\Controllers\Admin\DashboardController::class, 'appeals'])->name('admin.appeals');
-        Route::post('/appeals/{post}/respond', [App\Http\Controllers\Admin\DashboardController::class, 'respondToAppeal'])->name('admin.appeal.respond');
+        Route::get('/appeals', [App\Http\Controllers\Admin\DashboardController::class, 'appeals'])->name('appeals');
+        Route::post('/appeals/{post}/respond', [App\Http\Controllers\Admin\DashboardController::class, 'respondToAppeal'])->name('appeal.respond');
         Route::delete('/posts/{post}', [App\Http\Controllers\Admin\DashboardController::class, 'deletePost'])->name('post.delete');
         Route::delete('/users/{user}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteUser'])->name('user.delete');
         Route::post('/businesses/{business}/verify', [App\Http\Controllers\Admin\DashboardController::class, 'toggleVerification'])->name('business.verify');
