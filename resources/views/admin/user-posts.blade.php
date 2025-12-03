@@ -375,7 +375,11 @@
         }
 
         async function deletePost(postId) {
+            console.log('deletePost called with postId:', postId);
+            console.log('CSRF Token:', csrfToken);
+            
             const reason = prompt('Please provide a reason for deleting this post (required for user notification):');
+            console.log('Reason entered:', reason);
             
             if (!reason || reason.trim() === '') {
                 alert('A reason is required to delete the post.');
@@ -383,9 +387,12 @@
             }
 
             if (!confirm('Are you sure you want to delete this post? The user will be notified and can appeal.')) {
+                console.log('User cancelled deletion');
                 return;
             }
 
+            console.log('Sending DELETE request to:', `/admin/posts/${postId}`);
+            
             try {
                 const response = await fetch(`/admin/posts/${postId}`, {
                     method: 'DELETE',
@@ -397,7 +404,9 @@
                     body: JSON.stringify({ reason: reason.trim() })
                 });
 
+                console.log('Response status:', response.status);
                 const data = await response.json();
+                console.log('Response data:', data);
 
                 if (data.success) {
                     alert(data.message);
