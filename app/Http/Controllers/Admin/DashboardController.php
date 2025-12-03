@@ -79,8 +79,15 @@ class DashboardController extends Controller
         $post->save();
         $post->delete(); // This performs the soft delete
         
-        // Send notification to the user
-        $user->notify(new PostDeleted($post->id, trim($reason), now()));
+        // Create notification using custom Notification model
+        \App\Models\Notification::create([
+            'user_id' => $user->id,
+            'notifier_id' => auth('admin')->id(),
+            'type' => 'post_deleted',
+            'post_id' => $post->id,
+            'message' => 'Your post has been removed by an admin. Reason: ' . trim($reason),
+            'read' => false,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -292,14 +299,33 @@ class DashboardController extends Controller
             $post->deleted_by = null;
             $post->save();
 
-            // Notify user
-            $post->user->notify(new \App\Notifications\AppealApproved($post->id));
+            // Create notification using custom Notification model
+            \App\Models\Notification::create([
+                'user_id' => $post->user_id,
+                'notifier_id' => auth('admin')->id(),
+                'type' => 'appeal_approved',
+                'post_id' => $post->id,
+                'message' => 'Your appeal has been approved! Your post has been restored.',
+                'read' => false,
+            ]);
         } else {
             $post->appeal_status = 'denied';
             $post->save();
 
-            // Notify user
-            $post->user->notify(new \App\Notifications\AppealDenied($post->id, $request->response));
+            // Create notification using custom Notification model
+            $message = 'Your appeal has been denied.';
+            if ($request->response) {
+                $message .= ' Admin response: ' . $request->response;
+            }
+            
+            \App\Models\Notification::create([
+                'user_id' => $post->user_id,
+                'notifier_id' => auth('admin')->id(),
+                'type' => 'appeal_denied',
+                'post_id' => $post->id,
+                'message' => $message,
+                'read' => false,
+            ]);
         }
 
         return response()->json([
