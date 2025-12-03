@@ -246,21 +246,6 @@
                 </div>
             </div>
         </div>
-                        
-                        <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm text-center">
-                            ← Back to Dashboard
-                        </a>
-                    </div>
-                    @else
-                    <div class="ml-auto">
-                        <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm">
-                            ← Back to Dashboard
-                        </a>
-                    </div>
-                    @endif
-                </div>
-            </div>
-        </div>
 
         <!-- Posts Grid -->
         <div class="bg-white shadow rounded-lg">
