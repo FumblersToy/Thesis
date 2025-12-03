@@ -311,8 +311,90 @@
         </div>
     </div>
 
+    <!-- Delete Reason Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Delete Post</h3>
+                <textarea id="deleteReason" 
+                          class="w-full border border-gray-300 rounded-md p-3 text-sm" 
+                          rows="4" 
+                          placeholder="Enter reason for deletion (required)..."></textarea>
+                <div class="text-xs text-gray-500 mt-1">Maximum 500 characters</div>
+                <div class="flex gap-2 mt-4">
+                    <button onclick="confirmDelete()" 
+                            class="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        Delete Post
+                    </button>
+                    <button onclick="closeDeleteModal()" 
+                            class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md text-sm font-medium">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        let currentPostId = null;
+
+        function deletePost(postId) {
+            console.log('Opening delete modal for post:', postId);
+            currentPostId = postId;
+            document.getElementById('deleteModal').classList.remove('hidden');
+            document.getElementById('deleteReason').value = '';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            currentPostId = null;
+        }
+
+        async function confirmDelete() {
+            const reason = document.getElementById('deleteReason').value.trim();
+            
+            if (!reason) {
+                alert('Please enter a reason for deletion.');
+                return;
+            }
+
+            if (reason.length > 500) {
+                alert('Reason must be 500 characters or less.');
+                return;
+            }
+
+            closeDeleteModal();
+            
+            console.log('Sending DELETE request for post:', currentPostId);
+            console.log('Reason:', reason);
+
+            try {
+                const response = await fetch(`/admin/posts/${currentPostId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reason: reason })
+                });
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Error deleting post: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Network error occurred');
+            }
+        }
 
         async function toggleVerification(businessId, verify) {
             const action = verify ? 'verify' : 'unverify';
@@ -367,52 +449,6 @@
                     location.reload();
                 } else {
                     alert('Error: ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Network error occurred');
-            }
-        }
-
-        async function deletePost(postId) {
-            console.log('deletePost called with postId:', postId);
-            console.log('CSRF Token:', csrfToken);
-            
-            const reason = prompt('Please provide a reason for deleting this post (required for user notification):');
-            console.log('Reason entered:', reason);
-            
-            if (!reason || reason.trim() === '') {
-                alert('A reason is required to delete the post.');
-                return;
-            }
-
-            if (!confirm('Are you sure you want to delete this post? The user will be notified and can appeal.')) {
-                console.log('User cancelled deletion');
-                return;
-            }
-
-            console.log('Sending DELETE request to:', `/admin/posts/${postId}`);
-            
-            try {
-                const response = await fetch(`/admin/posts/${postId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ reason: reason.trim() })
-                });
-
-                console.log('Response status:', response.status);
-                const data = await response.json();
-                console.log('Response data:', data);
-
-                if (data.success) {
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    alert('Error deleting post: ' + data.message);
                 }
             } catch (error) {
                 console.error('Error:', error);
