@@ -230,6 +230,11 @@
                                 <span id="messagesBadge" class="hidden absolute top-2 left-6 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
                             </a>
 
+                            <a href="{{ route('posts.deleted') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
+                                <span class="text-lg">🗑️</span>
+                                Deleted Posts
+                            </a>
+
                             <div class="border-t border-gray-200 my-2"></div>
 
                             <form method="POST" action="{{ route('logout') }}">

@@ -32,6 +32,12 @@
                     <span class="ml-2 text-xl font-semibold text-gray-800">Admin Dashboard</span>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <a href="{{ route('admin.appeals') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                        </svg>
+                        View Appeals
+                    </a>
                     <span class="text-gray-600">{{ auth('admin')->user()->name }}</span>
                     <form method="POST" action="{{ route('admin.logout') }}" class="inline" id="logoutForm">
                         @csrf
@@ -120,6 +126,107 @@
             </div>
         </div>
 
+        <!-- Activity Analytics -->
+        <div class="bg-white shadow rounded-lg mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Activity Analytics</h3>
+                <p class="mt-1 text-sm text-gray-500">Platform activity across different time periods</p>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Today's Activity -->
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+                        <h4 class="text-sm font-semibold text-blue-900 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Today
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-blue-700">Posts</span>
+                                <span class="text-lg font-bold text-blue-900">{{ $stats['posts_today'] }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-blue-700">Likes</span>
+                                <span class="text-lg font-bold text-blue-900">{{ $stats['likes_today'] }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-blue-700">Comments</span>
+                                <span class="text-lg font-bold text-blue-900">{{ $stats['comments_today'] }}</span>
+                            </div>
+                            <div class="pt-2 border-t border-blue-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-semibold text-blue-800">Total Activity</span>
+                                    <span class="text-xl font-bold text-blue-900">{{ $stats['posts_today'] + $stats['likes_today'] + $stats['comments_today'] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- This Week's Activity -->
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 border border-purple-200">
+                        <h4 class="text-sm font-semibold text-purple-900 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            This Week
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-purple-700">Posts</span>
+                                <span class="text-lg font-bold text-purple-900">{{ $stats['posts_week'] }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-purple-700">Likes</span>
+                                <span class="text-lg font-bold text-purple-900">{{ $stats['likes_week'] }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-purple-700">Comments</span>
+                                <span class="text-lg font-bold text-purple-900">{{ $stats['comments_week'] }}</span>
+                            </div>
+                            <div class="pt-2 border-t border-purple-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-semibold text-purple-800">Total Activity</span>
+                                    <span class="text-xl font-bold text-purple-900">{{ $stats['posts_week'] + $stats['likes_week'] + $stats['comments_week'] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- This Month's Activity -->
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+                        <h4 class="text-sm font-semibold text-green-900 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            This Month
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-green-700">Posts</span>
+                                <span class="text-lg font-bold text-green-900">{{ $stats['posts_month'] }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-green-700">Likes</span>
+                                <span class="text-lg font-bold text-green-900">{{ $stats['likes_month'] }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-green-700">Comments</span>
+                                <span class="text-lg font-bold text-green-900">{{ $stats['comments_month'] }}</span>
+                            </div>
+                            <div class="pt-2 border-t border-green-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-semibold text-green-800">Total Activity</span>
+                                    <span class="text-xl font-bold text-green-900">{{ $stats['posts_month'] + $stats['likes_month'] + $stats['comments_month'] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Users Table -->
         <div class="bg-white shadow overflow-hidden sm:rounded-md">
             <div class="px-4 py-5 sm:px-6">
@@ -193,6 +300,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $user->following_count }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <a href="{{ route('admin.user.posts', $user->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">View Posts</a>
+                                <a href="{{ route('admin.user.conversations', $user->id) }}" class="text-green-600 hover:text-green-900 mr-3">View Messages</a>
                                 <button onclick="deleteUser({{ $user->id }})" class="text-red-600 hover:text-red-900">Delete User</button>
                             </td>
                         </tr>

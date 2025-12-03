@@ -138,6 +138,120 @@
                         </a>
                     </div>
                     @else
+                    <a href="{{ route('admin.dashboard') }}" class="ml-auto bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm">
+                        ← Back to Dashboard
+                    </a>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- User Activity Analytics -->
+        <div class="bg-white shadow rounded-lg mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">User Activity</h3>
+                <p class="mt-1 text-sm text-gray-500">{{ $displayName }}'s activity and engagement statistics</p>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Today's Activity -->
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-200">
+                        <h4 class="text-sm font-semibold text-blue-900 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Today
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-blue-700">Posts Created</span>
+                                <span class="text-lg font-bold text-blue-900">{{ $userStats['posts_today'] }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-blue-700">Likes Received</span>
+                                <span class="text-lg font-bold text-blue-900">{{ $userStats['likes_today'] }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-blue-700">Comments Received</span>
+                                <span class="text-lg font-bold text-blue-900">{{ $userStats['comments_today'] }}</span>
+                            </div>
+                            <div class="pt-2 border-t border-blue-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-semibold text-blue-800">Total Engagement</span>
+                                    <span class="text-xl font-bold text-blue-900">{{ $userStats['likes_today'] + $userStats['comments_today'] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- This Week's Activity -->
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-6 border border-purple-200">
+                        <h4 class="text-sm font-semibold text-purple-900 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            This Week
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-purple-700">Posts Created</span>
+                                <span class="text-lg font-bold text-purple-900">{{ $userStats['posts_week'] }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-purple-700">Likes Received</span>
+                                <span class="text-lg font-bold text-purple-900">{{ $userStats['likes_week'] }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-purple-700">Comments Received</span>
+                                <span class="text-lg font-bold text-purple-900">{{ $userStats['comments_week'] }}</span>
+                            </div>
+                            <div class="pt-2 border-t border-purple-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-semibold text-purple-800">Total Engagement</span>
+                                    <span class="text-xl font-bold text-purple-900">{{ $userStats['likes_week'] + $userStats['comments_week'] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- This Month's Activity -->
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-6 border border-green-200">
+                        <h4 class="text-sm font-semibold text-green-900 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            This Month
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-green-700">Posts Created</span>
+                                <span class="text-lg font-bold text-green-900">{{ $userStats['posts_month'] }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-green-700">Likes Received</span>
+                                <span class="text-lg font-bold text-green-900">{{ $userStats['likes_month'] }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-green-700">Comments Received</span>
+                                <span class="text-lg font-bold text-green-900">{{ $userStats['comments_month'] }}</span>
+                            </div>
+                            <div class="pt-2 border-t border-green-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-semibold text-green-800">Total Engagement</span>
+                                    <span class="text-xl font-bold text-green-900">{{ $userStats['likes_month'] + $userStats['comments_month'] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+                        
+                        <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm text-center">
+                            ← Back to Dashboard
+                        </a>
+                    </div>
+                    @else
                     <div class="ml-auto">
                         <a href="{{ route('admin.dashboard') }}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm">
                             ← Back to Dashboard
@@ -276,7 +390,14 @@
         }
 
         async function deletePost(postId) {
-            if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+            const reason = prompt('Please provide a reason for deleting this post (required for user notification):');
+            
+            if (!reason || reason.trim() === '') {
+                alert('A reason is required to delete the post.');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this post? The user will be notified and can appeal within 15 days.')) {
                 return;
             }
 
@@ -285,13 +406,16 @@
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    }
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reason: reason.trim() })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
+                    alert(data.message);
                     location.reload();
                 } else {
                     alert('Error deleting post: ' + data.message);

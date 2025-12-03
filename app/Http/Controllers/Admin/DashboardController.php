@@ -7,8 +7,11 @@ use App\Models\User;
 use App\Models\Post;
 use App\Models\Musician;
 use App\Models\Business;
+use App\Models\Message;
+use App\Notifications\PostDeleted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Cloudinary\Cloudinary;
 use Exception;
 
@@ -25,11 +28,31 @@ class DashboardController extends Controller
             ->withCount(['posts', 'likes', 'comments', 'followers', 'following'])
             ->paginate(20);
 
+        $now = now();
+        $todayStart = $now->copy()->startOfDay();
+        $weekStart = $now->copy()->startOfWeek();
+        $monthStart = $now->copy()->startOfMonth();
+
         $stats = [
             'total_users' => User::count(),
             'total_posts' => Post::count(),
             'total_musicians' => Musician::count(),
             'total_businesses' => Business::count(),
+            
+            // Today's stats
+            'posts_today' => Post::where('created_at', '>=', $todayStart)->count(),
+            'likes_today' => DB::table('likes')->where('created_at', '>=', $todayStart)->count(),
+            'comments_today' => DB::table('comments')->where('created_at', '>=', $todayStart)->count(),
+            
+            // This week's stats
+            'posts_week' => Post::where('created_at', '>=', $weekStart)->count(),
+            'likes_week' => DB::table('likes')->where('created_at', '>=', $weekStart)->count(),
+            'comments_week' => DB::table('comments')->where('created_at', '>=', $weekStart)->count(),
+            
+            // This month's stats
+            'posts_month' => Post::where('created_at', '>=', $monthStart)->count(),
+            'likes_month' => DB::table('likes')->where('created_at', '>=', $monthStart)->count(),
+            'comments_month' => DB::table('comments')->where('created_at', '>=', $monthStart)->count(),
         ];
 
         return view('admin.dashboard', compact('users', 'stats'));
@@ -37,27 +60,25 @@ class DashboardController extends Controller
 
     public function deletePost(Request $request, $postId)
     {
+        $request->validate([
+            'reason' => 'required|string|max:500'
+        ]);
+
         $post = Post::findOrFail($postId);
+        $user = $post->user;
         
-        // Delete the image from Cloudinary if it exists
-        if ($post->image_public_id) {
-            try {
-                $cloudinaryUrl = config('cloudinary.cloud_url');
-                if ($cloudinaryUrl) {
-                    $cloudinary = new Cloudinary($cloudinaryUrl);
-                    $cloudinary->uploadApi()->destroy($post->image_public_id);
-                }
-            } catch (Exception $e) {
-                Log::error('Cloudinary delete error: ' . $e->getMessage());
-                // Continue with post deletion even if Cloudinary deletion fails
-            }
-        }
+        // Soft delete the post with reason
+        $post->deletion_reason = $request->reason;
+        $post->deleted_by = auth('admin')->id();
+        $post->save();
+        $post->delete(); // This performs the soft delete
         
-        $post->delete();
+        // Send notification to the user
+        $user->notify(new PostDeleted($post->id, $request->reason, now()));
 
         return response()->json([
             'success' => true,
-            'message' => 'Post deleted successfully'
+            'message' => 'Post deleted successfully. User has been notified and has 15 days to appeal.'
         ]);
     }
 
@@ -69,7 +90,51 @@ class DashboardController extends Controller
             ->orderByDesc('created_at')
             ->paginate(12);
 
-        return view('admin.user-posts', compact('user', 'posts'));
+        $now = now();
+        $todayStart = $now->copy()->startOfDay();
+        $weekStart = $now->copy()->startOfWeek();
+        $monthStart = $now->copy()->startOfMonth();
+
+        // User activity stats
+        $userStats = [
+            // Posts
+            'posts_today' => Post::where('user_id', $userId)
+                ->where('created_at', '>=', $todayStart)->count(),
+            'posts_week' => Post::where('user_id', $userId)
+                ->where('created_at', '>=', $weekStart)->count(),
+            'posts_month' => Post::where('user_id', $userId)
+                ->where('created_at', '>=', $monthStart)->count(),
+            
+            // Likes received
+            'likes_today' => DB::table('likes')
+                ->join('posts', 'likes.post_id', '=', 'posts.id')
+                ->where('posts.user_id', $userId)
+                ->where('likes.created_at', '>=', $todayStart)->count(),
+            'likes_week' => DB::table('likes')
+                ->join('posts', 'likes.post_id', '=', 'posts.id')
+                ->where('posts.user_id', $userId)
+                ->where('likes.created_at', '>=', $weekStart)->count(),
+            'likes_month' => DB::table('likes')
+                ->join('posts', 'likes.post_id', '=', 'posts.id')
+                ->where('posts.user_id', $userId)
+                ->where('likes.created_at', '>=', $monthStart)->count(),
+            
+            // Comments received
+            'comments_today' => DB::table('comments')
+                ->join('posts', 'comments.post_id', '=', 'posts.id')
+                ->where('posts.user_id', $userId)
+                ->where('comments.created_at', '>=', $todayStart)->count(),
+            'comments_week' => DB::table('comments')
+                ->join('posts', 'comments.post_id', '=', 'posts.id')
+                ->where('posts.user_id', $userId)
+                ->where('comments.created_at', '>=', $weekStart)->count(),
+            'comments_month' => DB::table('comments')
+                ->join('posts', 'comments.post_id', '=', 'posts.id')
+                ->where('posts.user_id', $userId)
+                ->where('comments.created_at', '>=', $monthStart)->count(),
+        ];
+
+        return view('admin.user-posts', compact('user', 'posts', 'userStats'));
     }
 
     public function deleteUser(Request $request, $userId)
@@ -147,6 +212,93 @@ class DashboardController extends Controller
         return response()->json([
             'success' => true,
             'message' => $verified ? 'Musician verified successfully' : 'Musician unverified successfully'
+        ]);
+    }
+
+    public function userConversations($userId)
+    {
+        $user = User::with(['musician', 'business'])->findOrFail($userId);
+        
+        // Get all conversations where this user is involved
+        $conversations = Message::where('sender_id', $userId)
+            ->orWhere('receiver_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy(function($message) use ($userId) {
+                // Group by the other user's ID
+                return $message->sender_id == $userId ? $message->receiver_id : $message->sender_id;
+            })
+            ->map(function($messages) use ($userId) {
+                $otherUserId = $messages->first()->sender_id == $userId 
+                    ? $messages->first()->receiver_id 
+                    : $messages->first()->sender_id;
+                
+                $otherUser = User::with(['musician', 'business'])->find($otherUserId);
+                
+                return [
+                    'other_user' => $otherUser,
+                    'messages' => $messages->sortBy('created_at'),
+                    'message_count' => $messages->count(),
+                    'last_message' => $messages->sortByDesc('created_at')->first()
+                ];
+            })
+            ->sortByDesc(function($conversation) {
+                return $conversation['last_message']->created_at;
+            });
+
+        return view('admin.user-conversations', compact('user', 'conversations'));
+    }
+
+    /**
+     * View all post deletion appeals
+     */
+    public function appeals()
+    {
+        $appeals = Post::onlyTrashed()
+            ->where('appeal_status', 'pending')
+            ->with(['user.musician', 'user.business', 'deletedBy'])
+            ->orderByDesc('appeal_at')
+            ->get();
+
+        return view('admin.appeals', compact('appeals'));
+    }
+
+    /**
+     * Respond to a post deletion appeal
+     */
+    public function respondToAppeal(Request $request, $postId)
+    {
+        $request->validate([
+            'decision' => 'required|in:approved,denied',
+            'response' => 'nullable|string|max:500'
+        ]);
+
+        $post = Post::onlyTrashed()
+            ->where('id', $postId)
+            ->where('appeal_status', 'pending')
+            ->firstOrFail();
+
+        if ($request->decision === 'approved') {
+            // Restore the post
+            $post->restore();
+            $post->appeal_status = 'approved';
+            $post->deletion_reason = null;
+            $post->deleted_by = null;
+            $post->save();
+
+            // Notify user
+            $post->user->notify(new \App\Notifications\AppealApproved($post->id));
+        } else {
+            $post->appeal_status = 'denied';
+            $post->save();
+
+            // Notify user
+            $post->user->notify(new \App\Notifications\AppealDenied($post->id, $request->response));
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Appeal ' . $request->decision . ' successfully.'
         ]);
     }
 }
