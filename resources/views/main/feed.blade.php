@@ -230,6 +230,11 @@
                                 <span id="messagesBadge" class="hidden absolute top-2 left-6 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
                             </a>
 
+                            <a href="{{ route('posts.deleted') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
+                                <span class="text-lg">🗑️</span>
+                                Deleted Posts
+                            </a>
+
                             <div class="border-t border-gray-200 my-2"></div>
 
                             <form method="POST" action="{{ route('logout') }}">
@@ -1493,6 +1498,18 @@
                             } else if (notif.type === 'comment') {
                                 icon = '💬';
                                 clickHandler = `onclick="openNotificationPost(${notif.post_id}, ${notif.id})"`;
+                            } else if (notif.type === 'post_deleted') {
+                                icon = '🗑️';
+                                bgColor = notif.read ? 'bg-white' : 'bg-red-50';
+                                clickHandler = `onclick="window.location.href='{{ route('posts.deleted') }}'"`;
+                            } else if (notif.type === 'appeal_approved') {
+                                icon = '✅';
+                                bgColor = notif.read ? 'bg-white' : 'bg-green-50';
+                                clickHandler = `onclick="window.location.href='{{ route('feed') }}'"`;
+                            } else if (notif.type === 'appeal_denied') {
+                                icon = '❌';
+                                bgColor = notif.read ? 'bg-white' : 'bg-red-50';
+                                clickHandler = `onclick="window.location.href='{{ route('posts.deleted') }}'"`;
                             } else {
                                 clickHandler = notif.post_id ? `onclick="openNotificationPost(${notif.post_id}, ${notif.id})"` : '';
                             }

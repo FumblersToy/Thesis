@@ -58,35 +58,35 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact('users', 'stats'));
     }
 
-    public function deletePost($postId)
+    public function deletePost(Request $request, $postId)
     {
+        $request->validate([
+            'reason' => 'required|string|max:500'
+        ]);
+
         try {
             $post = Post::findOrFail($postId);
+            $user = $post->user;
             
-            // Delete image from Cloudinary if it exists
-            if ($post->image_path) {
-                try {
-                    $cloudinary = new Cloudinary([
-                        'cloud' => [
-                            'cloud_name' => config('cloudinary.cloud_name'),
-                            'api_key' => config('cloudinary.api_key'),
-                            'api_secret' => config('cloudinary.api_secret'),
-                        ],
-                    ]);
-                    
-                    $publicId = pathinfo($post->image_path, PATHINFO_FILENAME);
-                    $cloudinary->uploadApi()->destroy($publicId);
-                } catch (Exception $e) {
-                    Log::warning('Failed to delete image from Cloudinary', ['error' => $e->getMessage()]);
-                }
-            }
-            
-            // Hard delete the post
+            // Soft delete with reason
+            $post->deletion_reason = $request->reason;
+            $post->deleted_by = auth('admin')->id();
+            $post->save();
             $post->delete();
             
+            // Create notification
+            Notification::create([
+                'user_id' => $user->id,
+                'notifier_id' => auth('admin')->id(),
+                'type' => 'post_deleted',
+                'post_id' => $post->id,
+                'message' => 'Your post has been removed by an admin. Reason: ' . $request->reason,
+                'read' => false,
+            ]);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Post deleted successfully.'
+                'message' => 'Post deleted successfully. User has been notified.'
             ]);
         } catch (\Exception $e) {
             Log::error('Error deleting post', ['error' => $e->getMessage()]);
@@ -260,5 +260,68 @@ class DashboardController extends Controller
             });
 
         return view('admin.user-conversations', compact('user', 'conversations'));
+    }
+
+    public function appeals()
+    {
+        $appeals = Post::onlyTrashed()
+            ->where('appeal_status', 'pending')
+            ->with(['user.musician', 'user.business', 'deletedBy'])
+            ->orderByDesc('appeal_at')
+            ->get();
+
+        return view('admin.appeals', compact('appeals'));
+    }
+
+    public function respondToAppeal(Request $request, $postId)
+    {
+        $request->validate([
+            'decision' => 'required|in:approved,denied',
+            'response' => 'nullable|string|max:500'
+        ]);
+
+        $post = Post::onlyTrashed()
+            ->where('id', $postId)
+            ->where('appeal_status', 'pending')
+            ->firstOrFail();
+
+        if ($request->decision === 'approved') {
+            $post->restore();
+            $post->appeal_status = 'approved';
+            $post->deletion_reason = null;
+            $post->deleted_by = null;
+            $post->save();
+
+            Notification::create([
+                'user_id' => $post->user_id,
+                'notifier_id' => auth('admin')->id(),
+                'type' => 'appeal_approved',
+                'post_id' => $post->id,
+                'message' => 'Your appeal has been approved! Your post has been restored.',
+                'read' => false,
+            ]);
+        } else {
+            $post->appeal_status = 'denied';
+            $post->save();
+
+            $message = 'Your appeal has been denied.';
+            if ($request->response) {
+                $message .= ' Admin response: ' . $request->response;
+            }
+            
+            Notification::create([
+                'user_id' => $post->user_id,
+                'notifier_id' => auth('admin')->id(),
+                'type' => 'appeal_denied',
+                'post_id' => $post->id,
+                'message' => $message,
+                'read' => false,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Appeal ' . $request->decision . ' successfully.'
+        ]);
     }
 }

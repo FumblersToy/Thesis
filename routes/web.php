@@ -139,6 +139,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/posts/cancel', [PostController::class, 'cancelUpload'])->name('posts.cancel');
     Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
     
+    // Post Appeals
+    Route::get('/posts/deleted', [App\Http\Controllers\PostAppealController::class, 'index'])->name('posts.deleted');
+    Route::post('/posts/{id}/appeal', [App\Http\Controllers\PostAppealController::class, 'submitAppeal'])->name('posts.appeal');
+    
     // Likes
     Route::post('/posts/{id}/like', [App\Http\Controllers\LikeController::class, 'toggle'])->name('posts.like');    // Comments
     Route::post('/posts/{id}/comments', [App\Http\Controllers\CommentController::class, 'store'])->name('posts.comments.store');
@@ -193,6 +197,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         })->name('dashboard');
         Route::get('/users/{user}/posts', [App\Http\Controllers\Admin\DashboardController::class, 'userPosts'])->name('user.posts');
         Route::get('/users/{user}/conversations', [App\Http\Controllers\Admin\DashboardController::class, 'userConversations'])->name('user.conversations');
+        Route::get('/appeals', [App\Http\Controllers\Admin\DashboardController::class, 'appeals'])->name('admin.appeals');
+        Route::post('/appeals/{post}/respond', [App\Http\Controllers\Admin\DashboardController::class, 'respondToAppeal'])->name('admin.appeal.respond');
         Route::delete('/posts/{post}', [App\Http\Controllers\Admin\DashboardController::class, 'deletePost'])->name('post.delete');
         Route::delete('/users/{user}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteUser'])->name('user.delete');
         Route::post('/businesses/{business}/verify', [App\Http\Controllers\Admin\DashboardController::class, 'toggleVerification'])->name('business.verify');
