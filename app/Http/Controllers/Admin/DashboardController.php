@@ -65,39 +65,20 @@ class DashboardController extends Controller
         ]);
 
         try {
-            Log::info('Starting post deletion', ['post_id' => $postId, 'admin_id' => auth('admin')->id()]);
-            
             $post = Post::findOrFail($postId);
-            $user = $post->user;
-            
-            Log::info('Post found, user:', ['user_id' => $user->id, 'post_id' => $post->id]);
             
             // Soft delete with reason
             $post->deletion_reason = $request->reason;
             $post->deleted_by = auth('admin')->id();
             $post->save();
             $post->delete();
-            
-            Log::info('Post soft deleted, creating notification');
-            
-            // Create notification (notifier_id is null for admin actions)
-            $notification = Notification::create([
-                'user_id' => $user->id,
-                'notifier_id' => null,
-                'type' => 'post_deleted',
-                'post_id' => $post->id,
-                'message' => 'Your post has been removed by an admin. Reason: ' . $request->reason,
-                'read' => false,
-            ]);
-            
-            Log::info('Notification created', ['notification_id' => $notification->id]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Post deleted successfully. User has been notified.'
+                'message' => 'Post deleted successfully.'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error deleting post', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            Log::error('Error deleting post', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'An error occurred while deleting the post.'
@@ -299,32 +280,9 @@ class DashboardController extends Controller
             $post->deletion_reason = null;
             $post->deleted_by = null;
             $post->save();
-
-            Notification::create([
-                'user_id' => $post->user_id,
-                'notifier_id' => null,
-                'type' => 'appeal_approved',
-                'post_id' => $post->id,
-                'message' => 'Your appeal has been approved! Your post has been restored.',
-                'read' => false,
-            ]);
         } else {
             $post->appeal_status = 'denied';
             $post->save();
-
-            $message = 'Your appeal has been denied.';
-            if ($request->response) {
-                $message .= ' Admin response: ' . $request->response;
-            }
-            
-            Notification::create([
-                'user_id' => $post->user_id,
-                'notifier_id' => null,
-                'type' => 'appeal_denied',
-                'post_id' => $post->id,
-                'message' => $message,
-                'read' => false,
-            ]);
         }
 
         return response()->json([

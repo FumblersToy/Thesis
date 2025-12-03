@@ -1498,18 +1498,6 @@
                             } else if (notif.type === 'comment') {
                                 icon = '💬';
                                 clickHandler = `onclick="openNotificationPost(${notif.post_id}, ${notif.id})"`;
-                            } else if (notif.type === 'post_deleted') {
-                                icon = '🗑️';
-                                bgColor = notif.read ? 'bg-white' : 'bg-red-50';
-                                clickHandler = `onclick="window.location.href='{{ route('posts.deleted') }}'"`;
-                            } else if (notif.type === 'appeal_approved') {
-                                icon = '✅';
-                                bgColor = notif.read ? 'bg-white' : 'bg-green-50';
-                                clickHandler = `onclick="window.location.href='{{ route('feed') }}'"`;
-                            } else if (notif.type === 'appeal_denied') {
-                                icon = '❌';
-                                bgColor = notif.read ? 'bg-white' : 'bg-red-50';
-                                clickHandler = `onclick="window.location.href='{{ route('posts.deleted') }}'"`;
                             } else {
                                 clickHandler = notif.post_id ? `onclick="openNotificationPost(${notif.post_id}, ${notif.id})"` : '';
                             }
