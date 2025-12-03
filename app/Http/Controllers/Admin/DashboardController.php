@@ -80,10 +80,10 @@ class DashboardController extends Controller
             
             Log::info('Post soft deleted, creating notification');
             
-            // Create notification
+            // Create notification (notifier_id is null for admin actions)
             $notification = Notification::create([
                 'user_id' => $user->id,
-                'notifier_id' => auth('admin')->id(),
+                'notifier_id' => null,
                 'type' => 'post_deleted',
                 'post_id' => $post->id,
                 'message' => 'Your post has been removed by an admin. Reason: ' . $request->reason,
@@ -302,7 +302,7 @@ class DashboardController extends Controller
 
             Notification::create([
                 'user_id' => $post->user_id,
-                'notifier_id' => auth('admin')->id(),
+                'notifier_id' => null,
                 'type' => 'appeal_approved',
                 'post_id' => $post->id,
                 'message' => 'Your appeal has been approved! Your post has been restored.',
@@ -319,7 +319,7 @@ class DashboardController extends Controller
             
             Notification::create([
                 'user_id' => $post->user_id,
-                'notifier_id' => auth('admin')->id(),
+                'notifier_id' => null,
                 'type' => 'appeal_denied',
                 'post_id' => $post->id,
                 'message' => $message,
