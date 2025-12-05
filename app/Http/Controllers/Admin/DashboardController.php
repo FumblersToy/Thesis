@@ -161,26 +161,17 @@ class DashboardController extends Controller
                 'appeal_status' => 'none'
             ]);
             
-            // Try to send email notification (don't fail if email fails)
-            try {
-                Mail::to($user->email)->send(new \App\Mail\AccountDeletionNotification($user, $reason, 15));
-                $emailSent = true;
-            } catch (\Exception $e) {
-                Log::error('Failed to send deletion email: ' . $e->getMessage());
-                $emailSent = false;
-            }
+            // TODO: Email sending disabled temporarily - fix Blade template first
+            // Mail::to($user->email)->send(new \App\Mail\AccountDeletionNotification($user, $reason, 15));
 
             return response()->json([
                 'success' => true,
-                'message' => $emailSent 
-                    ? 'User account scheduled for deletion in 15 days. Notification email sent.'
-                    : 'User account scheduled for deletion in 15 days. (Email notification failed)'
+                'message' => 'User account scheduled for deletion in 15 days.'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error scheduling user deletion: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error scheduling user deletion. Please try again.'
+                'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
     }
