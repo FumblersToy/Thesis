@@ -36,7 +36,13 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
-                        View Appeals
+                        Post Appeals
+                    </a>
+                    <a href="{{ route('admin.user.appeals') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        User Appeals
                     </a>
                     <span class="text-gray-600">{{ auth('admin')->user()->name }}</span>
                     <form method="POST" action="{{ route('admin.logout') }}" class="inline" id="logoutForm">
@@ -328,7 +334,14 @@
         });
 
         async function deleteUser(userId) {
-            if (!confirm('Are you sure you want to delete this user? This will also delete all their posts and cannot be undone.')) {
+            const reason = prompt('Please enter the reason for account deletion:', 'Terms of Service Violation');
+            
+            if (!reason || reason.trim() === '') {
+                alert('A deletion reason is required.');
+                return;
+            }
+            
+            if (!confirm('This will schedule the user account for deletion in 15 days and send them an email notification. They will have a chance to appeal. Continue?')) {
                 return;
             }
 
@@ -337,16 +350,19 @@
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
-                    }
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reason: reason.trim() })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
+                    alert(data.message);
                     location.reload();
                 } else {
-                    alert('Error deleting user: ' + data.message);
+                    alert('Error scheduling user deletion: ' + data.message);
                 }
             } catch (error) {
                 console.error('Error:', error);

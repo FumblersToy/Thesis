@@ -142,50 +142,31 @@ class DashboardController extends Controller
     public function deleteUser(Request $request, $userId)
     {
         $user = User::findOrFail($userId);
+        $admin = Auth::guard('admin')->user();
         
+        // Get deletion reason from request
+        $reason = $request->input('reason', 'Terms of Service Violation');
+        
+        // Schedule deletion for 15 days from now
+        $deletionDate = now()->addDays(15);
+        
+        $user->update([
+            'deletion_scheduled_at' => $deletionDate,
+            'deletion_reason' => $reason,
+            'deleted_by' => $admin->id,
+            'appeal_status' => 'none'
+        ]);
+        
+        // Send email notification
         try {
-            $cloudinaryUrl = config('cloudinary.cloud_url');
-            $cloudinary = $cloudinaryUrl ? new Cloudinary($cloudinaryUrl) : null;
-
-            // Delete all user's posts and their images from Cloudinary
-            $posts = Post::where('user_id', $userId)->get();
-            foreach ($posts as $post) {
-                if ($post->image_public_id && $cloudinary) {
-                    try {
-                        $cloudinary->uploadApi()->destroy($post->image_public_id);
-                    } catch (Exception $e) {
-                        Log::error('Cloudinary delete error for post: ' . $e->getMessage());
-                        // Continue deletion even if Cloudinary deletion fails
-                    }
-                }
-            }
-
-            // Delete profile pictures from Cloudinary if they exist
-            if ($user->musician && $user->musician->profile_picture_public_id && $cloudinary) {
-                try {
-                    $cloudinary->uploadApi()->destroy($user->musician->profile_picture_public_id);
-                } catch (Exception $e) {
-                    Log::error('Cloudinary delete error for musician profile: ' . $e->getMessage());
-                }
-            }
-
-            if ($user->business && $user->business->profile_picture_public_id && $cloudinary) {
-                try {
-                    $cloudinary->uploadApi()->destroy($user->business->profile_picture_public_id);
-                } catch (Exception $e) {
-                    Log::error('Cloudinary delete error for business profile: ' . $e->getMessage());
-                }
-            }
-        } catch (Exception $e) {
-            Log::error('Error deleting user assets from Cloudinary: ' . $e->getMessage());
+            \Mail::to($user->email)->send(new \App\Mail\AccountDeletionNotification($user, $reason, 15));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send deletion email: ' . $e->getMessage());
         }
-        
-        // Delete user (cascade will handle related records)
-        $user->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'User deleted successfully'
+            'message' => 'User account scheduled for deletion in 15 days. Notification email sent.'
         ]);
     }
 
@@ -288,6 +269,60 @@ class DashboardController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Appeal ' . $request->decision . ' successfully.'
+        ]);
+    }
+
+    public function userAppeals()
+    {
+        $appeals = User::whereNotNull('deletion_scheduled_at')
+            ->where('appeal_status', 'pending')
+            ->with(['musician', 'business', 'deletedBy'])
+            ->orderByDesc('appeal_at')
+            ->get();
+
+        return view('admin.user-appeals', compact('appeals'));
+    }
+
+    public function respondToUserAppeal(Request $request, $userId)
+    {
+        $request->validate([
+            'decision' => 'required|in:approved,denied',
+            'response' => 'nullable|string|max:500'
+        ]);
+
+        $user = User::findOrFail($userId);
+        
+        if ($user->appeal_status !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This appeal has already been processed.'
+            ], 400);
+        }
+
+        $user->appeal_response = $request->response;
+        
+        if ($request->decision === 'approved') {
+            // Restore account - clear deletion fields
+            $user->update([
+                'appeal_status' => 'approved',
+                'deletion_scheduled_at' => null,
+                'deletion_reason' => null,
+                'deleted_by' => null
+            ]);
+            
+            $message = 'Appeal approved. User account has been restored.';
+        } else {
+            // Deny appeal - keep deletion scheduled
+            $user->update([
+                'appeal_status' => 'denied'
+            ]);
+            
+            $message = 'Appeal denied. Account will be deleted as scheduled.';
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $message
         ]);
     }
 }

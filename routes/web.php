@@ -167,6 +167,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'show'])->name('settings.show');
     Route::post('/settings', [App\Http\Controllers\SettingsController::class, 'update'])->name('settings.update');
     
+    // Account Deletion Appeal
+    Route::post('/account/appeal', [App\Http\Controllers\UserAppealController::class, 'submitAppeal'])->name('account.appeal.submit');
+    Route::get('/account/appeal', [App\Http\Controllers\UserAppealController::class, 'showAppealPage'])->name('account.appeal.show');
+    
     // Map
     Route::get('/map', function () {
         return view('main.map');
@@ -197,8 +201,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         })->name('dashboard');
         Route::get('/users/{user}/posts', [App\Http\Controllers\Admin\DashboardController::class, 'userPosts'])->name('user.posts');
         Route::get('/users/{user}/conversations', [App\Http\Controllers\Admin\DashboardController::class, 'userConversations'])->name('user.conversations');
+        
+        // Post Appeals
         Route::get('/appeals', [App\Http\Controllers\Admin\DashboardController::class, 'appeals'])->name('appeals');
         Route::post('/appeals/{post}/respond', [App\Http\Controllers\Admin\DashboardController::class, 'respondToAppeal'])->name('appeal.respond');
+        
+        // User Account Appeals
+        Route::get('/user-appeals', [App\Http\Controllers\Admin\DashboardController::class, 'userAppeals'])->name('user.appeals');
+        Route::post('/user-appeals/{user}/respond', [App\Http\Controllers\Admin\DashboardController::class, 'respondToUserAppeal'])->name('user.appeal.respond');
+        
         Route::delete('/posts/{post}', [App\Http\Controllers\Admin\DashboardController::class, 'deletePost'])->name('post.delete');
         Route::delete('/users/{user}', [App\Http\Controllers\Admin\DashboardController::class, 'deleteUser'])->name('user.delete');
         Route::post('/businesses/{business}/verify', [App\Http\Controllers\Admin\DashboardController::class, 'toggleVerification'])->name('business.verify');

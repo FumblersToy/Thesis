@@ -29,6 +29,59 @@
                 <div class="mb-4 p-4 rounded-xl bg-green-500/80 text-white shadow-lg">{{ session('status') }}</div>
             @endif
 
+            @if ($user->isDeletionPending())
+                <div class="mb-6 glass-effect backdrop-blur-xl rounded-3xl shadow-2xl border-2 border-red-500 p-6">
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0">
+                            <svg class="w-12 h-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-red-400 mb-2">⚠️ Account Scheduled for Deletion</h3>
+                            <p class="text-gray-200 mb-3">
+                                Your account has been scheduled for deletion and will be permanently removed in 
+                                <strong class="text-red-400">{{ $user->daysUntilDeletion() }} days</strong>.
+                            </p>
+                            <div class="bg-red-900/30 rounded-lg p-3 mb-4">
+                                <p class="text-sm font-medium text-red-300">Reason:</p>
+                                <p class="text-sm text-gray-200">{{ $user->deletion_reason }}</p>
+                            </div>
+                            
+                            @if ($user->appeal_status === 'none')
+                                <p class="text-gray-200 mb-3">
+                                    If you believe this action was taken in error, you can submit an appeal to contest this decision.
+                                </p>
+                                <button onclick="openAppealModal()" class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-semibold transition-colors shadow-lg">
+                                    Submit Appeal
+                                </button>
+                            @elseif ($user->appeal_status === 'pending')
+                                <div class="bg-blue-900/30 rounded-lg p-3">
+                                    <p class="text-sm font-medium text-blue-300">✓ Appeal Status: Pending Review</p>
+                                    <p class="text-sm text-gray-200 mt-1">Your appeal has been submitted and is being reviewed by the admin team.</p>
+                                    @if ($user->appeal_message)
+                                        <p class="text-xs text-gray-300 mt-2">Your message: "{{ $user->appeal_message }}"</p>
+                                    @endif
+                                </div>
+                            @elseif ($user->appeal_status === 'approved')
+                                <div class="bg-green-900/30 rounded-lg p-3">
+                                    <p class="text-sm font-medium text-green-300">✓ Appeal Approved</p>
+                                    <p class="text-sm text-gray-200 mt-1">Your account has been restored. The deletion has been cancelled.</p>
+                                </div>
+                            @elseif ($user->appeal_status === 'denied')
+                                <div class="bg-red-900/30 rounded-lg p-3">
+                                    <p class="text-sm font-medium text-red-300">✗ Appeal Denied</p>
+                                    <p class="text-sm text-gray-200 mt-1">Your appeal was reviewed but not approved. Account deletion will proceed as scheduled.</p>
+                                    @if ($user->appeal_response)
+                                        <p class="text-xs text-gray-300 mt-2">Admin response: "{{ $user->appeal_response }}"</p>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <form action="{{ route('settings.update') }}" method="POST" enctype="multipart/form-data" class="glass-effect backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6 space-y-8" id="settingsForm">
                 @csrf
 
@@ -651,8 +704,99 @@
         }
     });
     });
+
+    // Appeal Modal Functions
+    function openAppealModal() {
+        document.getElementById('appealModal').classList.remove('hidden');
+        document.getElementById('appealModal').classList.add('flex');
+    }
+
+    function closeAppealModal() {
+        document.getElementById('appealModal').classList.add('hidden');
+        document.getElementById('appealModal').classList.remove('flex');
+    }
+
+    async function submitAppeal() {
+        const message = document.getElementById('appealMessage').value.trim();
+        
+        if (!message) {
+            alert('Please enter a message explaining why you believe this deletion should be reversed.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/account/appeal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ message })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while submitting your appeal.');
+        }
+    }
     </script>
+
+    <!-- Appeal Modal -->
+    <div id="appealModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-gray-800">Submit Account Deletion Appeal</h2>
+                    <button onclick="closeAppealModal()" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="mb-4">
+                    <p class="text-gray-700 mb-2">
+                        Use this form to appeal the deletion of your account. Please explain why you believe this action was taken in error or should be reconsidered.
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        The admin team will review your appeal and respond within 24-48 hours.
+                    </p>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 font-medium mb-2">Your Appeal Message *</label>
+                    <textarea id="appealMessage" 
+                              class="w-full border-2 border-gray-300 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              rows="6"
+                              maxlength="1000"
+                              placeholder="Please explain your situation..."></textarea>
+                    <p class="text-sm text-gray-500 mt-1">Maximum 1000 characters</p>
+                </div>
+
+                <div class="flex gap-3">
+                    <button onclick="submitAppeal()" class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors">
+                        Submit Appeal
+                    </button>
+                    <button onclick="closeAppealModal()" class="px-6 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-xl font-semibold transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
+
+
 
 

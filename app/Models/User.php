@@ -25,6 +25,14 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'deleted_at',
+        'deletion_reason',
+        'deleted_by',
+        'deletion_scheduled_at',
+        'appeal_status',
+        'appeal_message',
+        'appeal_at',
+        'appeal_response',
     ];
 
     /**
@@ -48,6 +56,9 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'last_seen_at' => 'datetime',
             'password' => 'hashed',
+            'deleted_at' => 'datetime',
+            'deletion_scheduled_at' => 'datetime',
+            'appeal_at' => 'datetime',
         ];
     }
 
@@ -132,6 +143,30 @@ class User extends Authenticatable implements MustVerifyEmail
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
+    }
+
+    // Admin relationship (who deleted this account)
+    public function deletedBy()
+    {
+        return $this->belongsTo(Admin::class, 'deleted_by');
+    }
+
+    // Check if account is pending deletion
+    public function isDeletionPending(): bool
+    {
+        return $this->deletion_scheduled_at !== null && 
+               $this->deletion_scheduled_at->isFuture() &&
+               $this->appeal_status !== 'approved';
+    }
+
+    // Get days until deletion
+    public function daysUntilDeletion(): ?int
+    {
+        if (!$this->isDeletionPending()) {
+            return null;
+        }
+        
+        return now()->diffInDays($this->deletion_scheduled_at, false);
     }
 
     // Update last seen timestamp
