@@ -162,9 +162,9 @@ class DashboardController extends Controller
         
         // Send email notification
         try {
-            \Mail::to($user->email)->send(new \App\Mail\AccountDeletionNotification($user, $reason, 15));
+            Mail::to($user->email)->send(new \App\Mail\AccountDeletionNotification($user, $reason, 15));
         } catch (\Exception $e) {
-            \Log::error('Failed to send deletion email: ' . $e->getMessage());
+            Log::error('Failed to send deletion email: ' . $e->getMessage());
         }
 
         return response()->json([
