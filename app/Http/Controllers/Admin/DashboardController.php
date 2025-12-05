@@ -160,13 +160,10 @@ class DashboardController extends Controller
                 'deleted_by' => $admin->id,
                 'appeal_status' => 'none'
             ]);
-            
-            // Send deletion notification email
-            Mail::to($user->email)->send(new \App\Mail\AccountDeletionNotification($user, $reason, 15));
 
             return response()->json([
                 'success' => true,
-                'message' => 'User account scheduled for deletion in 15 days. Notification email sent.'
+                'message' => 'User account scheduled for deletion in 15 days.'
             ]);
         } catch (\Exception $e) {
             return response()->json([

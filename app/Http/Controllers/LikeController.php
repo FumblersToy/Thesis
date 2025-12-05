@@ -17,6 +17,14 @@ class LikeController extends Controller
 
     public function toggle(Request $request, $postId)
     {
+        // Check if account is disabled
+        if (Auth::user()->isDisabled()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account is disabled. You cannot like posts.'
+            ], 403);
+        }
+
         try {
             $post = Post::findOrFail($postId);
             $userId = Auth::id();

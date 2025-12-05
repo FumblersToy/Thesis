@@ -65,6 +65,14 @@ class MessageController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if account is disabled
+        if (Auth::user()->isDisabled()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account is disabled. You cannot send messages.'
+            ], 403);
+        }
+
         $request->validate([
             'receiver_id' => 'required|exists:users,id',
             'content' => 'required|string|max:1000',

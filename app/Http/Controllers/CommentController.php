@@ -17,6 +17,14 @@ class CommentController extends Controller
 
     public function store(Request $request, $postId)
     {
+        // Check if account is disabled
+        if (Auth::user()->isDisabled()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account is disabled. You cannot comment.'
+            ], 403);
+        }
+
         try {
             $request->validate([
                 'content' => 'required|string|max:1000',

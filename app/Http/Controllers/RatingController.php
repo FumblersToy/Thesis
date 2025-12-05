@@ -20,6 +20,14 @@ class RatingController extends Controller
     {
         $user = Auth::user();
         
+        // Check if account is disabled
+        if ($user->isDisabled()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account is disabled. You cannot rate musicians.'
+            ], 403);
+        }
+        
         // Check if user is a business
         $business = Business::where('user_id', $user->id)->first();
         if (!$business) {

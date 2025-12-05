@@ -20,6 +20,17 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
+        // Check if account is disabled
+        if (Auth::user()->isDisabled()) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Your account is disabled. You cannot create posts.'
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'Your account is disabled. You cannot create posts.');
+        }
+
         try {
             $request->validate([
                 'description' => 'nullable|string|max:1000',

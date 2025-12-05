@@ -160,6 +160,12 @@ class User extends Authenticatable implements MustVerifyEmail
                $this->appeal_status !== 'approved';
     }
 
+    // Check if account is disabled (pending deletion)
+    public function isDisabled(): bool
+    {
+        return $this->isDeletionPending();
+    }
+
     // Get days until deletion
     public function daysUntilDeletion(): ?int
     {

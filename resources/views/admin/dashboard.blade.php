@@ -341,7 +341,7 @@
                 return;
             }
             
-            if (!confirm('This will schedule the user account for deletion in 15 days and send them an email notification. They will have a chance to appeal. Continue?')) {
+            if (!confirm('This will DISABLE the user account immediately and schedule permanent deletion in 15 days. The user cannot post, comment, message, or interact with others. They can only submit an appeal. Continue?')) {
                 return;
             }
 
