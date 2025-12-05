@@ -144,33 +144,45 @@ class DashboardController extends Controller
 
     public function deleteUser(Request $request, $userId)
     {
-        $user = User::findOrFail($userId);
-        $admin = Auth::guard('admin')->user();
-        
-        // Get deletion reason from request
-        $reason = $request->input('reason', 'Terms of Service Violation');
-        
-        // Schedule deletion for 15 days from now
-        $deletionDate = now()->addDays(15);
-        
-        $user->update([
-            'deletion_scheduled_at' => $deletionDate,
-            'deletion_reason' => $reason,
-            'deleted_by' => $admin->id,
-            'appeal_status' => 'none'
-        ]);
-        
-        // Send email notification
         try {
-            Mail::to($user->email)->send(new \App\Mail\AccountDeletionNotification($user, $reason, 15));
-        } catch (\Exception $e) {
-            Log::error('Failed to send deletion email: ' . $e->getMessage());
-        }
+            $user = User::findOrFail($userId);
+            $admin = Auth::guard('admin')->user();
+            
+            // Get deletion reason from request
+            $reason = $request->input('reason', 'Terms of Service Violation');
+            
+            // Schedule deletion for 15 days from now
+            $deletionDate = now()->addDays(15);
+            
+            $user->update([
+                'deletion_scheduled_at' => $deletionDate,
+                'deletion_reason' => $reason,
+                'deleted_by' => $admin->id,
+                'appeal_status' => 'none'
+            ]);
+            
+            // Try to send email notification (don't fail if email fails)
+            try {
+                Mail::to($user->email)->send(new \App\Mail\AccountDeletionNotification($user, $reason, 15));
+                $emailSent = true;
+            } catch (\Exception $e) {
+                Log::error('Failed to send deletion email: ' . $e->getMessage());
+                $emailSent = false;
+            }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User account scheduled for deletion in 15 days. Notification email sent.'
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => $emailSent 
+                    ? 'User account scheduled for deletion in 15 days. Notification email sent.'
+                    : 'User account scheduled for deletion in 15 days. (Email notification failed)'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error scheduling user deletion: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error scheduling user deletion. Please try again.'
+            ], 500);
+        }
     }
 
     public function toggleVerification(Request $request, $businessId)
