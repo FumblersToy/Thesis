@@ -279,15 +279,6 @@ function initFeed() {
     // NOTE: Form submission is handled in feed.blade.php with AbortController support
     // Do not add another submit listener here as it would conflict
 
-    // Auto-apply filters when checkboxes or selects change
-    const filterCheckboxes = document.querySelectorAll('#instruments input[type="checkbox"], #venues input[type="checkbox"]');
-    filterCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            currentPage = 1;
-            loadPosts(1, false);
-        });
-    });
-    
     // Auto-apply when distance changes
     const maxDistanceSelect = document.getElementById('maxDistance');
     if (maxDistanceSelect) {
@@ -741,11 +732,20 @@ function initFeed() {
             const div = document.createElement('div');
             div.innerHTML = `
                 <label class="flex items-center gap-3 text-white/80 cursor-pointer hover:text-white transition-colors">
-                    <input type="checkbox" value="${option}" class="rounded border-white/30 bg-white/10 text-purple-500 focus:ring-purple-400">
+                    <input type="checkbox" value="${option}" class="rounded border-white/30 bg-white/10 text-purple-500 focus:ring-purple-400 filter-checkbox">
                     <span>${option}</span>
                 </label>
             `;
             container.appendChild(div);
+        });
+        
+        // Add auto-apply listeners to the newly created checkboxes
+        const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                currentPage = 1;
+                loadPosts(1, false);
+            });
         });
     }
 
