@@ -273,11 +273,9 @@ class PostController extends Controller
                     });
                     
                     // OR match posts with instrument keywords in description
-                    $q->orWhere(function ($descQuery) use ($instruments) {
-                        foreach ($instruments as $instrument) {
-                            $descQuery->orWhere('description', 'LIKE', '%' . $instrument . '%');
-                        }
-                    });
+                    foreach ($instruments as $instrument) {
+                        $q->orWhere('description', 'LIKE', '%' . $instrument . '%');
+                    }
                 });
             }
 
@@ -290,11 +288,9 @@ class PostController extends Controller
                     });
                     
                     // OR match posts with venue keywords in description
-                    $q->orWhere(function ($descQuery) use ($venues) {
-                        foreach ($venues as $venue) {
-                            $descQuery->orWhere('description', 'LIKE', '%' . $venue . '%');
-                        }
-                    });
+                    foreach ($venues as $venue) {
+                        $q->orWhere('description', 'LIKE', '%' . $venue . '%');
+                    }
                 });
             }
 
