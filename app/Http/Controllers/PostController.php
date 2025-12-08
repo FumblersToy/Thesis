@@ -267,18 +267,19 @@ class PostController extends Controller
             // Filter by instruments (user instrument OR description contains instrument keyword)
             if ($instruments->isNotEmpty()) {
                 $query->where(function ($q) use ($instruments) {
-                    // Match users with the instrument in any of the 3 instrument fields (case-insensitive)
-                    $q->whereHas('user.musician', function ($subQuery) use ($instruments) {
-                        foreach ($instruments as $instrument) {
-                            $subQuery->orWhereRaw('LOWER(instrument) = ?', [strtolower($instrument)])
-                                ->orWhereRaw('LOWER(instrument2) = ?', [strtolower($instrument)])
-                                ->orWhereRaw('LOWER(instrument3) = ?', [strtolower($instrument)]);
-                        }
-                    });
-                    
-                    // OR match posts with instrument keywords in description (case-insensitive)
                     foreach ($instruments as $instrument) {
-                        $q->orWhere('description', 'LIKE', '%' . $instrument . '%');
+                        $q->orWhere(function ($subQ) use ($instrument) {
+                            // Match users with this instrument in any of the 3 instrument fields
+                            $subQ->whereHas('user.musician', function ($musicianQuery) use ($instrument) {
+                                $musicianQuery->where(function ($fieldQuery) use ($instrument) {
+                                    $fieldQuery->whereRaw('LOWER(instrument) = ?', [strtolower($instrument)])
+                                        ->orWhereRaw('LOWER(instrument2) = ?', [strtolower($instrument)])
+                                        ->orWhereRaw('LOWER(instrument3) = ?', [strtolower($instrument)]);
+                                });
+                            })
+                            // OR match posts with this instrument keyword in description
+                            ->orWhere('description', 'LIKE', '%' . $instrument . '%');
+                        });
                     }
                 });
             }
