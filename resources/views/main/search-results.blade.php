@@ -79,9 +79,14 @@
                     <!-- User Profile Section (dynamic) -->
                     <div class="relative ml-6">
                         <button id="profileButton" class="flex items-center gap-3 bg-white/80 backdrop-blur-xl p-4 rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 group border border-gray-200">
-                            <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
-                                src="{{ $currentProfileImage }}"
-                                alt="profile">
+                            <div class="relative">
+                                <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                                    src="{{ $currentProfileImage }}"
+                                    alt="profile">
+                                @if(Auth::user()->isDisabled())
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">!</span>
+                                @endif
+                            </div>
                             
                             <div class="hidden sm:block text-left">
                                 <p class="text-gray-800 font-semibold">
@@ -126,9 +131,12 @@
                                 </a>
                                 @endif
 
-                                <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
+                                <a href="{{ route('settings.show') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900 relative">
                                     <span class="text-lg">⚙️</span>
                                     Settings
+                                    @if(Auth::user()->isDisabled())
+                                    <span class="absolute top-2 left-6 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">!</span>
+                                    @endif
                                 </a>
                                 
                                 <a href="{{route('messages.index')}}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">

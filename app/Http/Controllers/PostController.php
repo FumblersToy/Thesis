@@ -264,17 +264,37 @@ class PostController extends Controller
 
             $query = Post::query();
 
-            // Filter by instruments
+            // Filter by instruments (user instrument OR description contains instrument keyword)
             if ($instruments->isNotEmpty()) {
-                $query->whereHas('user.musician', function ($q) use ($instruments) {
-                    $q->whereIn('instrument', $instruments);
+                $query->where(function ($q) use ($instruments) {
+                    // Match users with the instrument
+                    $q->whereHas('user.musician', function ($subQuery) use ($instruments) {
+                        $subQuery->whereIn('instrument', $instruments);
+                    });
+                    
+                    // OR match posts with instrument keywords in description
+                    $q->orWhere(function ($descQuery) use ($instruments) {
+                        foreach ($instruments as $instrument) {
+                            $descQuery->orWhere('description', 'LIKE', '%' . $instrument . '%');
+                        }
+                    });
                 });
             }
 
-            // Filter by venues
+            // Filter by venues (user venue OR description contains venue keyword)
             if ($venues->isNotEmpty()) {
-                $query->whereHas('user.business', function ($q) use ($venues) {
-                    $q->whereIn('venue', $venues);
+                $query->where(function ($q) use ($venues) {
+                    // Match users with the venue
+                    $q->whereHas('user.business', function ($subQuery) use ($venues) {
+                        $subQuery->whereIn('venue', $venues);
+                    });
+                    
+                    // OR match posts with venue keywords in description
+                    $q->orWhere(function ($descQuery) use ($venues) {
+                        foreach ($venues as $venue) {
+                            $descQuery->orWhere('description', 'LIKE', '%' . $venue . '%');
+                        }
+                    });
                 });
             }
 

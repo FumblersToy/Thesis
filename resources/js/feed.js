@@ -67,30 +67,33 @@ function initFeed() {
                         // clone desktop filters HTML
                         cloneWrapper.innerHTML = desktopFilters.innerHTML;
 
-                        // Fix duplicated IDs inside the clone (applyFilters)
-                        const mobileApply = cloneWrapper.querySelector('#applyFilters');
-                        if (mobileApply) {
-                            // prevent duplicate id conflict
-                            mobileApply.id = 'applyFiltersMobile';
-                            mobileApply.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                if (applyFiltersBtn) applyFiltersBtn.click();
-                                // close mobile menu after applying
-                                mobileMenu.classList.add('-translate-x-full');
+                        // Add auto-apply listeners to mobile filter checkboxes
+                        setTimeout(() => {
+                            const mobileCheckboxes = cloneWrapper.querySelectorAll('input[type="checkbox"]');
+                            mobileCheckboxes.forEach(checkbox => {
+                                checkbox.addEventListener('change', function() {
+                                    currentPage = 1;
+                                    loadPosts(1, false);
+                                    mobileMenu.classList.add('-translate-x-full');
+                                });
                             });
-                        } else {
-                            // Add a fallback apply button
-                            const btn = document.createElement('button');
-                            btn.type = 'button';
-                            btn.id = 'applyFiltersMobile';
-                            btn.className = 'w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl font-semibold';
-                            btn.textContent = 'Apply Filters ✨';
-                            btn.addEventListener('click', function() {
-                                if (applyFiltersBtn) applyFiltersBtn.click();
-                                mobileMenu.classList.add('-translate-x-full');
-                            });
-                            cloneWrapper.appendChild(btn);
-                        }
+                            
+                            const mobileSortBy = cloneWrapper.querySelector('#sortBy');
+                            if (mobileSortBy) {
+                                mobileSortBy.addEventListener('change', function() {
+                                    currentPage = 1;
+                                    loadPosts(1, false);
+                                });
+                            }
+                            
+                            const mobileMaxDistance = cloneWrapper.querySelector('#maxDistance');
+                            if (mobileMaxDistance) {
+                                mobileMaxDistance.addEventListener('change', function() {
+                                    currentPage = 1;
+                                    loadPosts(1, false);
+                                });
+                            }
+                        }, 100);
 
                         // Replace mobile menu content
                         mobileMenu.innerHTML = '';
@@ -276,22 +279,21 @@ function initFeed() {
     // NOTE: Form submission is handled in feed.blade.php with AbortController support
     // Do not add another submit listener here as it would conflict
 
-    // Apply filters with loading state
-    if (applyFiltersBtn) {
-        applyFiltersBtn.addEventListener('click', function() {
-            const button = this;
-            const originalText = button.innerHTML;
-            button.innerHTML = '🔄 Applying...';
-            
+    // Auto-apply filters when checkboxes or selects change
+    const filterCheckboxes = document.querySelectorAll('#instruments input[type="checkbox"], #venues input[type="checkbox"]');
+    filterCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
             currentPage = 1;
             loadPosts(1, false);
-            
-            setTimeout(() => {
-                button.innerHTML = '✅ Applied!';
-                setTimeout(() => {
-                    button.innerHTML = originalText;
-                }, 1000);
-            }, 1000);
+        });
+    });
+    
+    // Auto-apply when distance changes
+    const maxDistanceSelect = document.getElementById('maxDistance');
+    if (maxDistanceSelect) {
+        maxDistanceSelect.addEventListener('change', function() {
+            currentPage = 1;
+            loadPosts(1, false);
         });
     }
 

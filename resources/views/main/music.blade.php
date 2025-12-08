@@ -26,9 +26,14 @@
 
                     <div class="relative">
                         <button id="profileBtn" class="flex items-center gap-3 bg-white/80 backdrop-blur-xl p-4 rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 group border border-gray-200">
-                            <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
-                                 src="{{ Auth::user()->musician->profile_picture ?? 'https://via.placeholder.com/150' }}"
-                                 alt="profile">
+                            <div class="relative">
+                                <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                                     src="{{ Auth::user()->musician->profile_picture ?? 'https://via.placeholder.com/150' }}"
+                                     alt="profile">
+                                @if(Auth::user()->isDisabled())
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">!</span>
+                                @endif
+                            </div>
                             
                             <div class="hidden sm:block text-left">
                                 <p class="font-semibold" style="color: #2d2838;">
@@ -72,9 +77,12 @@
                                 </a>
                                 @endif
 
-                                <a href="{{ route('settings.show') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors" style="color: #2d2838;">
+                                <a href="{{ route('settings.show') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors relative" style="color: #2d2838;">
                                     <span class="text-lg">⚙️</span>
                                     Settings
+                                    @if(Auth::user()->isDisabled())
+                                    <span class="absolute top-2 left-6 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">!</span>
+                                    @endif
                                 </a>
                                 
                                 <a href="{{ route('messages.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors" style="color: #2d2838;">

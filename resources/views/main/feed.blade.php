@@ -82,11 +82,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <button type="button" id="applyFilters"
-                        class="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl hover:from-purple-600 hover:to-pink-600 transition-all duration-300 font-semibold text-lg shadow-lg hover-glow animate-scale-in border-2">
-                        Apply Filters ✨
-                    </button>
                 </form>
             </div>
         </aside>
@@ -174,7 +169,7 @@
                             <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                                  src="{{ $profileImage }}"
                                  alt="profile">
-                            <span id="profileNotificationBadge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">0</span>
+                            <span id="profileNotificationBadge" class="@if(Auth::user()->isDisabled()) @else hidden @endif absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">@if(Auth::user()->isDisabled())!@else 0 @endif</span>
                         </div>
                         
                         <div class="hidden sm:block text-left">
@@ -219,9 +214,12 @@
                             </a>
                             @endif
 
-                            <a href="{{ route('settings.show') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900">
+                            <a href="{{ route('settings.show') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900 relative">
                                 <span class="text-lg">⚙️</span>
                                 Settings
+                                @if(Auth::user()->isDisabled())
+                                <span class="absolute top-2 left-6 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">!</span>
+                                @endif
                             </a>
                             
                             <a href="{{ route('messages.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900 relative">
@@ -1547,6 +1545,7 @@
             function updateNotificationBadges(count) {
                 const notificationBadge = document.getElementById('notificationBadge');
                 const profileNotificationBadge = document.getElementById('profileNotificationBadge');
+                const isDisabled = {{ Auth::user()->isDisabled() ? 'true' : 'false' }};
                 
                 if (count > 0) {
                     if (notificationBadge) {
@@ -1557,6 +1556,13 @@
                         profileNotificationBadge.textContent = count;
                         profileNotificationBadge.classList.remove('hidden');
                     }
+                } else if (isDisabled) {
+                    // Keep showing "!" if account is disabled even when no notifications
+                    if (profileNotificationBadge) {
+                        profileNotificationBadge.textContent = '!';
+                        profileNotificationBadge.classList.remove('hidden');
+                    }
+                    if (notificationBadge) notificationBadge.classList.add('hidden');
                 } else {
                     if (notificationBadge) notificationBadge.classList.add('hidden');
                     if (profileNotificationBadge) profileNotificationBadge.classList.add('hidden');
