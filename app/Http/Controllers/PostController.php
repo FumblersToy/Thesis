@@ -267,12 +267,16 @@ class PostController extends Controller
             // Filter by instruments (user instrument OR description contains instrument keyword)
             if ($instruments->isNotEmpty()) {
                 $query->where(function ($q) use ($instruments) {
-                    // Match users with the instrument
+                    // Match users with the instrument in any of the 3 instrument fields (case-insensitive)
                     $q->whereHas('user.musician', function ($subQuery) use ($instruments) {
-                        $subQuery->whereIn('instrument', $instruments);
+                        foreach ($instruments as $instrument) {
+                            $subQuery->orWhereRaw('LOWER(instrument) = ?', [strtolower($instrument)])
+                                ->orWhereRaw('LOWER(instrument2) = ?', [strtolower($instrument)])
+                                ->orWhereRaw('LOWER(instrument3) = ?', [strtolower($instrument)]);
+                        }
                     });
                     
-                    // OR match posts with instrument keywords in description
+                    // OR match posts with instrument keywords in description (case-insensitive)
                     foreach ($instruments as $instrument) {
                         $q->orWhere('description', 'LIKE', '%' . $instrument . '%');
                     }
