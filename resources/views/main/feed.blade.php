@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Musician Feed</title>
+    <title>Bandmate</title>
     @vite(['resources/css/app.css', 'resources/css/feed.css', 'resources/css/socket.css'])
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Leaflet removed: maps are no longer used in the app. Address inputs and "Use My Location" remain. -->
