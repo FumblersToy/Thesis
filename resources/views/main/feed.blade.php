@@ -406,7 +406,8 @@
                     const isVerified = post.is_verified || false; // Add verified status
 
                     const userTypeEmoji = userType === 'musician' ? '🎵' : (userType === 'business' ? '🏢' : '👤');
-                    const userMeta = [userGenre, userLocation].filter(Boolean).join(' · ');
+                    const userTypeLabel = userType === 'musician' ? 'Musician' : (userType === 'business' ? 'Business' : 'Member');
+                    const userMeta = [userTypeLabel, userGenre, userLocation].filter(Boolean).join(' · ');
 
                     // Build avatar HTML (fall back to initial if no avatar)
                     const avatarHtml = userAvatar ?

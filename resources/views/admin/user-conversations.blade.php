@@ -158,7 +158,7 @@
                                         </div>
                                         <div>
                                             <div class="px-4 py-2 rounded-2xl {{ $isFromUser ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-900' }}">
-                                                <p class="text-sm">{{ $message->message }}</p>
+                                                <p class="text-sm">{{ $message->content }}</p>
                                             </div>
                                             <p class="text-xs text-gray-500 mt-1 {{ $isFromUser ? 'text-right' : '' }}">
                                                 {{ $message->created_at->format('M j, Y g:i A') }}
