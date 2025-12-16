@@ -8,7 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Leaflet removed: maps are no longer used in the app. Address inputs and "Use My Location" remain. -->
 </head>
-<body class="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-purple-200 via-blue-200 to-teal-200">
+<body class="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-slate-100 via-blue-50 to-teal-50">
     <div class="floating-elements fixed inset-0 pointer-events-none"></div>
     
     <!-- Toast Notification Container -->
@@ -695,6 +695,24 @@
                 createPostForm.addEventListener('submit', async function(e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    
+                    // NSFW content filter - client-side check
+                    const descriptionInput = document.getElementById('description');
+                    if (descriptionInput && descriptionInput.value.trim()) {
+                        const description = descriptionInput.value.toLowerCase();
+                        const nsfwKeywords = [
+                            'sex', 'porn', 'nude', 'naked', 'xxx', 'nsfw', 'fuck', 'dick', 'pussy', 'cock', 'cum',
+                            'ass', 'boobs', 'tits', 'nipple', 'penis', 'vagina', 'horny', 'masturbate', 'orgasm',
+                            'anal', 'oral', 'blowjob', 'handjob', 'boner', 'erection', 'slut', 'whore', 'bitch'
+                        ];
+                        
+                        for (const keyword of nsfwKeywords) {
+                            if (description.includes(keyword)) {
+                                alert('Your post contains inappropriate content. Please keep descriptions professional and respectful.');
+                                return;
+                            }
+                        }
+                    }
                     
                     // Prevent multiple submissions
                     if (uploadAbortController) {

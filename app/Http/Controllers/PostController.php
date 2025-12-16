@@ -36,6 +36,24 @@ class PostController extends Controller
                 'description' => 'nullable|string|max:1000',
                 'images.*' => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov,avi,wmv|max:51200', // 50MB for videos
             ]);
+
+            // NSFW content filter
+            if ($request->filled('description')) {
+                $description = strtolower($request->input('description'));
+                $nsfwKeywords = [
+                    'sex', 'porn', 'nude', 'naked', 'xxx', 'nsfw', 'fuck', 'dick', 'pussy', 'cock', 'cum',
+                    'ass', 'boobs', 'tits', 'nipple', 'penis', 'vagina', 'horny', 'masturbate', 'orgasm',
+                    'anal', 'oral', 'blowjob', 'handjob', 'boner', 'erection', 'slut', 'whore', 'bitch'
+                ];
+                
+                foreach ($nsfwKeywords as $keyword) {
+                    if (str_contains($description, $keyword)) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'description' => ['Your post contains inappropriate content. Please keep descriptions professional and respectful.']
+                        ]);
+                    }
+                }
+            }
         } catch (\Illuminate\Validation\ValidationException $e) {
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
