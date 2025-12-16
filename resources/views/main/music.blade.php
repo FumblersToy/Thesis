@@ -8,7 +8,7 @@
     @vite(['resources/css/app.css'])
     <style>
         body {
-            background: #e8e8e8;
+            background: #d1d5db;
             min-height: 100vh;
         }
     </style>
