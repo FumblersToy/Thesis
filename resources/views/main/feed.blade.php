@@ -8,7 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Leaflet removed: maps are no longer used in the app. Address inputs and "Use My Location" remain. -->
 </head>
-<body class="min-h-screen relative overflow-x-hidden gradient-bg">
+<body class="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-slate-200 via-gray-200 to-blue-100">
     <div class="floating-elements fixed inset-0 pointer-events-none"></div>
     
     <!-- Toast Notification Container -->
@@ -116,7 +116,7 @@
                     <div class="w-full max-w-md relative">
                         <form action="{{ route('search') }}" method="GET" id="searchForm">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
@@ -124,7 +124,7 @@
                                 type="text" 
                                 name="query" 
                                 id="searchInput"
-                                class="block w-full px-3 py-3 border border-white/20 rounded-2xl leading-5 bg-white/10 backdrop-blur-xl placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-white/30 text-white sm:text-sm" 
+                                class="block w-full px-3 py-3 border border-gray-300 rounded-2xl leading-5 bg-white/90 backdrop-blur-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-purple-400 text-gray-800 sm:text-sm" 
                                 placeholder="Search musicians, bands, venues..."
                                 value="{{ request('query') }}"
                                 autocomplete="off">
@@ -164,7 +164,7 @@
                     }
                 @endphp
                 <div class="relative ml-6">
-                    <button id="profileButton" class="flex items-center gap-3 bg-white/80 backdrop-blur-xl p-4 rounded-2xl hover:bg-white/90 shadow-lg transition-all duration-300 group border border-gray-200">
+                    <button id="profileButton" class="flex items-center gap-3 bg-white/95 backdrop-blur-xl p-4 rounded-2xl hover:bg-white shadow-lg transition-all duration-300 group border border-gray-300">
                         <div class="relative">
                             <img class="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                                  src="{{ $profileImage }}"
@@ -271,7 +271,7 @@
             </div>
 
             <!-- Create Post (static form) -->
-            <div class="bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-lg mb-8 animate-scale-in hover:shadow-xl transition-all duration-300 border border-gray-200">
+            <div class="bg-white/95 backdrop-blur-xl p-8 rounded-3xl shadow-lg mb-8 animate-scale-in hover:shadow-xl transition-all duration-300 border border-gray-300">
                 <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-3">
                     Create a Post
                 </h2>
@@ -323,7 +323,7 @@
             </div>
 
             <div class="text-center mt-12">
-                <button id="loadMore" class="px-8 py-4 bg-white/80 backdrop-blur-xl text-gray-800 rounded-2xl font-semibold hover:bg-white/90 shadow-lg transition-all duration-300 border border-gray-200">
+                <button id="loadMore" class="px-8 py-4 bg-white/95 backdrop-blur-xl text-gray-800 rounded-2xl font-semibold hover:bg-white shadow-lg transition-all duration-300 border border-gray-300">
                     Load More 🎵
                 </button>
             </div>
@@ -480,6 +480,7 @@
                     inner += `
                         <div class="p-6 cursor-pointer hover:bg-gray-50 transition-colors post-content-clickable" 
                              data-post-id="${post.id}"
+                             data-user-id="${userId}"
                              data-image-url="${post.image_path}"
                              data-image-url-2="${post.image_path_2 || ''}"
                              data-image-url-3="${post.image_path_3 || ''}"

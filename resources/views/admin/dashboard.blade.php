@@ -290,14 +290,21 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    @if($user->musician) bg-purple-100 text-purple-800
-                                    @elseif($user->business) bg-blue-100 text-blue-800
-                                    @else bg-gray-100 text-gray-800 @endif">
-                                    @if($user->musician) Musician
-                                    @elseif($user->business) Business
-                                    @else User @endif
-                                </span>
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        @if($user->musician) bg-purple-100 text-purple-800
+                                        @elseif($user->business) bg-blue-100 text-blue-800
+                                        @else bg-gray-100 text-gray-800 @endif">
+                                        @if($user->musician) Musician
+                                        @elseif($user->business) Business
+                                        @else User @endif
+                                    </span>
+                                    @if($user->isDisabled())
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 animate-pulse">
+                                            🚫 Disabled
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $user->posts_count }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $user->likes_count }}</td>
