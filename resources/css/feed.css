@@ -97,7 +97,7 @@
     border: 1px solid rgba(181, 176, 189, 0.1);
 }
 .gradient-bg {
-    background: #fafafa;
+    background: #e8e8e8;
 }
 .gradient-card {
     background: linear-gradient(145deg, rgba(42,36,56,0.3) 0%, rgba(42,36,56,0.15) 100%);
