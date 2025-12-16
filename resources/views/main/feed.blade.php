@@ -8,7 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Leaflet removed: maps are no longer used in the app. Address inputs and "Use My Location" remain. -->
 </head>
-<body class="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-slate-200 via-gray-200 to-blue-100">
+<body class="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-purple-200 via-blue-200 to-teal-200">
     <div class="floating-elements fixed inset-0 pointer-events-none"></div>
     
     <!-- Toast Notification Container -->

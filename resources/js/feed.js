@@ -580,8 +580,9 @@ function initFeed() {
         image_path_3: post.image_path_3
     });
 
-    // Build user meta string with distance if available
-    let userMeta = [userGenre, userLocation].filter(Boolean).join(' · ');
+    // Build user meta string with user type, distance if available
+    const userTypeLabel = userType === 'musician' ? 'Musician' : userType === 'business' ? 'Business' : 'Member';
+    let userMeta = [userTypeLabel, userGenre, userLocation].filter(Boolean).join(' · ');
     if (post.distance !== undefined) {
         userMeta += (userMeta ? ' · ' : '') + `${post.distance} km away`;
     }
